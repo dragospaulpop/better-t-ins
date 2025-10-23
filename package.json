@@ -5,7 +5,7 @@
   "workspaces": {
     "packages": [
       "apps/*",
-      "packages/*"
+      "packages/api/*"
     ],
     "catalog": {
       "hono": "^4.8.2",

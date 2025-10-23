@@ -1,7 +1,7 @@
-import { mysqlTable, varchar, int, boolean } from "drizzle-orm/mysql-core";
+import { boolean, int, mysqlTable, varchar } from "drizzle-orm/mysql-core";
 
 export const todo = mysqlTable("todo", {
-	id: int("id").primaryKey().autoincrement(),
-	text: varchar("text", { length: 255 }).notNull(),
-	completed: boolean("completed").default(false).notNull(),
+  id: int("id").primaryKey().autoincrement(),
+  text: varchar("text", { length: 255 }).notNull(),
+  completed: boolean("completed").default(false).notNull(),
 });
