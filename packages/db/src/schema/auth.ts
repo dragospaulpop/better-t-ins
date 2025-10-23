@@ -14,6 +14,18 @@ export const user = mysqlTable("user", {
   image: text("image"),
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
+  twoFactorEnabled: boolean("two_factor_enabled"),
+});
+
+export const twoFactor = mysqlTable("two_factor", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  userId: varchar("user_id", { length: 36 })
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  secret: text("secret"),
+  backupCodes: text("backup_codes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const session = mysqlTable("session", {

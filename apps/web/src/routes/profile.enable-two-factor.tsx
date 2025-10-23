@@ -1,0 +1,57 @@
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { ArrowLeftIcon } from "lucide-react";
+import EnableTwoFactorForm from "@/components/enable-two-factor-form";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { authClient } from "@/lib/auth-client";
+
+export const Route = createFileRoute("/profile/enable-two-factor")({
+  component: RouteComponent,
+  beforeLoad: async () => {
+    const session = await authClient.getSession();
+    if (!session.data) {
+      redirect({
+        to: "/login",
+        throw: true,
+      });
+    }
+    if (session.data?.user.twoFactorEnabled) {
+      redirect({
+        to: "/profile",
+        throw: true,
+      });
+    }
+    return { session };
+  },
+});
+
+function RouteComponent() {
+  const navigate = useNavigate();
+  return (
+    <div className="p-2">
+      <Card className="mx-auto w-full max-w-md">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <Button
+              onClick={() => {
+                navigate({
+                  to: "/profile",
+                });
+              }}
+              variant="ghost"
+            >
+              <ArrowLeftIcon className="size-4" />
+              Back
+            </Button>
+            <CardTitle className="flex-1 text-center">
+              Enable Two-Factor Authentication
+            </CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <EnableTwoFactorForm />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

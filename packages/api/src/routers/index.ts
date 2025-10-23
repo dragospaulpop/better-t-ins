@@ -8,9 +8,5 @@ export const appRouter = router({
     user: ctx.session.user,
   })),
   todo: todoRouter,
-  profile: protectedProcedure.query(async ({ ctx }) => ({
-    message: "This is profile",
-    user: ctx.session.user,
-  })),
 });
 export type AppRouter = typeof appRouter;
