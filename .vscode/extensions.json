@@ -1,0 +1,16 @@
+{
+  "recommendations": [
+    "biomejs.biome",
+    "catppuccin.catppuccin-vsc",
+    "formulahendry.auto-rename-tag",
+    "oven.bun-vscode",
+    "openai.chatgpt",
+    "kamikillerto.vscode-colorize",
+    "echoapi.echoapi-for-vscode",
+    "oderwat.indent-rainbow",
+    "ms-vscode.vscode-typescript-next",
+    "yoavbls.pretty-ts-errors",
+    "bradlc.vscode-tailwindcss",
+    "shardulm94.trailing-spaces"
+  ]
+}
