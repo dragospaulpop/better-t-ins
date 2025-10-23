@@ -1,11 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import ErrorComponent from "@/components/error";
-import Loader from "@/components/loader";
 import { authClient } from "@/lib/auth-client";
 import { trpc } from "@/utils/trpc";
 
-export const Route = createFileRoute("/dashboard")({
+export const Route = createFileRoute("/profile")({
   component: RouteComponent,
   beforeLoad: async () => {
     const session = await authClient.getSession();
@@ -22,24 +20,13 @@ export const Route = createFileRoute("/dashboard")({
 function RouteComponent() {
   const { session } = Route.useRouteContext();
 
-  const { isLoading, error, data } = useQuery({
-    ...trpc.privateData.queryOptions(),
-    retry: false,
-  });
-
-  if (isLoading) {
-    return <Loader />;
-  }
-
-  if (error) {
-    return <ErrorComponent error={error} />;
-  }
+  const profile = useQuery(trpc.profile.queryOptions());
 
   return (
-    <div>
-      <h1>Dashboard</h1>
+    <div className="p-2">
+      <h1>Profile</h1>
       <p>Welcome {session.data?.user.name}</p>
-      <p>API: {data?.message}</p>
+      <p>API: {profile.data?.message}</p>
     </div>
   );
 }

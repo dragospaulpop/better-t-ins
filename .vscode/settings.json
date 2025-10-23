@@ -29,9 +29,9 @@
   "editor.formatOnPaste": true,
   "emmet.showExpandedAbbreviation": "never",
   "editor.codeActionsOnSave": {
-    "source.fixAll": false,
+    "source.fixAll": "never",
     "source.fixAll.biome": "always",
-    "source.organizeImports": false,
+    "source.organizeImports": "never",
     "source.organizeImports.biome": "always"
   },
   "prettier.enable": false,
