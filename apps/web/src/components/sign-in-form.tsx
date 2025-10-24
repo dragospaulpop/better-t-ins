@@ -33,11 +33,18 @@ export default function SignInForm({
           password: value.password,
         },
         {
-          onSuccess: () => {
-            navigate({
-              to: "/dashboard",
-            });
-            toast.success("Sign in successful");
+          onSuccess: ({data}) => {
+            if (data.twoFactorRedirect) {
+              navigate({
+                to: "/login/two-factor",
+              });
+              toast.success("Please se your authenticator app to complete the sign in process");
+            } else {
+              navigate({
+                to: "/dashboard",
+              });
+              toast.success("Sign in successful");
+            }
           },
           onError: (error) => {
             toast.error(error.error.message || error.error.statusText);
