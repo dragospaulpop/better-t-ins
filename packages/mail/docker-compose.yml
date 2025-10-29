@@ -1,0 +1,14 @@
+name: better-t-ins
+
+services:
+  mailhog:
+    image: mailhog/mailhog
+    container_name: better-t-ins-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    volumes:
+      - better-t-ins_mailhog_data:/var/lib/mailhog
+
+volumes:
+  better-t-ins_mailhog_data:

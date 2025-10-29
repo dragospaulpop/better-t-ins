@@ -28,8 +28,8 @@ export const Route = createFileRoute("/profile/enable-two-factor")({
 function RouteComponent() {
   const navigate = useNavigate();
   return (
-    <div className="p-2">
-      <Card className="mx-auto w-full max-w-md">
+    <div className="grid place-items-start p-2">
+      <Card className="mx-auto w-full sm:max-w-2xl">
         <CardHeader>
           <div className="flex items-center justify-between">
             <Button
@@ -38,9 +38,10 @@ function RouteComponent() {
                   to: "/profile",
                 });
               }}
+              size="sm"
               variant="ghost"
             >
-              <ArrowLeftIcon className="size-4" />
+              <ArrowLeftIcon />
               Back
             </Button>
             <CardTitle className="flex-1 text-center">

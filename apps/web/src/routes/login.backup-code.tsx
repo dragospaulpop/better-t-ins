@@ -1,7 +1,7 @@
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { REGEXP_ONLY_DIGITS } from "input-otp";
-import { Loader2Icon } from "lucide-react";
+import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
+import { ArrowLeftIcon, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import z from "zod";
 import { Button } from "@/components/ui/button";
@@ -9,10 +9,10 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Field,
   FieldError,
@@ -27,11 +27,17 @@ import {
 } from "@/components/ui/input-otp";
 import { authClient } from "@/lib/auth-client";
 
-export const Route = createFileRoute("/login/two-factor")({
+export const Route = createFileRoute("/login/backup-code")({
   component: RouteComponent,
 });
 
-const TOTP_CODE_LENGTH = 6;
+const BACKUP_CODE_LENGTH = 10;
+const BACKUP_CODE_REGEXP = REGEXP_ONLY_DIGITS_AND_CHARS;
+
+const formSchema = z.object({
+  code: z.string().min(BACKUP_CODE_LENGTH, "Backup code must be 10 characters"),
+  trustDevice: z.boolean(),
+});
 
 function RouteComponent() {
   const navigate = useNavigate();
@@ -39,20 +45,21 @@ function RouteComponent() {
   const form = useForm({
     defaultValues: {
       code: "",
+      trustDevice: false,
     },
     onSubmit: async ({ value }) => {
-      await authClient.twoFactor.verifyTotp(
+      await authClient.twoFactor.verifyBackupCode(
         {
           code: value.code,
-          trustDevice: true,
+          disableSession: false,
+          trustDevice: value.trustDevice,
         },
         {
           onSuccess: () => {
             navigate({
-              to: "/profile",
-              replace: true,
+              to: "/dashboard",
             });
-            toast.success("Two-Factor Authentication verified successfully");
+            toast.success("Backup code verified successfully");
           },
           onError: (error) => {
             toast.error(error.error.message || error.error.statusText);
@@ -61,19 +68,33 @@ function RouteComponent() {
       );
     },
     validators: {
-      onSubmit: z.object({
-        code: z.string().min(TOTP_CODE_LENGTH, "Code must be 6 digits"),
-      }),
+      onSubmit: formSchema,
     },
   });
-
   return (
     <div className="grid place-items-center p-2">
-      <Card className="w-full sm:max-w-md">
+      <Card className="w-full sm:max-w-lg">
         <CardHeader>
-          <CardTitle>Two-Factor Authentication</CardTitle>
+          <div className="flex items-center justify-between">
+            <Button
+              onClick={() => {
+                navigate({
+                  to: "..",
+                });
+              }}
+              variant="ghost"
+            >
+              <ArrowLeftIcon />
+              Back
+            </Button>
+
+            <CardTitle className="flex-1 text-center">
+              Enter Backup Code
+            </CardTitle>
+          </div>
           <CardDescription>
-            Enter the code from your authenticator app
+            Login with one of the backup codes you saved when you enabled
+            two-factor authentication.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -95,40 +116,54 @@ function RouteComponent() {
                         aria-invalid={isInvalid}
                         containerClassName="justify-center"
                         id={field.name}
-                        maxLength={6}
+                        maxLength={BACKUP_CODE_LENGTH}
                         name={field.name}
                         onBlur={field.handleBlur}
                         onChange={(value) => field.handleChange(value)}
-                        pattern={REGEXP_ONLY_DIGITS}
+                        pattern={BACKUP_CODE_REGEXP}
                         value={field.state.value}
                       >
                         <InputOTPGroup>
                           <InputOTPSlot
-                            className="h-12 w-12 md:h-14 md:w-14"
+                            className="h-8 w-8 md:h-10 md:w-10"
                             index={0}
                           />
                           <InputOTPSlot
-                            className="h-12 w-12 md:h-14 md:w-14"
+                            className="h-8 w-8 md:h-10 md:w-10"
                             index={1}
                           />
                           <InputOTPSlot
-                            className="h-12 w-12 md:h-14 md:w-14"
+                            className="h-8 w-8 md:h-10 md:w-10"
                             index={2}
                           />
-                        </InputOTPGroup>
-                        <InputOTPSeparator />
-                        <InputOTPGroup>
                           <InputOTPSlot
-                            className="h-12 w-12 md:h-14 md:w-14"
+                            className="h-8 w-8 md:h-10 md:w-10"
                             index={3}
                           />
                           <InputOTPSlot
-                            className="h-12 w-12 md:h-14 md:w-14"
+                            className="h-8 w-8 md:h-10 md:w-10"
                             index={4}
                           />
+                          <InputOTPSeparator />
                           <InputOTPSlot
-                            className="h-12 w-12 md:h-14 md:w-14"
+                            className="h-8 w-8 md:h-10 md:w-10"
                             index={5}
+                          />
+                          <InputOTPSlot
+                            className="h-8 w-8 md:h-10 md:w-10"
+                            index={6}
+                          />
+                          <InputOTPSlot
+                            className="h-8 w-8 md:h-10 md:w-10"
+                            index={7}
+                          />
+                          <InputOTPSlot
+                            className="h-8 w-8 md:h-10 md:w-10"
+                            index={8}
+                          />
+                          <InputOTPSlot
+                            className="h-8 w-8 md:h-10 md:w-10"
+                            index={9}
                           />
                         </InputOTPGroup>
                       </InputOTP>
@@ -138,6 +173,23 @@ function RouteComponent() {
                     </Field>
                   );
                 }}
+              </form.Field>
+              <form.Field name="trustDevice">
+                {(field) => (
+                  <Field orientation="horizontal">
+                    <Checkbox
+                      checked={field.state.value}
+                      id={field.name}
+                      name={field.name}
+                      onCheckedChange={(value) =>
+                        field.handleChange(value as boolean)
+                      }
+                    />
+                    <FieldLabel className="font-normal" htmlFor={field.name}>
+                      Trust this device for 30 days
+                    </FieldLabel>
+                  </Field>
+                )}
               </form.Field>
 
               <form.Subscribe>
@@ -158,24 +210,6 @@ function RouteComponent() {
             </FieldGroup>
           </form>
         </CardContent>
-        <CardFooter>
-          <Field orientation="horizontal">
-            <FieldLabel htmlFor="sign-up">
-              No access to your authenticator app?
-            </FieldLabel>
-            <Button
-              onClick={() => {
-                navigate({
-                  to: "/login/backup-code",
-                  from: "/login/two-factor",
-                });
-              }}
-              variant="link"
-            >
-              Try backup codes
-            </Button>
-          </Field>
-        </CardFooter>
       </Card>
     </div>
   );

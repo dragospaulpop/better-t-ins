@@ -1,0 +1,33 @@
+{
+  "name": "@better-t-ins/mail",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "mail:start": "docker compose up -d",
+    "mail:watch": "docker compose up",
+    "mail:stop": "docker compose stop",
+    "mail:down": "docker compose down"
+  },
+  "dependencies": {
+    "nodemailer": "^7.0.10",
+    "resend": "^6.3.0",
+    "dotenv": "catalog:"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^7.0.3",
+    "tsdown": "catalog:"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

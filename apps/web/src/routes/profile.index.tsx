@@ -1,5 +1,6 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { CheckIcon, XIcon } from "lucide-react";
+import { CheckCircleIcon, XIcon } from "lucide-react";
+import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +10,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Field } from "@/components/ui/field";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { authClient } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/profile/")({
@@ -30,52 +45,126 @@ function RouteComponent() {
   const navigate = useNavigate();
 
   return (
-    <div className="p-2">
-      <Card className="mx-auto w-full max-w-md">
+    <div className="grid place-items-start p-2">
+      <Card className="mx-auto w-full sm:max-w-2xl">
         <CardHeader>
           <CardTitle>Profile</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col items-center justify-center gap-2">
-            <Avatar className="size-16">
-              <AvatarImage src={session.data?.user.image ?? undefined} />
-              <AvatarFallback>
-                {session.data?.user.name.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="space-y-2">
-              <p className="text-center font-medium text-sm">
-                {session.data?.user.name}
-              </p>
-              <p className="flex items-center justify-center gap-2 text-center text-muted-foreground text-sm">
+          <Item>
+            <ItemMedia>
+              <Avatar className="size-16">
+                <AvatarImage
+                  className="grayscale"
+                  src={session.data?.user.image ?? undefined}
+                />
+
+                <AvatarFallback>
+                  {session.data?.user.name.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>{session.data?.user.name}</ItemTitle>
+              <ItemDescription>
                 <span className="font-medium leading-none">
                   {session.data?.user.email}
                 </span>
-                {session.data?.user.emailVerified ? (
-                  <CheckIcon className="size-3 text-green-500" />
-                ) : (
-                  <XIcon className="size-3 self-end text-red-500" />
-                )}
-              </p>
-            </div>
-          </div>
+              </ItemDescription>
+            </ItemContent>
+            <ItemActions>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  {session.data?.user.emailVerified ? (
+                    <CheckCircleIcon className="size-8 text-success" />
+                  ) : (
+                    <XIcon className="size-8 text-destructive" />
+                  )}
+                </TooltipTrigger>
+                <TooltipContent>
+                  {session.data?.user.emailVerified
+                    ? "Email verified"
+                    : "Email not verified"}
+                </TooltipContent>
+              </Tooltip>
+            </ItemActions>
+          </Item>
         </CardContent>
         <CardFooter className="flex justify-center">
-          {session.data?.user.twoFactorEnabled ? (
-            <Button variant="destructive">
-              Disable Two-Factor Authentication
-            </Button>
-          ) : (
-            <Button
-              onClick={() => {
-                navigate({
-                  to: "/profile/enable-two-factor",
-                });
-              }}
-            >
-              Enable Two-Factor Authentication
-            </Button>
-          )}
+          <Field
+            className="w-full flex-wrap justify-center"
+            orientation="horizontal"
+          >
+            {session.data?.user.twoFactorEnabled ? (
+              <Button variant="destructive">
+                Disable Two-Factor Authentication
+              </Button>
+            ) : (
+              <Button
+                onClick={() => {
+                  navigate({
+                    to: "/profile/enable-two-factor",
+                  });
+                }}
+              >
+                Enable Two-Factor Authentication
+              </Button>
+            )}
+            {session.data?.user && (
+              <Button
+                onClick={async () => {
+                  await authClient.deleteUser({
+                    callbackURL: `${window.location.origin}/goodbye`,
+                    fetchOptions: {
+                      onSuccess: () => {
+                        toast.success(
+                          "Account deletion process started. Check your email for a verification link."
+                        );
+                      },
+                      onError: (deleteUserError) => {
+                        toast.error(
+                          deleteUserError.error.message ||
+                            deleteUserError.error.statusText
+                        );
+                        window.location.reload();
+                      },
+                    },
+                  });
+                }}
+                variant="destructive"
+              >
+                Delete Account
+              </Button>
+            )}
+            {!session.data?.user.emailVerified && session.data?.user.email ? (
+              <Button
+                onClick={() => {
+                  if (!session.data?.user.email) {
+                    return;
+                  }
+                  authClient.sendVerificationEmail(
+                    {
+                      email: session.data.user.email,
+                      callbackURL: `${window.location.origin}/dashboard`,
+                    },
+                    {
+                      onSuccess: () => {
+                        toast.success("Verification email sent");
+                      },
+                      onError: (error) => {
+                        toast.error(
+                          error.error.message || error.error.statusText
+                        );
+                      },
+                    }
+                  );
+                }}
+                variant="secondary"
+              >
+                Resend Verification Email
+              </Button>
+            ) : null}
+          </Field>
         </CardFooter>
       </Card>
     </div>

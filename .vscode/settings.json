@@ -36,4 +36,25 @@
   },
   "prettier.enable": false,
   "prettier.requireConfig": true,
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "typescript.prettier.fileExcludePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/out/**",
+    "**/public/**",
+    "@radix-ui/**",
+    "radix-ui/**"
+  ],
+  "javascript.prettier.fileExcludePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/out/**",
+    "**/public/**",
+    "@radix-ui/**",
+    "radix-ui/**"
+  ]
 }
