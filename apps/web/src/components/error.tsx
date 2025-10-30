@@ -4,13 +4,18 @@ import { CircleXIcon } from "lucide-react";
 
 export default function ErrorComponent({
   error,
+  element = "div",
 }: {
+  element?: "div" | "span";
   error: TRPCClientErrorLike<AppRouter>;
 }) {
+  const Comp = element === "div" ? "div" : "span";
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-4 pt-8">
+    <Comp className="flex h-full flex-col items-center justify-center gap-4 pt-8">
       <CircleXIcon className="size-10 text-red-500" />
-      <p>{error.message ?? "An unknown error occurred"}</p>
-    </div>
+      <span className="font-medium text-sm">
+        {error.message ?? "An unknown error occurred"}
+      </span>
+    </Comp>
   );
 }

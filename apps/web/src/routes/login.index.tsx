@@ -1,7 +1,10 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { useState } from "react";
+import { LogInIcon, UserPlusIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 import SignInForm from "@/components/sign-in-form";
 import SignUpForm from "@/components/sign-up-form";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import VerifyEmailForm from "@/components/verify-emailform";
 import { authClient } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/login/")({
@@ -9,7 +12,8 @@ export const Route = createFileRoute("/login/")({
   beforeLoad: async () => {
     const session = await authClient.getSession();
 
-    if (session.data) {
+    const canAccess = session.data?.user.emailVerified;
+    if (canAccess) {
       redirect({
         to: "/dashboard",
         replace: true,
@@ -22,11 +26,77 @@ export const Route = createFileRoute("/login/")({
 });
 
 function RouteComponent() {
-  const [showSignIn, setShowSignIn] = useState(false);
+  const [tab, setTab] = useState<"sign-in" | "sign-up" | "verify-email">(
+    "sign-in"
+  );
+  const [email, setEmail] = useState<string>("");
+  const { data: session } = authClient.useSession();
 
-  return showSignIn ? (
-    <SignInForm onSwitchToSignUp={() => setShowSignIn(false)} />
-  ) : (
-    <SignUpForm onSwitchToSignIn={() => setShowSignIn(true)} />
+  useEffect(() => {
+    const visibleTab =
+      session && !session?.user.emailVerified ? "verify-email" : "sign-in";
+    if (visibleTab === "verify-email") {
+      setEmail(session?.user.email || "");
+    }
+    setTab(visibleTab);
+  }, [session]);
+
+  const handleSwitchToSignIn = () => {
+    setTab("sign-in");
+    setEmail("");
+  };
+
+  const handleSwitchToSignUp = () => {
+    setTab("sign-up");
+    setEmail("");
+  };
+
+  const handleSwitchToVerifyEmail = (loggedInEmail: string) => {
+    setTab("verify-email");
+    setEmail(loggedInEmail);
+  };
+
+  return (
+    <div className="grid place-items-center p-2">
+      <div className="flex h-full max-h-1/2 w-full max-w-sm flex-col gap-6">
+        <Tabs
+          defaultValue={tab}
+          onValueChange={(value) => {
+            if (value === "sign-in") {
+              handleSwitchToSignIn();
+            } else if (value === "sign-up") {
+              handleSwitchToSignUp();
+            }
+          }}
+          value={tab}
+        >
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="sign-in">
+              <LogInIcon className="size-4" />
+              Sign In
+            </TabsTrigger>
+            <TabsTrigger value="sign-up">
+              <UserPlusIcon className="size-4" />
+              Sign Up
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="sign-in">
+            <SignInForm
+              onSwitchToSignUp={handleSwitchToSignUp}
+              onSwitchToVerifyEmail={handleSwitchToVerifyEmail}
+            />
+          </TabsContent>
+          <TabsContent value="sign-up">
+            <SignUpForm onSwitchToSignIn={() => setTab("sign-in")} />
+          </TabsContent>
+          <TabsContent value="verify-email">
+            <VerifyEmailForm
+              email={email}
+              onSwitchToSignIn={handleSwitchToSignIn}
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
   );
 }

@@ -12,7 +12,24 @@ export const auth = betterAuth<BetterAuthOptions>({
     schema,
   }),
   appName: "VerdeINS",
-  plugins: [twoFactor()],
+  plugins: [
+    twoFactor({
+      otpOptions: {
+        sendOTP: async ({ user, otp }) => {
+          await sendEmail({
+            to: user.email,
+            subject: "Your OTP code",
+            html: `
+            <p>Hello ${user.name},</p>
+            <p>Your OTP code is: <strong>${otp}</strong></p>
+            <p>This code will expire in 3 minutes.</p>
+            <p>Best regards,</p>
+            <p>The ${process.env.APP_NAME} team</p>`,
+          });
+        },
+      },
+    }),
+  ],
   trustedOrigins: [process.env.CORS_ORIGIN || ""],
   emailAndPassword: {
     enabled: true,
@@ -60,3 +77,10 @@ export const auth = betterAuth<BetterAuthOptions>({
     },
   },
 });
+
+// Infer the API type with plugins included
+export type AuthAPIWithPlugins = ReturnType<
+  typeof betterAuth<
+    BetterAuthOptions & { plugins: [ReturnType<typeof twoFactor>] }
+  >
+>["api"];

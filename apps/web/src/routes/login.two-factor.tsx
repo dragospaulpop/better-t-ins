@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Field,
   FieldError,
@@ -25,6 +26,11 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { authClient } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/login/two-factor")({
@@ -39,12 +45,13 @@ function RouteComponent() {
   const form = useForm({
     defaultValues: {
       code: "",
+      trustDevice: false,
     },
     onSubmit: async ({ value }) => {
       await authClient.twoFactor.verifyTotp(
         {
           code: value.code,
-          trustDevice: true,
+          trustDevice: value.trustDevice,
         },
         {
           onSuccess: () => {
@@ -63,6 +70,7 @@ function RouteComponent() {
     validators: {
       onSubmit: z.object({
         code: z.string().min(TOTP_CODE_LENGTH, "Code must be 6 digits"),
+        trustDevice: z.boolean(),
       }),
     },
   });
@@ -93,6 +101,7 @@ function RouteComponent() {
                     <Field data-invalid={isInvalid}>
                       <InputOTP
                         aria-invalid={isInvalid}
+                        autoFocus
                         containerClassName="justify-center"
                         id={field.name}
                         maxLength={6}
@@ -139,6 +148,23 @@ function RouteComponent() {
                   );
                 }}
               </form.Field>
+              <form.Field name="trustDevice">
+                {(field) => (
+                  <Field orientation="horizontal">
+                    <Checkbox
+                      checked={field.state.value}
+                      id={field.name}
+                      name={field.name}
+                      onCheckedChange={(value) =>
+                        field.handleChange(value as boolean)
+                      }
+                    />
+                    <FieldLabel className="font-normal" htmlFor={field.name}>
+                      Trust this device for 30 days
+                    </FieldLabel>
+                  </Field>
+                )}
+              </form.Field>
 
               <form.Subscribe>
                 {(state) => (
@@ -163,17 +189,56 @@ function RouteComponent() {
             <FieldLabel htmlFor="sign-up">
               No access to your authenticator app?
             </FieldLabel>
-            <Button
-              onClick={() => {
-                navigate({
-                  to: "/login/backup-code",
-                  from: "/login/two-factor",
-                });
-              }}
-              variant="link"
-            >
-              Try backup codes
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={() => {
+                    navigate({
+                      to: "/login/backup-code",
+                      from: "/login/two-factor",
+                    });
+                  }}
+                  variant="link"
+                >
+                  Backup codes
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                Try backup codes that were generated when you enabled two-factor
+                authentication
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={() => {
+                    authClient.twoFactor.sendOtp(
+                      {},
+                      {
+                        onSuccess: () => {
+                          toast.success("OTP code sent successfully");
+                          navigate({
+                            to: "/login/otp",
+                            from: "/login/two-factor",
+                          });
+                        },
+                        onError: (error) => {
+                          toast.error(
+                            error.error.message || error.error.statusText
+                          );
+                        },
+                      }
+                    );
+                  }}
+                  variant="link"
+                >
+                  OTP
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                Email a one-time password (OTP) code to your email address
+              </TooltipContent>
+            </Tooltip>
           </Field>
         </CardFooter>
       </Card>

@@ -3,10 +3,12 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import {
   ArrowLeftIcon,
+  CheckIcon,
   CopyIcon,
   Loader2Icon,
   TriangleAlertIcon,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import QRCode from "react-qr-code";
 import { toast } from "sonner";
 import z from "zod";
@@ -54,9 +56,22 @@ export const Route = createFileRoute(
     return { session };
   },
 });
+
+const COPIED_TIMEOUT = 2000;
+
 function RouteComponent() {
   const { totpURI, backupCodes } = Route.useParams();
   const navigate = useNavigate();
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (copied) {
+      const timeout = setTimeout(() => {
+        setCopied(false);
+      }, COPIED_TIMEOUT);
+      return () => clearTimeout(timeout);
+    }
+  }, [copied]);
 
   const form = useForm({
     defaultValues: {
@@ -144,6 +159,7 @@ function RouteComponent() {
 
                           <InputOTP
                             aria-invalid={isInvalid}
+                            autoFocus
                             containerClassName="justify-center"
                             id={field.name}
                             maxLength={TOTP_CODE_LENGTH}
@@ -241,16 +257,21 @@ function RouteComponent() {
                 onClick={() => {
                   navigator.clipboard.writeText(backupCodes);
                   toast.success("Backup codes copied to clipboard");
+                  setCopied(true);
                 }}
                 size="icon-sm"
                 variant="ghost"
               >
-                <CopyIcon />
+                {copied ? (
+                  <CheckIcon className="size-4 text-success" />
+                ) : (
+                  <CopyIcon className="size-4" />
+                )}
               </Button>
             </FieldLabel>
             <FieldDescription>
               Use one of these codes to login if you lose access to your
-              authenticator app.
+              authenticator app. Each code can be used only once.
             </FieldDescription>
             <FieldContent className="grid grid-cols-5 gap-2">
               {backupCodes.split(",").map((code) => (

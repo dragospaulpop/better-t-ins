@@ -27,6 +27,7 @@ app.use(
   }),
   async (c, next) => {
     const session = await auth.api.getSession({ headers: c.req.raw.headers });
+
     if (!session) {
       c.set("user", null);
       c.set("session", null);
@@ -39,7 +40,7 @@ app.use(
   }
 );
 
-app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+app.on(["POST", "GET"], "/api/auth/*", async (c) => auth.handler(c.req.raw));
 
 app.use(
   "/trpc/*",

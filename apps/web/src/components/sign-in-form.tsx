@@ -34,8 +34,10 @@ const MIN_PASSWORD_LENGTH = 8;
 
 export default function SignInForm({
   onSwitchToSignUp,
+  onSwitchToVerifyEmail,
 }: {
   onSwitchToSignUp: () => void;
+  onSwitchToVerifyEmail: (email: string) => void;
 }) {
   const navigate = useNavigate({
     from: "/",
@@ -56,7 +58,9 @@ export default function SignInForm({
         },
         {
           onSuccess: ({ data }) => {
-            if (data.twoFactorRedirect) {
+            if (data.emailNotVerified) {
+              onSwitchToVerifyEmail(data.email);
+            } else if (data.twoFactorRedirect) {
               navigate({
                 to: "/login/two-factor",
               });
@@ -121,134 +125,127 @@ export default function SignInForm({
   }
 
   return (
-    <div className="grid place-items-center p-2">
-      <Card className="w-full sm:max-w-md">
-        <CardHeader>
-          <CardTitle>Welcome Back</CardTitle>
-          <CardDescription>
-            Sign in to your account to continue.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              form.handleSubmit();
-            }}
-          >
-            <FieldGroup className="">
-              <form.Field name="email">
-                {(field) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid;
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                      <InputGroup>
-                        <InputGroupInput
-                          aria-invalid={isInvalid}
-                          autoComplete="off"
-                          id={field.name}
-                          name={field.name}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                          placeholder="Your email"
-                          type="email"
-                          value={field.state.value}
-                        />
-                        <InputGroupAddon>
-                          <MailIcon />
-                        </InputGroupAddon>
-                      </InputGroup>
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  );
-                }}
-              </form.Field>
-
-              <form.Field name="password">
-                {(field) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid;
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                      <InputGroup>
-                        <InputGroupAddon>
-                          <LockIcon />
-                        </InputGroupAddon>
-                        <InputGroupInput
-                          id={field.name}
-                          name={field.name}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                          placeholder="Your password"
-                          type={isPassWordVisible ? "text" : "password"}
-                          value={field.state.value}
-                        />
-                        <InputGroupAddon align="inline-end">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <InputGroupButton
-                                className="rounded-full"
-                                onClick={() =>
-                                  setIsPassWordVisible(!isPassWordVisible)
-                                }
-                                size="icon-xs"
-                              >
-                                {isPassWordVisible ? (
-                                  <EyeOffIcon />
-                                ) : (
-                                  <EyeIcon />
-                                )}
-                              </InputGroupButton>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              Toggle password visibility
-                            </TooltipContent>
-                          </Tooltip>
-                        </InputGroupAddon>
-                      </InputGroup>
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  );
-                }}
-              </form.Field>
-
-              <form.Subscribe>
-                {(state) => (
-                  <Field>
-                    <Button
-                      className="w-full"
-                      disabled={!state.canSubmit || state.isSubmitting}
-                      type="submit"
-                    >
-                      {state.isSubmitting ? (
-                        <Loader2Icon className="animate-spin" />
-                      ) : (
-                        "Sign In"
-                      )}
-                    </Button>
+    <Card className="w-full sm:max-w-md">
+      <CardHeader>
+        <CardTitle>Welcome Back</CardTitle>
+        <CardDescription>Sign in to your account to continue.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            form.handleSubmit();
+          }}
+        >
+          <FieldGroup className="">
+            <form.Field name="email">
+              {(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                    <InputGroup>
+                      <InputGroupInput
+                        aria-invalid={isInvalid}
+                        autoComplete="off"
+                        autoFocus
+                        id={field.name}
+                        name={field.name}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        placeholder="Your email"
+                        type="email"
+                        value={field.state.value}
+                      />
+                      <InputGroupAddon>
+                        <MailIcon />
+                      </InputGroupAddon>
+                    </InputGroup>
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
-                )}
-              </form.Subscribe>
-            </FieldGroup>
-          </form>
-        </CardContent>
-        <CardFooter>
-          <Field orientation="horizontal">
-            <FieldLabel htmlFor="sign-up">Need an account? Sign Up</FieldLabel>
-            <Button onClick={onSwitchToSignUp} variant="link">
-              Sign Up
-            </Button>
-          </Field>
-        </CardFooter>
-      </Card>
-    </div>
+                );
+              }}
+            </form.Field>
+
+            <form.Field name="password">
+              {(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                    <InputGroup>
+                      <InputGroupAddon>
+                        <LockIcon />
+                      </InputGroupAddon>
+                      <InputGroupInput
+                        id={field.name}
+                        name={field.name}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        placeholder="Your password"
+                        type={isPassWordVisible ? "text" : "password"}
+                        value={field.state.value}
+                      />
+                      <InputGroupAddon align="inline-end">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <InputGroupButton
+                              className="rounded-full"
+                              onClick={() =>
+                                setIsPassWordVisible(!isPassWordVisible)
+                              }
+                              size="icon-xs"
+                            >
+                              {isPassWordVisible ? <EyeOffIcon /> : <EyeIcon />}
+                            </InputGroupButton>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            Toggle password visibility
+                          </TooltipContent>
+                        </Tooltip>
+                      </InputGroupAddon>
+                    </InputGroup>
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                );
+              }}
+            </form.Field>
+
+            <form.Subscribe>
+              {(state) => (
+                <Field>
+                  <Button
+                    className="w-full"
+                    disabled={!state.canSubmit || state.isSubmitting}
+                    type="submit"
+                  >
+                    {state.isSubmitting ? (
+                      <Loader2Icon className="animate-spin" />
+                    ) : (
+                      "Sign In"
+                    )}
+                  </Button>
+                </Field>
+              )}
+            </form.Subscribe>
+          </FieldGroup>
+        </form>
+      </CardContent>
+      <CardFooter>
+        <Field orientation="horizontal">
+          <FieldLabel htmlFor="sign-up">Need an account? Sign Up</FieldLabel>
+          <Button onClick={onSwitchToSignUp} variant="link">
+            Sign Up
+          </Button>
+        </Field>
+      </CardFooter>
+    </Card>
   );
 }

@@ -9,9 +9,10 @@ export const Route = createFileRoute("/dashboard")({
   component: RouteComponent,
   beforeLoad: async () => {
     const session = await authClient.getSession();
-    if (!session.data?.user.emailVerified) {
+    const canAccess = session.data?.user.emailVerified;
+    if (!canAccess) {
       redirect({
-        to: "/profile",
+        to: "/login",
         replace: true,
         throw: true,
       });

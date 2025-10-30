@@ -1,6 +1,7 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { CheckCircleIcon, XIcon } from "lucide-react";
 import { toast } from "sonner";
+import ShowBackupCodes from "@/components/show-backup-codes";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,9 +31,11 @@ export const Route = createFileRoute("/profile/")({
   component: RouteComponent,
   beforeLoad: async () => {
     const session = await authClient.getSession();
-    if (!session.data) {
+    const canAccess = session.data?.user.emailVerified;
+    if (!canAccess) {
       redirect({
         to: "/login",
+        replace: true,
         throw: true,
       });
     }
@@ -89,6 +92,8 @@ function RouteComponent() {
               </Tooltip>
             </ItemActions>
           </Item>
+
+          {session.data?.user.twoFactorEnabled ? <ShowBackupCodes /> : null}
         </CardContent>
         <CardFooter className="flex justify-center">
           <Field
@@ -96,9 +101,7 @@ function RouteComponent() {
             orientation="horizontal"
           >
             {session.data?.user.twoFactorEnabled ? (
-              <Button variant="destructive">
-                Disable Two-Factor Authentication
-              </Button>
+              <Button variant="destructive">Disable 2FA</Button>
             ) : (
               <Button
                 onClick={() => {
@@ -107,9 +110,10 @@ function RouteComponent() {
                   });
                 }}
               >
-                Enable Two-Factor Authentication
+                Enable 2FA
               </Button>
             )}
+
             {session.data?.user && (
               <Button
                 onClick={async () => {
@@ -136,34 +140,6 @@ function RouteComponent() {
                 Delete Account
               </Button>
             )}
-            {!session.data?.user.emailVerified && session.data?.user.email ? (
-              <Button
-                onClick={() => {
-                  if (!session.data?.user.email) {
-                    return;
-                  }
-                  authClient.sendVerificationEmail(
-                    {
-                      email: session.data.user.email,
-                      callbackURL: `${window.location.origin}/dashboard`,
-                    },
-                    {
-                      onSuccess: () => {
-                        toast.success("Verification email sent");
-                      },
-                      onError: (error) => {
-                        toast.error(
-                          error.error.message || error.error.statusText
-                        );
-                      },
-                    }
-                  );
-                }}
-                variant="secondary"
-              >
-                Resend Verification Email
-              </Button>
-            ) : null}
           </Field>
         </CardFooter>
       </Card>

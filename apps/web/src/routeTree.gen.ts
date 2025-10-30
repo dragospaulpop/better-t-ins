@@ -17,6 +17,7 @@ import { Route as ProfileIndexRouteImport } from './routes/profile.index'
 import { Route as LoginIndexRouteImport } from './routes/login.index'
 import { Route as ProfileEnableTwoFactorRouteImport } from './routes/profile.enable-two-factor'
 import { Route as LoginTwoFactorRouteImport } from './routes/login.two-factor'
+import { Route as LoginOtpRouteImport } from './routes/login.otp'
 import { Route as LoginBackupCodeRouteImport } from './routes/login.backup-code'
 import { Route as ProfileConfirmTotpTotpURIBackupCodesRouteImport } from './routes/profile.confirm-totp.$totpURI.$backupCodes'
 
@@ -60,6 +61,11 @@ const LoginTwoFactorRoute = LoginTwoFactorRouteImport.update({
   path: '/login/two-factor',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginOtpRoute = LoginOtpRouteImport.update({
+  id: '/login/otp',
+  path: '/login/otp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginBackupCodeRoute = LoginBackupCodeRouteImport.update({
   id: '/login/backup-code',
   path: '/login/backup-code',
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/goodbye': typeof GoodbyeRoute
   '/todos': typeof TodosRoute
   '/login/backup-code': typeof LoginBackupCodeRoute
+  '/login/otp': typeof LoginOtpRoute
   '/login/two-factor': typeof LoginTwoFactorRoute
   '/profile/enable-two-factor': typeof ProfileEnableTwoFactorRoute
   '/login': typeof LoginIndexRoute
@@ -90,6 +97,7 @@ export interface FileRoutesByTo {
   '/goodbye': typeof GoodbyeRoute
   '/todos': typeof TodosRoute
   '/login/backup-code': typeof LoginBackupCodeRoute
+  '/login/otp': typeof LoginOtpRoute
   '/login/two-factor': typeof LoginTwoFactorRoute
   '/profile/enable-two-factor': typeof ProfileEnableTwoFactorRoute
   '/login': typeof LoginIndexRoute
@@ -103,6 +111,7 @@ export interface FileRoutesById {
   '/goodbye': typeof GoodbyeRoute
   '/todos': typeof TodosRoute
   '/login/backup-code': typeof LoginBackupCodeRoute
+  '/login/otp': typeof LoginOtpRoute
   '/login/two-factor': typeof LoginTwoFactorRoute
   '/profile/enable-two-factor': typeof ProfileEnableTwoFactorRoute
   '/login/': typeof LoginIndexRoute
@@ -117,6 +126,7 @@ export interface FileRouteTypes {
     | '/goodbye'
     | '/todos'
     | '/login/backup-code'
+    | '/login/otp'
     | '/login/two-factor'
     | '/profile/enable-two-factor'
     | '/login'
@@ -129,6 +139,7 @@ export interface FileRouteTypes {
     | '/goodbye'
     | '/todos'
     | '/login/backup-code'
+    | '/login/otp'
     | '/login/two-factor'
     | '/profile/enable-two-factor'
     | '/login'
@@ -141,6 +152,7 @@ export interface FileRouteTypes {
     | '/goodbye'
     | '/todos'
     | '/login/backup-code'
+    | '/login/otp'
     | '/login/two-factor'
     | '/profile/enable-two-factor'
     | '/login/'
@@ -154,6 +166,7 @@ export interface RootRouteChildren {
   GoodbyeRoute: typeof GoodbyeRoute
   TodosRoute: typeof TodosRoute
   LoginBackupCodeRoute: typeof LoginBackupCodeRoute
+  LoginOtpRoute: typeof LoginOtpRoute
   LoginTwoFactorRoute: typeof LoginTwoFactorRoute
   ProfileEnableTwoFactorRoute: typeof ProfileEnableTwoFactorRoute
   LoginIndexRoute: typeof LoginIndexRoute
@@ -219,6 +232,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginTwoFactorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login/otp': {
+      id: '/login/otp'
+      path: '/login/otp'
+      fullPath: '/login/otp'
+      preLoaderRoute: typeof LoginOtpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login/backup-code': {
       id: '/login/backup-code'
       path: '/login/backup-code'
@@ -242,6 +262,7 @@ const rootRouteChildren: RootRouteChildren = {
   GoodbyeRoute: GoodbyeRoute,
   TodosRoute: TodosRoute,
   LoginBackupCodeRoute: LoginBackupCodeRoute,
+  LoginOtpRoute: LoginOtpRoute,
   LoginTwoFactorRoute: LoginTwoFactorRoute,
   ProfileEnableTwoFactorRoute: ProfileEnableTwoFactorRoute,
   LoginIndexRoute: LoginIndexRoute,

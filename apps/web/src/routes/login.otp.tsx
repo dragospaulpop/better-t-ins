@@ -1,6 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { ArrowLeftIcon, Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import z from "zod";
@@ -9,6 +9,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -27,15 +28,15 @@ import {
 } from "@/components/ui/input-otp";
 import { authClient } from "@/lib/auth-client";
 
-export const Route = createFileRoute("/login/backup-code")({
+export const Route = createFileRoute("/login/otp")({
   component: RouteComponent,
 });
 
-const BACKUP_CODE_LENGTH = 10;
-const BACKUP_CODE_REGEXP = REGEXP_ONLY_DIGITS_AND_CHARS;
+const OTP_CODE_LENGTH = 6;
+const OTP_CODE_REGEXP = REGEXP_ONLY_DIGITS;
 
 const formSchema = z.object({
-  code: z.string().min(BACKUP_CODE_LENGTH, "Backup code must be 10 characters"),
+  code: z.string().min(OTP_CODE_LENGTH, "OTP code must be 6 digits"),
   trustDevice: z.boolean(),
 });
 
@@ -48,10 +49,9 @@ function RouteComponent() {
       trustDevice: false,
     },
     onSubmit: async ({ value }) => {
-      await authClient.twoFactor.verifyBackupCode(
+      await authClient.twoFactor.verifyOtp(
         {
-          code: `${value.code.slice(0, BACKUP_CODE_LENGTH / 2)}-${value.code.slice(BACKUP_CODE_LENGTH / 2)}`,
-          disableSession: false,
+          code: value.code,
           trustDevice: value.trustDevice,
         },
         {
@@ -59,7 +59,7 @@ function RouteComponent() {
             navigate({
               to: "/dashboard",
             });
-            toast.success("Backup code verified successfully");
+            toast.success("OTP code verified successfully");
           },
           onError: (error) => {
             toast.error(error.error.message || error.error.statusText);
@@ -88,13 +88,11 @@ function RouteComponent() {
               Back
             </Button>
 
-            <CardTitle className="flex-1 text-center">
-              Enter Backup Code
-            </CardTitle>
+            <CardTitle className="flex-1 text-center">Enter OTP Code</CardTitle>
           </div>
           <CardDescription>
-            Login with one of the backup codes you saved when you enabled
-            two-factor authentication.
+            Login with the OTP code you received in your email. This code will
+            expire in 3 minutes.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -117,11 +115,11 @@ function RouteComponent() {
                         autoFocus
                         containerClassName="justify-center"
                         id={field.name}
-                        maxLength={BACKUP_CODE_LENGTH}
+                        maxLength={OTP_CODE_LENGTH}
                         name={field.name}
                         onBlur={field.handleBlur}
                         onChange={(value) => field.handleChange(value)}
-                        pattern={BACKUP_CODE_REGEXP}
+                        pattern={OTP_CODE_REGEXP}
                         value={field.state.value}
                       >
                         <InputOTPGroup>
@@ -137,6 +135,7 @@ function RouteComponent() {
                             className="h-8 w-8 md:h-10 md:w-10"
                             index={2}
                           />
+                          <InputOTPSeparator />
                           <InputOTPSlot
                             className="h-8 w-8 md:h-10 md:w-10"
                             index={3}
@@ -145,26 +144,9 @@ function RouteComponent() {
                             className="h-8 w-8 md:h-10 md:w-10"
                             index={4}
                           />
-                          <InputOTPSeparator />
                           <InputOTPSlot
                             className="h-8 w-8 md:h-10 md:w-10"
                             index={5}
-                          />
-                          <InputOTPSlot
-                            className="h-8 w-8 md:h-10 md:w-10"
-                            index={6}
-                          />
-                          <InputOTPSlot
-                            className="h-8 w-8 md:h-10 md:w-10"
-                            index={7}
-                          />
-                          <InputOTPSlot
-                            className="h-8 w-8 md:h-10 md:w-10"
-                            index={8}
-                          />
-                          <InputOTPSlot
-                            className="h-8 w-8 md:h-10 md:w-10"
-                            index={9}
                           />
                         </InputOTPGroup>
                       </InputOTP>
@@ -211,6 +193,28 @@ function RouteComponent() {
             </FieldGroup>
           </form>
         </CardContent>
+        <CardFooter>
+          <Button
+            className="flex-1"
+            onClick={() => {
+              authClient.twoFactor.sendOtp(
+                {},
+                {
+                  onSuccess: () => {
+                    toast.success("OTP code resent successfully");
+                  },
+                  onError: (error) => {
+                    toast.error(error.error.message || error.error.statusText);
+                  },
+                }
+              );
+            }}
+            type="button"
+            variant="link"
+          >
+            Resend Code
+          </Button>
+        </CardFooter>
       </Card>
     </div>
   );
