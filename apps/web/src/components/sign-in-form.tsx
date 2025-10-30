@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   EyeIcon,
   EyeOffIcon,
@@ -177,7 +177,18 @@ export default function SignInForm({
                   field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                    <FieldLabel
+                      className="flex items-center justify-between gap-2"
+                      htmlFor={field.name}
+                    >
+                      Password
+                      <Link
+                        className="text-xs hover:underline"
+                        to="/login/send-password-reset"
+                      >
+                        Forgot your password?
+                      </Link>
+                    </FieldLabel>
                     <InputGroup>
                       <InputGroupAddon>
                         <LockIcon />
@@ -240,7 +251,7 @@ export default function SignInForm({
       </CardContent>
       <CardFooter>
         <Field orientation="horizontal">
-          <FieldLabel htmlFor="sign-up">Need an account? Sign Up</FieldLabel>
+          <FieldLabel htmlFor="sign-up">Need an account? </FieldLabel>
           <Button onClick={onSwitchToSignUp} variant="link">
             Sign Up
           </Button>

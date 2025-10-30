@@ -34,13 +34,13 @@ export default function ShowBackupCodes() {
           {isLoading ? <Loader element="span" /> : null}
 
           {data?.backupCodes && !isLoading && !isError ? (
-            <div className="grid grid-cols-5 gap-2">
+            <span className="grid w-full grid-cols-5 gap-2">
               {data.backupCodes.map((code: string) => (
                 <Badge className="w-full text-center" key={code}>
                   {code}
                 </Badge>
               ))}
-            </div>
+            </span>
           ) : null}
           {!data?.backupCodes || data?.backupCodes.length === 0 ? (
             <span className="font-medium leading-none">

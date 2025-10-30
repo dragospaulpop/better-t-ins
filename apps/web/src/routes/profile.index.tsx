@@ -140,6 +140,18 @@ function RouteComponent() {
                 Delete Account
               </Button>
             )}
+            {session.data?.user && (
+              <Button
+                onClick={() => {
+                  navigate({
+                    to: "/profile/change-password",
+                  });
+                }}
+                variant="outline"
+              >
+                Change Password
+              </Button>
+            )}
           </Field>
         </CardFooter>
       </Card>

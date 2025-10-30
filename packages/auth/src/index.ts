@@ -33,9 +33,20 @@ export const auth = betterAuth<BetterAuthOptions>({
   trustedOrigins: [process.env.CORS_ORIGIN || ""],
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false,
+    requireEmailVerification: false, // this autosends the verification email with the url set to /
     autoSignIn: true,
-    // sendResetPassword:
+    sendResetPassword: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: "Reset your password",
+        html: `<p>Hello ${user.name},</p>
+        <p>Click the link to reset your password: <a href="${url}">${url}</a></p>
+        <p>If you did not request this, please ignore this email.</p>
+        <p>This link will expire in 1 hour.</p>
+        <p>Best regards,</p>
+        <p>The ${process.env.APP_NAME} team</p>`,
+      });
+    },
     // resetPasswordTokenExpiresIn: 3600, // 1 hour
   },
   emailVerification: {

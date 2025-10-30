@@ -16,7 +16,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfileIndexRouteImport } from './routes/profile.index'
 import { Route as LoginIndexRouteImport } from './routes/login.index'
 import { Route as ProfileEnableTwoFactorRouteImport } from './routes/profile.enable-two-factor'
+import { Route as ProfileChangePasswordRouteImport } from './routes/profile.change-password'
 import { Route as LoginTwoFactorRouteImport } from './routes/login.two-factor'
+import { Route as LoginSendPasswordResetRouteImport } from './routes/login.send-password-reset'
+import { Route as LoginResetPasswordRouteImport } from './routes/login.reset-password'
 import { Route as LoginOtpRouteImport } from './routes/login.otp'
 import { Route as LoginBackupCodeRouteImport } from './routes/login.backup-code'
 import { Route as ProfileConfirmTotpTotpURIBackupCodesRouteImport } from './routes/profile.confirm-totp.$totpURI.$backupCodes'
@@ -56,9 +59,24 @@ const ProfileEnableTwoFactorRoute = ProfileEnableTwoFactorRouteImport.update({
   path: '/profile/enable-two-factor',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileChangePasswordRoute = ProfileChangePasswordRouteImport.update({
+  id: '/profile/change-password',
+  path: '/profile/change-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginTwoFactorRoute = LoginTwoFactorRouteImport.update({
   id: '/login/two-factor',
   path: '/login/two-factor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginSendPasswordResetRoute = LoginSendPasswordResetRouteImport.update({
+  id: '/login/send-password-reset',
+  path: '/login/send-password-reset',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginResetPasswordRoute = LoginResetPasswordRouteImport.update({
+  id: '/login/reset-password',
+  path: '/login/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginOtpRoute = LoginOtpRouteImport.update({
@@ -85,7 +103,10 @@ export interface FileRoutesByFullPath {
   '/todos': typeof TodosRoute
   '/login/backup-code': typeof LoginBackupCodeRoute
   '/login/otp': typeof LoginOtpRoute
+  '/login/reset-password': typeof LoginResetPasswordRoute
+  '/login/send-password-reset': typeof LoginSendPasswordResetRoute
   '/login/two-factor': typeof LoginTwoFactorRoute
+  '/profile/change-password': typeof ProfileChangePasswordRoute
   '/profile/enable-two-factor': typeof ProfileEnableTwoFactorRoute
   '/login': typeof LoginIndexRoute
   '/profile': typeof ProfileIndexRoute
@@ -98,7 +119,10 @@ export interface FileRoutesByTo {
   '/todos': typeof TodosRoute
   '/login/backup-code': typeof LoginBackupCodeRoute
   '/login/otp': typeof LoginOtpRoute
+  '/login/reset-password': typeof LoginResetPasswordRoute
+  '/login/send-password-reset': typeof LoginSendPasswordResetRoute
   '/login/two-factor': typeof LoginTwoFactorRoute
+  '/profile/change-password': typeof ProfileChangePasswordRoute
   '/profile/enable-two-factor': typeof ProfileEnableTwoFactorRoute
   '/login': typeof LoginIndexRoute
   '/profile': typeof ProfileIndexRoute
@@ -112,7 +136,10 @@ export interface FileRoutesById {
   '/todos': typeof TodosRoute
   '/login/backup-code': typeof LoginBackupCodeRoute
   '/login/otp': typeof LoginOtpRoute
+  '/login/reset-password': typeof LoginResetPasswordRoute
+  '/login/send-password-reset': typeof LoginSendPasswordResetRoute
   '/login/two-factor': typeof LoginTwoFactorRoute
+  '/profile/change-password': typeof ProfileChangePasswordRoute
   '/profile/enable-two-factor': typeof ProfileEnableTwoFactorRoute
   '/login/': typeof LoginIndexRoute
   '/profile/': typeof ProfileIndexRoute
@@ -127,7 +154,10 @@ export interface FileRouteTypes {
     | '/todos'
     | '/login/backup-code'
     | '/login/otp'
+    | '/login/reset-password'
+    | '/login/send-password-reset'
     | '/login/two-factor'
+    | '/profile/change-password'
     | '/profile/enable-two-factor'
     | '/login'
     | '/profile'
@@ -140,7 +170,10 @@ export interface FileRouteTypes {
     | '/todos'
     | '/login/backup-code'
     | '/login/otp'
+    | '/login/reset-password'
+    | '/login/send-password-reset'
     | '/login/two-factor'
+    | '/profile/change-password'
     | '/profile/enable-two-factor'
     | '/login'
     | '/profile'
@@ -153,7 +186,10 @@ export interface FileRouteTypes {
     | '/todos'
     | '/login/backup-code'
     | '/login/otp'
+    | '/login/reset-password'
+    | '/login/send-password-reset'
     | '/login/two-factor'
+    | '/profile/change-password'
     | '/profile/enable-two-factor'
     | '/login/'
     | '/profile/'
@@ -167,7 +203,10 @@ export interface RootRouteChildren {
   TodosRoute: typeof TodosRoute
   LoginBackupCodeRoute: typeof LoginBackupCodeRoute
   LoginOtpRoute: typeof LoginOtpRoute
+  LoginResetPasswordRoute: typeof LoginResetPasswordRoute
+  LoginSendPasswordResetRoute: typeof LoginSendPasswordResetRoute
   LoginTwoFactorRoute: typeof LoginTwoFactorRoute
+  ProfileChangePasswordRoute: typeof ProfileChangePasswordRoute
   ProfileEnableTwoFactorRoute: typeof ProfileEnableTwoFactorRoute
   LoginIndexRoute: typeof LoginIndexRoute
   ProfileIndexRoute: typeof ProfileIndexRoute
@@ -225,11 +264,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileEnableTwoFactorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile/change-password': {
+      id: '/profile/change-password'
+      path: '/profile/change-password'
+      fullPath: '/profile/change-password'
+      preLoaderRoute: typeof ProfileChangePasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login/two-factor': {
       id: '/login/two-factor'
       path: '/login/two-factor'
       fullPath: '/login/two-factor'
       preLoaderRoute: typeof LoginTwoFactorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login/send-password-reset': {
+      id: '/login/send-password-reset'
+      path: '/login/send-password-reset'
+      fullPath: '/login/send-password-reset'
+      preLoaderRoute: typeof LoginSendPasswordResetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login/reset-password': {
+      id: '/login/reset-password'
+      path: '/login/reset-password'
+      fullPath: '/login/reset-password'
+      preLoaderRoute: typeof LoginResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login/otp': {
@@ -263,7 +323,10 @@ const rootRouteChildren: RootRouteChildren = {
   TodosRoute: TodosRoute,
   LoginBackupCodeRoute: LoginBackupCodeRoute,
   LoginOtpRoute: LoginOtpRoute,
+  LoginResetPasswordRoute: LoginResetPasswordRoute,
+  LoginSendPasswordResetRoute: LoginSendPasswordResetRoute,
   LoginTwoFactorRoute: LoginTwoFactorRoute,
+  ProfileChangePasswordRoute: ProfileChangePasswordRoute,
   ProfileEnableTwoFactorRoute: ProfileEnableTwoFactorRoute,
   LoginIndexRoute: LoginIndexRoute,
   ProfileIndexRoute: ProfileIndexRoute,
