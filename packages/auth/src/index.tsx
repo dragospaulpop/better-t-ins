@@ -49,7 +49,7 @@ export const auth = betterAuth<BetterAuthOptions>({
     }),
     haveIBeenPwned({
       customPasswordCompromisedMessage:
-        "This password has been compromised. Please choose a different password.",
+        "This password has been compromised. Please choose a different password or request a password reset.",
     }),
   ],
   trustedOrigins: [process.env.CORS_ORIGIN || ""],

@@ -63,7 +63,9 @@ function RouteComponent() {
           },
           {
             onSuccess: () => {
-              toast.success("Password reset email sent");
+              toast.success(
+                "If this email exists in our system, check your email for the reset link"
+              );
             },
             onError: (error) => {
               toast.error(error.error.message || error.error.statusText);
