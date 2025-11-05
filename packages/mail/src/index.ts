@@ -1,3 +1,4 @@
+import "dotenv/config";
 import nodemailer from "nodemailer";
 import { Resend } from "resend";
 
@@ -7,17 +8,19 @@ let sendEmail: (opts: {
   to: string;
   subject: string;
   html: string;
+  text?: string;
 }) => Promise<void>;
 
 if (isProd) {
   // Use Resend in production
   const resend = new Resend(process.env.RESEND_API_KEY);
-  sendEmail = async ({ to, subject, html }) => {
+  sendEmail = async ({ to, subject, html, text }) => {
     await resend.emails.send({
       from: process.env.FROM_EMAIL || "noreply@localhost",
       to,
       subject,
       html,
+      text,
     });
   };
 } else {
@@ -33,12 +36,13 @@ if (isProd) {
       : undefined,
   });
 
-  sendEmail = async ({ to, subject, html }) => {
+  sendEmail = async ({ to, subject, html, text }) => {
     await transporter.sendMail({
       from: "noreply@localhost",
       to,
       subject,
       html,
+      text,
     });
   };
 }

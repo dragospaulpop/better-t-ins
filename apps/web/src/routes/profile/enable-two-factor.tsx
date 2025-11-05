@@ -3,7 +3,7 @@ import { ArrowLeftIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
-import EnableTwoFactorForm from "@/routes/login/-components/enable-two-factor-form";
+import EnableTwoFactorForm from "./-components/enable-two-factor-form";
 
 export const Route = createFileRoute("/profile/enable-two-factor")({
   component: RouteComponent,

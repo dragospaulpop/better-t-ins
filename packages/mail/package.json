@@ -6,6 +6,14 @@
       "types": "./dist/index.d.ts",
       "default": "./src/index.ts"
     },
+    "./render": {
+      "types": "./dist/render.d.ts",
+      "default": "./src/render.tsx"
+    },
+    "./emails/*": {
+      "types": "./dist/emails/*.d.ts",
+      "default": "./src/emails/*.tsx"
+    },
     "./*": {
       "types": "./dist/*.d.ts",
       "default": "./src/*.ts"
@@ -13,18 +21,28 @@
   },
   "scripts": {
     "build": "tsdown",
+    "email:dev": "email dev --dir src/emails --port 3030",
     "mail:start": "docker compose up -d",
     "mail:watch": "docker compose up",
     "mail:stop": "docker compose stop",
-    "mail:down": "docker compose down"
+    "mail:down": "docker compose down",
+    "email:export": "email export"
   },
   "dependencies": {
+    "@react-email/components": "0.5.7",
+    "@react-email/render": "1.4.0",
+    "dotenv": "catalog:",
     "nodemailer": "^7.0.10",
-    "resend": "^6.3.0",
-    "dotenv": "catalog:"
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "resend": "^6.3.0"
   },
   "devDependencies": {
+    "@react-email/preview-server": "4.3.2",
     "@types/nodemailer": "^7.0.3",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "react-email": "4.3.2",
     "tsdown": "catalog:"
   },
   "peerDependencies": {

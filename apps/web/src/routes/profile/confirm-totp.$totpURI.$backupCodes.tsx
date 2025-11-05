@@ -143,7 +143,11 @@ function RouteComponent() {
                     Scan the QR code with your authenticator app
                   </FieldLabel>
 
-                  <QRCode size={256} value={totpURI} />
+                  <QRCode
+                    className="rounded-md bg-white p-2"
+                    size={256}
+                    value={totpURI}
+                  />
                 </Field>
                 <div className="flex flex-col items-center justify-center gap-4">
                   <form.Field name="code">

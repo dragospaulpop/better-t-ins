@@ -3,11 +3,11 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./src/index.ts"
+      "default": "./src/index.tsx"
     },
     "./*": {
       "types": "./dist/*.d.ts",
-      "default": "./src/*.ts"
+      "default": "./src/*.tsx"
     }
   },
   "type": "module",
@@ -15,10 +15,12 @@
     "build": "tsdown"
   },
   "devDependencies": {
-    "tsdown": "catalog:"
+    "tsdown": "catalog:",
+    "@types/react": "^19.2.2"
   },
   "peerDependencies": {
-    "typescript": "^5"
+    "typescript": "^5",
+    "react": "^19.2.0"
   },
   "dependencies": {
     "better-auth": "catalog:",

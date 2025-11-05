@@ -193,7 +193,7 @@ export default function SignInForm({
                       Password
                       <Link
                         className="text-xs hover:underline"
-                        to="/login/send-password-reset"
+                        to="/login/password-reset-or-magic-link"
                       >
                         Forgot your password?
                       </Link>

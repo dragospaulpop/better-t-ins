@@ -64,6 +64,10 @@
     "mail:down": {
       "cache": false,
       "persistent": true
+    },
+    "email:dev": {
+      "cache": false,
+      "persistent": true
     }
   }
 }
