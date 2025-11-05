@@ -5,12 +5,18 @@ import {
   EyeOffIcon,
   LockIcon,
   MailIcon,
+  RotateCcwKeyIcon,
   UserIcon,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
+import { Progress } from "@/components/ui/progress";
 import { authClient } from "@/lib/auth-client";
+import generatePassword, {
+  isStrongEnough,
+  passwordStrength,
+} from "@/utils/password-generator";
 import Loader from "../../../components/loader";
 import { Button } from "../../../components/ui/button";
 import {
@@ -39,7 +45,7 @@ import {
   TooltipTrigger,
 } from "../../../components/ui/tooltip";
 
-const MIN_PASSWORD_LENGTH = 8;
+const MIN_PASSWORD_LENGTH_USER = 8;
 
 const formSchema = z
   .object({
@@ -47,13 +53,34 @@ const formSchema = z
     email: z.email("Invalid email address"),
     password: z
       .string()
-      .min(MIN_PASSWORD_LENGTH, "Password must be at least 8 characters"),
+      .min(MIN_PASSWORD_LENGTH_USER, "Password must be at least 8 characters")
+      .refine(
+        (password) =>
+          isStrongEnough(password, {
+            minLength: MIN_PASSWORD_LENGTH_USER,
+            uppercaseMinCount: 1,
+            lowercaseMinCount: 1,
+            numberMinCount: 1,
+            specialMinCount: 1,
+          }),
+        "Password must include at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character"
+      ),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
     message: "Passwords do not match",
   });
+
+const MIN_PASSWORD_LENGTH = 16;
+const MAX_PASSWORD_LENGTH = 22;
+
+const PASSWORD_STRENGTH_TO_COLOR = {
+  100: "bg-green-500",
+  50: "bg-yellow-500",
+  25: "bg-red-500",
+  5: "bg-gray-500",
+};
 
 export default function SignUpForm({
   onSwitchToSignIn,
@@ -65,6 +92,15 @@ export default function SignUpForm({
   });
   const { isPending } = authClient.useSession();
   const [isPassWordVisible, setIsPassWordVisible] = useState(false);
+  const [passwordStrengthValue, setPasswordStrengthValue] = useState(0);
+
+  const generateRandomPassword = () => {
+    const randomLength =
+      Math.floor(Math.random() * (MAX_PASSWORD_LENGTH - MIN_PASSWORD_LENGTH)) +
+      MIN_PASSWORD_LENGTH;
+
+    return generatePassword(randomLength, true);
+  };
 
   const form = useForm({
     defaultValues: {
@@ -214,7 +250,12 @@ export default function SignUpForm({
                         id={field.name}
                         name={field.name}
                         onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
+                        onChange={(e) => {
+                          field.handleChange(e.target.value);
+                          setPasswordStrengthValue(
+                            passwordStrength(e.target.value)
+                          );
+                        }}
                         placeholder="Your password"
                         type={isPassWordVisible ? "text" : "password"}
                         value={field.state.value}
@@ -223,6 +264,31 @@ export default function SignUpForm({
                         <LockIcon />
                       </InputGroupAddon>
                       <InputGroupAddon align="inline-end">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <InputGroupButton
+                              className="rounded-full"
+                              onClick={() => {
+                                const randomPassword = generateRandomPassword();
+                                field.handleChange(randomPassword);
+                                setPasswordStrengthValue(
+                                  passwordStrength(randomPassword)
+                                );
+                                form.setFieldValue(
+                                  "confirmPassword",
+                                  randomPassword
+                                );
+                              }}
+                              size="icon-xs"
+                            >
+                              <RotateCcwKeyIcon />
+                            </InputGroupButton>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            Generate random password
+                          </TooltipContent>
+                        </Tooltip>
+
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <InputGroupButton
@@ -241,6 +307,14 @@ export default function SignUpForm({
                         </Tooltip>
                       </InputGroupAddon>
                     </InputGroup>
+                    <Progress
+                      indicatorClassName={
+                        PASSWORD_STRENGTH_TO_COLOR[
+                          passwordStrengthValue as keyof typeof PASSWORD_STRENGTH_TO_COLOR
+                        ] || "bg-gray-500"
+                      }
+                      value={passwordStrengthValue}
+                    />
                     {isInvalid && (
                       <FieldError errors={field.state.meta.errors} />
                     )}
