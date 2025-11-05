@@ -6,10 +6,12 @@ import {
   EyeOffIcon,
   Loader2Icon,
   LockIcon,
+  RotateCcwKeyIcon,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
+import PasswordStrengthTooltip from "@/components/password-strength-tooltip";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -24,27 +26,48 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { Progress } from "@/components/ui/progress";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { authClient } from "@/lib/auth-client";
+import generatePassword, {
+  isStrongEnough,
+  passwordStrength,
+} from "@/utils/password-generator";
 
 export const Route = createFileRoute("/profile/change-password")({
   component: RouteComponent,
 });
 
-const MIN_PASSWORD_LENGTH = 8;
+const MIN_PASSWORD_LENGTH_USER = 8;
+const MIN_PASSWORD_LENGTH = 16;
+const MAX_PASSWORD_LENGTH = 22;
 
 const formSchema = z
   .object({
     password: z
       .string()
-      .min(MIN_PASSWORD_LENGTH, "Password must be at least 8 characters"),
+      .min(MIN_PASSWORD_LENGTH_USER, "Current password can not be empty"),
     newPassword: z
       .string()
-      .min(MIN_PASSWORD_LENGTH, "New password must be at least 8 characters"),
+      .min(
+        MIN_PASSWORD_LENGTH_USER,
+        "New password must be at least 8 characters"
+      )
+      .refine(
+        (password) =>
+          isStrongEnough(password, {
+            minLength: MIN_PASSWORD_LENGTH_USER,
+            uppercaseMinCount: 1,
+            lowercaseMinCount: 1,
+            numberMinCount: 1,
+            specialMinCount: 1,
+          }),
+        "Password must include at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character"
+      ),
     confirmNewPassword: z
       .string()
       .min(
@@ -56,9 +79,26 @@ const formSchema = z
     path: ["confirmNewPassword"],
     message: "Passwords do not match",
   });
+
+const PASSWORD_STRENGTH_TO_COLOR = {
+  100: "bg-success",
+  50: "bg-warning",
+  25: "bg-destructive",
+  5: "bg-muted-foreground",
+};
+
 function RouteComponent() {
   const navigate = useNavigate();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [passwordStrengthValue, setPasswordStrengthValue] = useState(0);
+
+  const generateRandomPassword = () => {
+    const randomLength =
+      Math.floor(Math.random() * (MAX_PASSWORD_LENGTH - MIN_PASSWORD_LENGTH)) +
+      MIN_PASSWORD_LENGTH;
+
+    return generatePassword(randomLength, true);
+  };
 
   const form = useForm({
     defaultValues: {
@@ -185,7 +225,12 @@ function RouteComponent() {
                           id={field.name}
                           name={field.name}
                           onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value)}
+                          onChange={(e) => {
+                            field.handleChange(e.target.value);
+                            setPasswordStrengthValue(
+                              passwordStrength(e.target.value)
+                            );
+                          }}
                           placeholder="Your new password"
                           type={isPasswordVisible ? "text" : "password"}
                           value={field.state.value}
@@ -194,6 +239,31 @@ function RouteComponent() {
                           <LockIcon />
                         </InputGroupAddon>
                         <InputGroupAddon align="inline-end">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <InputGroupButton
+                                className="rounded-full"
+                                onClick={() => {
+                                  const randomPassword =
+                                    generateRandomPassword();
+                                  field.handleChange(randomPassword);
+                                  setPasswordStrengthValue(
+                                    passwordStrength(randomPassword)
+                                  );
+                                  form.setFieldValue(
+                                    "confirmNewPassword",
+                                    randomPassword
+                                  );
+                                }}
+                                size="icon-xs"
+                              >
+                                <RotateCcwKeyIcon />
+                              </InputGroupButton>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              Generate random password
+                            </TooltipContent>
+                          </Tooltip>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <InputGroupButton
@@ -216,6 +286,17 @@ function RouteComponent() {
                           </Tooltip>
                         </InputGroupAddon>
                       </InputGroup>
+                      <div className="flex items-center gap-2">
+                        <Progress
+                          indicatorClassName={
+                            PASSWORD_STRENGTH_TO_COLOR[
+                              passwordStrengthValue as keyof typeof PASSWORD_STRENGTH_TO_COLOR
+                            ] || "bg-muted-foreground"
+                          }
+                          value={passwordStrengthValue}
+                        />
+                        <PasswordStrengthTooltip />
+                      </div>
                       {isInvalid && (
                         <FieldError errors={field.state.meta.errors} />
                       )}

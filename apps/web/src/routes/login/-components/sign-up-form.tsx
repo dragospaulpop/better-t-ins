@@ -11,6 +11,7 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
+import PasswordStrengthTooltip from "@/components/password-strength-tooltip";
 import { Progress } from "@/components/ui/progress";
 import { authClient } from "@/lib/auth-client";
 import generatePassword, {
@@ -46,6 +47,15 @@ import {
 } from "../../../components/ui/tooltip";
 
 const MIN_PASSWORD_LENGTH_USER = 8;
+const MIN_PASSWORD_LENGTH = 16;
+const MAX_PASSWORD_LENGTH = 22;
+
+const PASSWORD_STRENGTH_TO_COLOR = {
+  100: "bg-success",
+  50: "bg-warning",
+  25: "bg-destructive",
+  5: "bg-muted-foreground",
+};
 
 const formSchema = z
   .object({
@@ -71,16 +81,6 @@ const formSchema = z
     path: ["confirmPassword"],
     message: "Passwords do not match",
   });
-
-const MIN_PASSWORD_LENGTH = 16;
-const MAX_PASSWORD_LENGTH = 22;
-
-const PASSWORD_STRENGTH_TO_COLOR = {
-  100: "bg-green-500",
-  50: "bg-yellow-500",
-  25: "bg-red-500",
-  5: "bg-gray-500",
-};
 
 export default function SignUpForm({
   onSwitchToSignIn,
@@ -242,7 +242,6 @@ export default function SignUpForm({
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-
                     <InputGroup>
                       <InputGroupInput
                         aria-invalid={isInvalid}
@@ -307,14 +306,17 @@ export default function SignUpForm({
                         </Tooltip>
                       </InputGroupAddon>
                     </InputGroup>
-                    <Progress
-                      indicatorClassName={
-                        PASSWORD_STRENGTH_TO_COLOR[
-                          passwordStrengthValue as keyof typeof PASSWORD_STRENGTH_TO_COLOR
-                        ] || "bg-gray-500"
-                      }
-                      value={passwordStrengthValue}
-                    />
+                    <div className="flex items-center gap-2">
+                      <Progress
+                        indicatorClassName={
+                          PASSWORD_STRENGTH_TO_COLOR[
+                            passwordStrengthValue as keyof typeof PASSWORD_STRENGTH_TO_COLOR
+                          ] || "bg-muted-foreground"
+                        }
+                        value={passwordStrengthValue}
+                      />
+                      <PasswordStrengthTooltip />
+                    </div>
                     {isInvalid && (
                       <FieldError errors={field.state.meta.errors} />
                     )}
