@@ -1,7 +1,6 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { CheckCircleIcon, XIcon } from "lucide-react";
 import { toast } from "sonner";
-import ShowBackupCodes from "@/components/show-backup-codes";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +25,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { authClient } from "@/lib/auth-client";
+import ShowBackupCodes from "@/routes/login/-components/show-backup-codes";
 
 export const Route = createFileRoute("/profile/")({
   component: RouteComponent,

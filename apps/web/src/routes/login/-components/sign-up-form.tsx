@@ -11,8 +11,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
 import { authClient } from "@/lib/auth-client";
-import Loader from "./loader";
-import { Button } from "./ui/button";
+import Loader from "../../../components/loader";
+import { Button } from "../../../components/ui/button";
 import {
   Card,
   CardContent,
@@ -20,15 +20,24 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "./ui/card";
-import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
+} from "../../../components/ui/card";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "../../../components/ui/field";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-} from "./ui/input-group";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+} from "../../../components/ui/input-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "../../../components/ui/tooltip";
 
 const MIN_PASSWORD_LENGTH = 8;
 

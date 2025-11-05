@@ -1,11 +1,11 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { LogInIcon, UserPlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import SignInForm from "@/components/sign-in-form";
-import SignUpForm from "@/components/sign-up-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import VerifyEmailForm from "@/components/verify-emailform";
 import { authClient } from "@/lib/auth-client";
+import SignInForm from "@/routes/login/-components/sign-in-form";
+import SignUpForm from "@/routes/login/-components/sign-up-form";
+import VerifyEmailForm from "@/routes/login/-components/verify-email-form";
 
 export const Route = createFileRoute("/login/")({
   component: RouteComponent,

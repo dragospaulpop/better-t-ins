@@ -5,16 +5,16 @@ import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
 import { authClient } from "@/lib/auth-client";
-import { Button } from "./ui/button";
-import { Field, FieldError, FieldGroup } from "./ui/field";
+import { Button } from "../../../components/ui/button";
+import { Field, FieldError, FieldGroup } from "../../../components/ui/field";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-} from "./ui/input-group";
-import { Label } from "./ui/label";
-import { Tooltip, TooltipTrigger } from "./ui/tooltip";
+} from "../../../components/ui/input-group";
+import { Label } from "../../../components/ui/label";
+import { Tooltip, TooltipTrigger } from "../../../components/ui/tooltip";
 
 const MIN_PASSWORD_LENGTH = 1;
 
