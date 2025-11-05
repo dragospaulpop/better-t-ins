@@ -7,7 +7,7 @@ import {
   LockIcon,
   MailIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
 import { authClient } from "@/lib/auth-client";
@@ -53,6 +53,7 @@ export default function SignInForm({
   });
   const { isPending } = authClient.useSession();
   const [isPassWordVisible, setIsPassWordVisible] = useState(false);
+  const { refetch } = authClient.useSession();
 
   const form = useForm({
     defaultValues: {
@@ -129,6 +130,29 @@ export default function SignInForm({
     },
   });
 
+  useEffect(() => {
+    if (!PublicKeyCredential.isConditionalMediationAvailable?.()) {
+      toast.error("Conditional mediation is not available");
+      return;
+    }
+    authClient.signIn.passkey(
+      {
+        autoFill: true,
+      },
+      {
+        onSuccess: () => {
+          refetch();
+          navigate({
+            to: "/dashboard",
+          });
+        },
+        onError: (error) => {
+          toast.error(error.error.message || error.error.statusText);
+        },
+      }
+    );
+  }, [navigate, refetch]);
+
   if (isPending) {
     return <Loader />;
   }
@@ -158,7 +182,7 @@ export default function SignInForm({
                     <InputGroup>
                       <InputGroupInput
                         aria-invalid={isInvalid}
-                        autoComplete="off"
+                        autoComplete="email webauthn"
                         autoFocus
                         id={field.name}
                         name={field.name}
@@ -203,6 +227,7 @@ export default function SignInForm({
                         <LockIcon />
                       </InputGroupAddon>
                       <InputGroupInput
+                        autoComplete="current-password webauthn"
                         id={field.name}
                         name={field.name}
                         onBlur={field.handleBlur}

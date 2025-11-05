@@ -11,6 +11,7 @@ import render from "@better-t-ins/mail/render";
 import { type BetterAuthOptions, betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { haveIBeenPwned, magicLink, twoFactor } from "better-auth/plugins";
+import { passkey } from "better-auth/plugins/passkey";
 
 export const auth = betterAuth<BetterAuthOptions>({
   database: drizzleAdapter(db, {
@@ -51,6 +52,7 @@ export const auth = betterAuth<BetterAuthOptions>({
       customPasswordCompromisedMessage:
         "This password has been compromised. Please choose a different password or request a password reset.",
     }),
+    passkey(),
   ],
   trustedOrigins: [process.env.CORS_ORIGIN || ""],
 

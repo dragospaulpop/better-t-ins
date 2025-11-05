@@ -1,6 +1,15 @@
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { CheckCircleIcon, XIcon } from "lucide-react";
+import { useForm } from "@tanstack/react-form";
+import {
+  createFileRoute,
+  redirect,
+  useNavigate,
+  useRouter,
+} from "@tanstack/react-router";
+import { CheckCircleIcon, TrashIcon, XIcon } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
+import z from "zod";
+import ErrorComponent from "@/components/error";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,7 +19,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Field } from "@/components/ui/field";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
 import {
   Item,
   ItemActions,
@@ -32,6 +54,8 @@ export const Route = createFileRoute("/profile/")({
   beforeLoad: async () => {
     const session = await authClient.getSession();
     const canAccess = session.data?.user.emailVerified;
+    const { data: passkeys, error: passkeyError } =
+      await authClient.passkey.listUserPasskeys();
     if (!canAccess) {
       redirect({
         to: "/login",
@@ -39,13 +63,44 @@ export const Route = createFileRoute("/profile/")({
         throw: true,
       });
     }
-    return { session };
+    return { session, passkeys, passkeyError };
   },
 });
 
+const addPasskeySchema = z.object({
+  name: z.string().min(1, "Name is required"),
+});
+
 function RouteComponent() {
-  const { session } = Route.useRouteContext();
+  const { session, passkeys, passkeyError } = Route.useRouteContext();
   const navigate = useNavigate();
+  const [addPasskeyDialogOpen, setAddPasskeyDialogOpen] = useState(false);
+  const router = useRouter();
+
+  const addPasskeyForm = useForm({
+    defaultValues: {
+      name: "",
+    },
+    validators: {
+      onSubmit: addPasskeySchema,
+    },
+    onSubmit: async ({ value }) => {
+      await authClient.passkey.addPasskey(
+        { name: value.name },
+        {
+          onSuccess: () => {
+            toast.success("Passkey added successfully");
+            setAddPasskeyDialogOpen(false);
+            addPasskeyForm.reset();
+            router.invalidate();
+          },
+          onError: (error) => {
+            toast.error(error.error.message || error.error.statusText);
+          },
+        }
+      );
+    },
+  });
 
   return (
     <div className="grid place-items-start p-2">
@@ -95,6 +150,50 @@ function RouteComponent() {
 
           {session.data?.user.twoFactorEnabled ? <ShowBackupCodes /> : null}
         </CardContent>
+        {passkeyError ? (
+          <ErrorComponent
+            element="div"
+            error={{
+              message: passkeyError.message || "An unknown error occurred",
+            }}
+          />
+        ) : null}
+        {passkeys ? (
+          <div className="flex flex-col gap-2">
+            {passkeys.map((passkey) => (
+              <Item key={passkey.id}>
+                <ItemContent>
+                  <ItemTitle>{passkey.name}</ItemTitle>
+                  <ItemDescription>{passkey.id}</ItemDescription>
+                </ItemContent>
+                <ItemActions>
+                  <Button
+                    onClick={() => {
+                      authClient.passkey.deletePasskey(
+                        { id: passkey.id },
+                        {
+                          onSuccess: () => {
+                            toast.success("Passkey deleted successfully");
+                            router.invalidate();
+                          },
+                          onError: (error) => {
+                            toast.error(
+                              error.error.message || error.error.statusText
+                            );
+                          },
+                        }
+                      );
+                    }}
+                    size="icon"
+                    variant="destructive"
+                  >
+                    <TrashIcon className="size-4" />
+                  </Button>
+                </ItemActions>
+              </Item>
+            ))}
+          </div>
+        ) : null}
         <CardFooter className="flex justify-center">
           <Field
             className="w-full flex-wrap justify-center"
@@ -152,6 +251,75 @@ function RouteComponent() {
                 Change Password
               </Button>
             )}
+            <Dialog
+              onOpenChange={setAddPasskeyDialogOpen}
+              open={addPasskeyDialogOpen}
+            >
+              <DialogTrigger asChild>
+                <Button variant="outline">Add Passkey</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add Passkey</DialogTitle>
+                </DialogHeader>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    addPasskeyForm.handleSubmit();
+                  }}
+                >
+                  <FieldGroup className="">
+                    <addPasskeyForm.Field name="name">
+                      {(field) => {
+                        const isInvalid =
+                          field.state.meta.isTouched &&
+                          !field.state.meta.isValid;
+                        return (
+                          <Field data-invalid={isInvalid}>
+                            <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+
+                            <InputGroup>
+                              <InputGroupInput
+                                aria-invalid={isInvalid}
+                                autoComplete="off"
+                                autoFocus
+                                id={field.name}
+                                name={field.name}
+                                onBlur={field.handleBlur}
+                                onChange={(e) =>
+                                  field.handleChange(e.target.value)
+                                }
+                                placeholder="Passkey name"
+                                type="text"
+                                value={field.state.value}
+                              />
+                            </InputGroup>
+                            {isInvalid && (
+                              <FieldError errors={field.state.meta.errors} />
+                            )}
+                          </Field>
+                        );
+                      }}
+                    </addPasskeyForm.Field>
+                    <addPasskeyForm.Subscribe>
+                      {(state) => (
+                        <Button
+                          disabled={!state.canSubmit || state.isSubmitting}
+                          onClick={async () => {
+                            await addPasskeyForm.handleSubmit();
+                          }}
+                          type="submit"
+                          variant="default"
+                        >
+                          {state.isSubmitting ? "Adding..." : "Add Passkey"}
+                        </Button>
+                      )}
+                    </addPasskeyForm.Subscribe>
+                  </FieldGroup>
+                </form>
+              </DialogContent>
+            </Dialog>
           </Field>
         </CardFooter>
       </Card>

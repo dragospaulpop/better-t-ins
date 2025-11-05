@@ -1,5 +1,6 @@
 import {
   boolean,
+  int,
   mysqlTable,
   text,
   timestamp,
@@ -67,4 +68,20 @@ export const verification = mysqlTable("verification", {
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at"),
   updatedAt: timestamp("updated_at"),
+});
+
+export const passkey = mysqlTable("passkey", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  name: text("name"),
+  publicKey: text("public_key").notNull(),
+  userId: varchar("user_id", { length: 36 })
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  credentialID: text("credential_id").notNull(),
+  counter: int("counter").notNull(),
+  deviceType: text("device_type").notNull(),
+  backedUp: boolean("backed_up").notNull(),
+  transports: text("transports").notNull(),
+  createdAt: timestamp("created_at").notNull(),
+  aaguid: text("aaguid"),
 });

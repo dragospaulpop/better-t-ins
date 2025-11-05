@@ -2,12 +2,16 @@ import type { AppRouter } from "@better-t-ins/api/routers/index";
 import type { TRPCClientErrorLike } from "@trpc/client";
 import { CircleXIcon } from "lucide-react";
 
+type ErrorLike = {
+  message: string;
+};
+
 export default function ErrorComponent({
   error,
   element = "div",
 }: {
   element?: "div" | "span";
-  error: TRPCClientErrorLike<AppRouter>;
+  error: TRPCClientErrorLike<AppRouter> | ErrorLike;
 }) {
   const Comp = element === "div" ? "div" : "span";
   return (
