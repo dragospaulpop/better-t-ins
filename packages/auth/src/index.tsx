@@ -10,7 +10,7 @@ import VerifyEmail from "@better-t-ins/mail/emails/verify-email";
 import render from "@better-t-ins/mail/render";
 import { type BetterAuthOptions, betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { magicLink, twoFactor } from "better-auth/plugins";
+import { haveIBeenPwned, magicLink, twoFactor } from "better-auth/plugins";
 
 export const auth = betterAuth<BetterAuthOptions>({
   database: drizzleAdapter(db, {
@@ -46,6 +46,10 @@ export const auth = betterAuth<BetterAuthOptions>({
           text,
         });
       },
+    }),
+    haveIBeenPwned({
+      customPasswordCompromisedMessage:
+        "This password has been compromised. Please choose a different password.",
     }),
   ],
   trustedOrigins: [process.env.CORS_ORIGIN || ""],
