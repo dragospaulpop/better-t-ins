@@ -13,6 +13,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import type { trpc } from "@/utils/trpc";
 import "../index.css";
+import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 
 export interface RouterAppContext {
   trpc: typeof trpc;
@@ -41,6 +42,8 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 });
 
 function RootComponent() {
+  const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+
   const isFetching = useRouterState({
     select: (s) => s.isLoading,
   });
@@ -54,10 +57,16 @@ function RootComponent() {
         disableTransitionOnChange
         storageKey="vite-ui-theme"
       >
-        <div className="grid h-svh grid-rows-[auto_1fr]">
-          <Header />
-          {isFetching ? <Loader /> : <Outlet />}
-        </div>
+        <GoogleReCaptchaProvider
+          reCaptchaKey={RECAPTCHA_SITE_KEY as string}
+          scriptProps={{ async: true, defer: true, appendTo: "body" }}
+          useRecaptchaNet
+        >
+          <div className="grid h-svh grid-rows-[auto_1fr]">
+            <Header />
+            {isFetching ? <Loader /> : <Outlet />}
+          </div>
+        </GoogleReCaptchaProvider>
         <Toaster richColors />
       </ThemeProvider>
       <TanStackRouterDevtools position="bottom-left" />

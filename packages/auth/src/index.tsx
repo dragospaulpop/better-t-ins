@@ -10,8 +10,25 @@ import VerifyEmail from "@better-t-ins/mail/emails/verify-email";
 import render from "@better-t-ins/mail/render";
 import { type BetterAuthOptions, betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { haveIBeenPwned, magicLink, twoFactor } from "better-auth/plugins";
+import {
+  captcha,
+  haveIBeenPwned,
+  magicLink,
+  twoFactor,
+} from "better-auth/plugins";
 import { passkey } from "better-auth/plugins/passkey";
+import "dotenv/config";
+
+const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY;
+const CORS_ORIGIN = process.env.CORS_ORIGIN;
+
+if (!RECAPTCHA_SECRET_KEY) {
+  throw new Error("RECAPTCHA_SECRET_KEY is not set");
+}
+
+if (!CORS_ORIGIN) {
+  throw new Error("CORS_ORIGIN is not set");
+}
 
 export const auth = betterAuth<BetterAuthOptions>({
   database: drizzleAdapter(db, {
@@ -53,8 +70,12 @@ export const auth = betterAuth<BetterAuthOptions>({
         "This password has been compromised. Please choose a different password or request a password reset.",
     }),
     passkey(),
+    captcha({
+      provider: "google-recaptcha", // or google-recaptcha, hcaptcha, captchafox
+      secretKey: RECAPTCHA_SECRET_KEY,
+    }),
   ],
-  trustedOrigins: [process.env.CORS_ORIGIN || ""],
+  trustedOrigins: [CORS_ORIGIN],
 
   emailAndPassword: {
     enabled: true,

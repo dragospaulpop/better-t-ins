@@ -23,10 +23,11 @@
     "react": "^19.2.0"
   },
   "dependencies": {
+    "@better-fetch/fetch": "^1.1.18",
+    "@better-t-ins/db": "workspace:*",
+    "@better-t-ins/mail": "workspace:*",
     "better-auth": "catalog:",
     "dotenv": "catalog:",
-    "zod": "catalog:",
-    "@better-t-ins/db": "workspace:*",
-    "@better-t-ins/mail": "workspace:*"
+    "zod": "catalog:"
   }
 }

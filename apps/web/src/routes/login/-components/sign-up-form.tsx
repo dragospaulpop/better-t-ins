@@ -8,7 +8,8 @@ import {
   RotateCcwKeyIcon,
   UserIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { toast } from "sonner";
 import z from "zod";
 import PasswordStrengthTooltip from "@/components/password-strength-tooltip";
@@ -45,6 +46,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "../../../components/ui/tooltip";
+import RecaptchaNotice from "./recaptcha-notice";
 
 const MIN_PASSWORD_LENGTH_USER = 8;
 const MIN_PASSWORD_LENGTH = 16;
@@ -93,6 +95,7 @@ export default function SignUpForm({
   const { isPending } = authClient.useSession();
   const [isPassWordVisible, setIsPassWordVisible] = useState(false);
   const [passwordStrengthValue, setPasswordStrengthValue] = useState(0);
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const generateRandomPassword = () => {
     const randomLength =
@@ -102,6 +105,19 @@ export default function SignUpForm({
     return generatePassword(randomLength, true);
   };
 
+  const verifyRecaptcha = useCallback(async () => {
+    if (!executeRecaptcha) {
+      toast.error("Failed to verify reCAPTCHA");
+      return null;
+    }
+    const token = await executeRecaptcha("signup");
+    if (!token) {
+      toast.error("Failed to verify reCAPTCHA");
+      return null;
+    }
+    return token;
+  }, [executeRecaptcha]);
+
   const form = useForm({
     defaultValues: {
       email: "froind@gmail.com",
@@ -110,6 +126,11 @@ export default function SignUpForm({
       confirmPassword: "TestTest1!",
     },
     onSubmit: async ({ value }) => {
+      const token = await verifyRecaptcha();
+      if (!token) {
+        toast.error("Failed to verify reCAPTCHA");
+        return;
+      }
       await authClient.signUp.email(
         {
           email: value.email,
@@ -117,6 +138,10 @@ export default function SignUpForm({
           name: value.name,
         },
         {
+          headers: {
+            "x-captcha-response": token,
+          },
+
           onSuccess: () => {
             authClient.sendVerificationEmail(
               {
@@ -393,13 +418,14 @@ export default function SignUpForm({
         </form>
       </CardContent>
 
-      <CardFooter>
+      <CardFooter className="flex-col items-center justify-center">
         <Field orientation="horizontal">
           <FieldLabel htmlFor="sign-in">Already have an account?</FieldLabel>
           <Button onClick={onSwitchToSignIn} variant="link">
             Sign In
           </Button>
         </Field>
+        <RecaptchaNotice />
       </CardFooter>
     </Card>
   );

@@ -7,7 +7,8 @@ import {
   LockIcon,
   MailIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { toast } from "sonner";
 import z from "zod";
 import { authClient } from "@/lib/auth-client";
@@ -38,6 +39,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "../../../components/ui/tooltip";
+import RecaptchaNotice from "./recaptcha-notice";
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -54,6 +56,20 @@ export default function SignInForm({
   const { isPending } = authClient.useSession();
   const [isPassWordVisible, setIsPassWordVisible] = useState(false);
   const { refetch } = authClient.useSession();
+  const { executeRecaptcha } = useGoogleReCaptcha();
+
+  const verifyRecaptcha = useCallback(async () => {
+    if (!executeRecaptcha) {
+      toast.error("Failed to verify reCAPTCHA");
+      return null;
+    }
+    const token = await executeRecaptcha("signin");
+    if (!token) {
+      toast.error("Failed to verify reCAPTCHA");
+      return null;
+    }
+    return token;
+  }, [executeRecaptcha]);
 
   const form = useForm({
     defaultValues: {
@@ -61,12 +77,22 @@ export default function SignInForm({
       password: "",
     },
     onSubmit: async ({ value }) => {
+      const token = await verifyRecaptcha();
+      if (!token) {
+        toast.error("Failed to verify reCAPTCHA");
+        return;
+      }
       await authClient.signIn.email(
         {
           email: value.email,
           password: value.password,
         },
         {
+          headers: {
+            // "x-captcha-response": `${token}test`,
+            "x-captcha-response": token,
+          },
+
           onSuccess: ({ data }) => {
             if (data.emailNotVerified) {
               onSwitchToVerifyEmail(data.email);
@@ -81,7 +107,9 @@ export default function SignInForm({
               navigate({
                 to: "/dashboard",
               });
-              toast.success("Sign in successful");
+              toast.success("Sign in successful", {
+                testId: "sign-in-success",
+              });
             }
           },
           onError: (error) => {
@@ -114,7 +142,9 @@ export default function SignInForm({
                 }
               );
             } else {
-              toast.error(error.error.message || error.error.statusText);
+              toast.error(error.error.message || error.error.statusText, {
+                testId: "email-error",
+              });
             }
           },
         }
@@ -283,13 +313,14 @@ export default function SignInForm({
           </FieldGroup>
         </form>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex-col items-center justify-center">
         <Field orientation="horizontal">
           <FieldLabel htmlFor="sign-up">Need an account? </FieldLabel>
           <Button onClick={onSwitchToSignUp} variant="link">
             Sign Up
           </Button>
         </Field>
+        <RecaptchaNotice />
       </CardFooter>
     </Card>
   );

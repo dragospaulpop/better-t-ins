@@ -1,6 +1,8 @@
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { ArrowLeftIcon, Loader2Icon, MailIcon } from "lucide-react";
+import { useCallback } from "react";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { toast } from "sonner";
 import z from "zod";
 import { Button } from "@/components/ui/button";
@@ -8,6 +10,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -26,6 +29,7 @@ import {
 } from "@/components/ui/input-group";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { authClient } from "@/lib/auth-client";
+import RecaptchaNotice from "./-components/recaptcha-notice";
 
 export const Route = createFileRoute("/login/password-reset-or-magic-link")({
   component: RouteComponent,
@@ -48,6 +52,20 @@ const formSchema = z.object({
 
 function RouteComponent() {
   const navigate = useNavigate();
+  const { executeRecaptcha } = useGoogleReCaptcha();
+
+  const verifyRecaptcha = useCallback(async () => {
+    if (!executeRecaptcha) {
+      toast.error("Failed to verify reCAPTCHA");
+      return null;
+    }
+    const token = await executeRecaptcha("password-reset-or-magic-link");
+    if (!token) {
+      toast.error("Failed to verify reCAPTCHA");
+      return null;
+    }
+    return token;
+  }, [executeRecaptcha]);
 
   const form = useForm({
     defaultValues: {
@@ -56,12 +74,20 @@ function RouteComponent() {
     },
     onSubmit: async ({ value }) => {
       if (value.resetOrMagicLink === "reset") {
+        const token = await verifyRecaptcha();
+        if (!token) {
+          toast.error("Failed to verify reCAPTCHA");
+          return;
+        }
         await authClient.requestPasswordReset(
           {
             email: value.email,
             redirectTo: `${window.location.origin}/login/reset-password`,
           },
           {
+            headers: {
+              "x-captcha-response": token,
+            },
             onSuccess: () => {
               toast.success(
                 "If this email exists in our system, check your email for the reset link"
@@ -210,6 +236,9 @@ function RouteComponent() {
             </FieldGroup>
           </form>
         </CardContent>
+        <CardFooter>
+          <RecaptchaNotice />
+        </CardFooter>
       </Card>
     </div>
   );
