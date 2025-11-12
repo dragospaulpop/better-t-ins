@@ -35,6 +35,24 @@ export const auth = betterAuth<BetterAuthOptions>({
     provider: "mysql",
     schema,
   }),
+  rateLimit: {
+    enabled: true,
+    max: 10,
+    window: 60, // 1 minute
+    customRules: {
+      "/sign-in/email": {
+        window: 10,
+        max: 3,
+      },
+      "/two-factor/*": () => {
+        // custom function to return rate limit window and max
+        return {
+          window: 10,
+          max: 3,
+        };
+      },
+    },
+  },
   appName: "VerdeINS",
   plugins: [
     twoFactor({
