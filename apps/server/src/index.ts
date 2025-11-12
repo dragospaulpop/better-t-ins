@@ -6,6 +6,11 @@ import "dotenv/config";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import protect from "./arcjet";
+
+const RATE_LIMIT_EXCEEDED_STATUS = 429;
+const EMAIL_INVALID_STATUS = 400;
+const FORBIDDEN_STATUS = 403;
 
 const app = new Hono<{
   Variables: {
@@ -40,7 +45,39 @@ app.use(
   }
 );
 
-app.on(["POST", "GET"], "/api/auth/*", async (c) => auth.handler(c.req.raw));
+app.on(["POST", "GET"], "/api/auth/*", async (c) => {
+  const decision = await protect(c);
+
+  if (decision.isDenied()) {
+    // console.log(decision.reason);
+    if (decision.reason.isRateLimit()) {
+      return c.json(
+        { message: "Rate limit exceeded" },
+        RATE_LIMIT_EXCEEDED_STATUS
+      );
+    }
+    if (decision.reason.isEmail()) {
+      let message: string;
+
+      if (decision.reason.emailTypes.includes("INVALID")) {
+        message = "Email address format is invalid. Is there a typo?";
+      } else if (decision.reason.emailTypes.includes("DISPOSABLE")) {
+        message = "We do not allow disposable email addresses.";
+      } else if (decision.reason.emailTypes.includes("NO_MX_RECORDS")) {
+        message =
+          "Your email domain does not have an MX record. Is there a typo?";
+      } else {
+        // This is a catch all, but the above should be exhaustive based on the
+        // configured rules.
+        message = "Invalid email.";
+      }
+
+      return c.json({ message }, EMAIL_INVALID_STATUS);
+    }
+    return c.json({ message: "Forbidden" }, FORBIDDEN_STATUS);
+  }
+  return auth.handler(c.req.raw);
+});
 
 app.use(
   "/trpc/*",
