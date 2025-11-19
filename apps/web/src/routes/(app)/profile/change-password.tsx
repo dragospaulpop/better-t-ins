@@ -38,7 +38,7 @@ import generatePassword, {
   passwordStrength,
 } from "@/utils/password-generator";
 
-export const Route = createFileRoute("/profile/change-password")({
+export const Route = createFileRoute("/(app)/profile/change-password")({
   component: RouteComponent,
 });
 

@@ -1,7 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import {
   createFileRoute,
-  redirect,
   useNavigate,
   useRouter,
 } from "@tanstack/react-router";
@@ -47,23 +46,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { authClient } from "@/lib/auth-client";
-import ShowBackupCodes from "@/routes/login/-components/show-backup-codes";
+import ShowBackupCodes from "@/routes/(auth)/login/-components/show-backup-codes";
 
-export const Route = createFileRoute("/profile/")({
+export const Route = createFileRoute("/(app)/profile/")({
   component: RouteComponent,
   beforeLoad: async () => {
-    const session = await authClient.getSession();
-    const canAccess = session.data?.user.emailVerified;
     const { data: passkeys, error: passkeyError } =
       await authClient.passkey.listUserPasskeys();
-    if (!canAccess) {
-      redirect({
-        to: "/login",
-        replace: true,
-        throw: true,
-      });
-    }
-    return { session, passkeys, passkeyError };
+    return { passkeys, passkeyError };
   },
 });
 

@@ -11,19 +11,20 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TodosRouteImport } from './routes/todos'
 import { Route as GoodbyeRouteImport } from './routes/goodbye'
-import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as appRouteRouteImport } from './routes/(app)/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ProfileIndexRouteImport } from './routes/profile/index'
-import { Route as LoginIndexRouteImport } from './routes/login/index'
-import { Route as FilesIndexRouteImport } from './routes/files/index'
-import { Route as ProfileEnableTwoFactorRouteImport } from './routes/profile/enable-two-factor'
-import { Route as ProfileChangePasswordRouteImport } from './routes/profile/change-password'
-import { Route as LoginTwoFactorRouteImport } from './routes/login/two-factor'
-import { Route as LoginResetPasswordRouteImport } from './routes/login/reset-password'
-import { Route as LoginPasswordResetOrMagicLinkRouteImport } from './routes/login/password-reset-or-magic-link'
-import { Route as LoginOtpRouteImport } from './routes/login/otp'
-import { Route as LoginBackupCodeRouteImport } from './routes/login/backup-code'
-import { Route as ProfileConfirmTotpTotpURIBackupCodesRouteImport } from './routes/profile/confirm-totp.$totpURI.$backupCodes'
+import { Route as authLoginIndexRouteImport } from './routes/(auth)/login/index'
+import { Route as appProfileIndexRouteImport } from './routes/(app)/profile/index'
+import { Route as appFilesIndexRouteImport } from './routes/(app)/files/index'
+import { Route as appDashboardIndexRouteImport } from './routes/(app)/dashboard/index'
+import { Route as authLoginTwoFactorRouteImport } from './routes/(auth)/login/two-factor'
+import { Route as authLoginResetPasswordRouteImport } from './routes/(auth)/login/reset-password'
+import { Route as authLoginPasswordResetOrMagicLinkRouteImport } from './routes/(auth)/login/password-reset-or-magic-link'
+import { Route as authLoginOtpRouteImport } from './routes/(auth)/login/otp'
+import { Route as authLoginBackupCodeRouteImport } from './routes/(auth)/login/backup-code'
+import { Route as appProfileEnableTwoFactorRouteImport } from './routes/(app)/profile/enable-two-factor'
+import { Route as appProfileChangePasswordRouteImport } from './routes/(app)/profile/change-password'
+import { Route as appProfileConfirmTotpTotpURIBackupCodesRouteImport } from './routes/(app)/profile/confirm-totp.$totpURI.$backupCodes'
 
 const TodosRoute = TodosRouteImport.update({
   id: '/todos',
@@ -35,9 +36,8 @@ const GoodbyeRoute = GoodbyeRouteImport.update({
   path: '/goodbye',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const appRouteRoute = appRouteRouteImport.update({
+  id: '/(app)',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -45,186 +45,190 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProfileIndexRoute = ProfileIndexRouteImport.update({
-  id: '/profile/',
-  path: '/profile/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginIndexRoute = LoginIndexRouteImport.update({
-  id: '/login/',
+const authLoginIndexRoute = authLoginIndexRouteImport.update({
+  id: '/(auth)/login/',
   path: '/login/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FilesIndexRoute = FilesIndexRouteImport.update({
+const appProfileIndexRoute = appProfileIndexRouteImport.update({
+  id: '/profile/',
+  path: '/profile/',
+  getParentRoute: () => appRouteRoute,
+} as any)
+const appFilesIndexRoute = appFilesIndexRouteImport.update({
   id: '/files/',
   path: '/files/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => appRouteRoute,
 } as any)
-const ProfileEnableTwoFactorRoute = ProfileEnableTwoFactorRouteImport.update({
-  id: '/profile/enable-two-factor',
-  path: '/profile/enable-two-factor',
-  getParentRoute: () => rootRouteImport,
+const appDashboardIndexRoute = appDashboardIndexRouteImport.update({
+  id: '/dashboard/',
+  path: '/dashboard/',
+  getParentRoute: () => appRouteRoute,
 } as any)
-const ProfileChangePasswordRoute = ProfileChangePasswordRouteImport.update({
-  id: '/profile/change-password',
-  path: '/profile/change-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginTwoFactorRoute = LoginTwoFactorRouteImport.update({
-  id: '/login/two-factor',
+const authLoginTwoFactorRoute = authLoginTwoFactorRouteImport.update({
+  id: '/(auth)/login/two-factor',
   path: '/login/two-factor',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LoginResetPasswordRoute = LoginResetPasswordRouteImport.update({
-  id: '/login/reset-password',
+const authLoginResetPasswordRoute = authLoginResetPasswordRouteImport.update({
+  id: '/(auth)/login/reset-password',
   path: '/login/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LoginPasswordResetOrMagicLinkRoute =
-  LoginPasswordResetOrMagicLinkRouteImport.update({
-    id: '/login/password-reset-or-magic-link',
+const authLoginPasswordResetOrMagicLinkRoute =
+  authLoginPasswordResetOrMagicLinkRouteImport.update({
+    id: '/(auth)/login/password-reset-or-magic-link',
     path: '/login/password-reset-or-magic-link',
     getParentRoute: () => rootRouteImport,
   } as any)
-const LoginOtpRoute = LoginOtpRouteImport.update({
-  id: '/login/otp',
+const authLoginOtpRoute = authLoginOtpRouteImport.update({
+  id: '/(auth)/login/otp',
   path: '/login/otp',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LoginBackupCodeRoute = LoginBackupCodeRouteImport.update({
-  id: '/login/backup-code',
+const authLoginBackupCodeRoute = authLoginBackupCodeRouteImport.update({
+  id: '/(auth)/login/backup-code',
   path: '/login/backup-code',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProfileConfirmTotpTotpURIBackupCodesRoute =
-  ProfileConfirmTotpTotpURIBackupCodesRouteImport.update({
+const appProfileEnableTwoFactorRoute =
+  appProfileEnableTwoFactorRouteImport.update({
+    id: '/profile/enable-two-factor',
+    path: '/profile/enable-two-factor',
+    getParentRoute: () => appRouteRoute,
+  } as any)
+const appProfileChangePasswordRoute =
+  appProfileChangePasswordRouteImport.update({
+    id: '/profile/change-password',
+    path: '/profile/change-password',
+    getParentRoute: () => appRouteRoute,
+  } as any)
+const appProfileConfirmTotpTotpURIBackupCodesRoute =
+  appProfileConfirmTotpTotpURIBackupCodesRouteImport.update({
     id: '/profile/confirm-totp/$totpURI/$backupCodes',
     path: '/profile/confirm-totp/$totpURI/$backupCodes',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => appRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
   '/goodbye': typeof GoodbyeRoute
   '/todos': typeof TodosRoute
-  '/login/backup-code': typeof LoginBackupCodeRoute
-  '/login/otp': typeof LoginOtpRoute
-  '/login/password-reset-or-magic-link': typeof LoginPasswordResetOrMagicLinkRoute
-  '/login/reset-password': typeof LoginResetPasswordRoute
-  '/login/two-factor': typeof LoginTwoFactorRoute
-  '/profile/change-password': typeof ProfileChangePasswordRoute
-  '/profile/enable-two-factor': typeof ProfileEnableTwoFactorRoute
-  '/files': typeof FilesIndexRoute
-  '/login': typeof LoginIndexRoute
-  '/profile': typeof ProfileIndexRoute
-  '/profile/confirm-totp/$totpURI/$backupCodes': typeof ProfileConfirmTotpTotpURIBackupCodesRoute
+  '/profile/change-password': typeof appProfileChangePasswordRoute
+  '/profile/enable-two-factor': typeof appProfileEnableTwoFactorRoute
+  '/login/backup-code': typeof authLoginBackupCodeRoute
+  '/login/otp': typeof authLoginOtpRoute
+  '/login/password-reset-or-magic-link': typeof authLoginPasswordResetOrMagicLinkRoute
+  '/login/reset-password': typeof authLoginResetPasswordRoute
+  '/login/two-factor': typeof authLoginTwoFactorRoute
+  '/dashboard': typeof appDashboardIndexRoute
+  '/files': typeof appFilesIndexRoute
+  '/profile': typeof appProfileIndexRoute
+  '/login': typeof authLoginIndexRoute
+  '/profile/confirm-totp/$totpURI/$backupCodes': typeof appProfileConfirmTotpTotpURIBackupCodesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
   '/goodbye': typeof GoodbyeRoute
   '/todos': typeof TodosRoute
-  '/login/backup-code': typeof LoginBackupCodeRoute
-  '/login/otp': typeof LoginOtpRoute
-  '/login/password-reset-or-magic-link': typeof LoginPasswordResetOrMagicLinkRoute
-  '/login/reset-password': typeof LoginResetPasswordRoute
-  '/login/two-factor': typeof LoginTwoFactorRoute
-  '/profile/change-password': typeof ProfileChangePasswordRoute
-  '/profile/enable-two-factor': typeof ProfileEnableTwoFactorRoute
-  '/files': typeof FilesIndexRoute
-  '/login': typeof LoginIndexRoute
-  '/profile': typeof ProfileIndexRoute
-  '/profile/confirm-totp/$totpURI/$backupCodes': typeof ProfileConfirmTotpTotpURIBackupCodesRoute
+  '/profile/change-password': typeof appProfileChangePasswordRoute
+  '/profile/enable-two-factor': typeof appProfileEnableTwoFactorRoute
+  '/login/backup-code': typeof authLoginBackupCodeRoute
+  '/login/otp': typeof authLoginOtpRoute
+  '/login/password-reset-or-magic-link': typeof authLoginPasswordResetOrMagicLinkRoute
+  '/login/reset-password': typeof authLoginResetPasswordRoute
+  '/login/two-factor': typeof authLoginTwoFactorRoute
+  '/dashboard': typeof appDashboardIndexRoute
+  '/files': typeof appFilesIndexRoute
+  '/profile': typeof appProfileIndexRoute
+  '/login': typeof authLoginIndexRoute
+  '/profile/confirm-totp/$totpURI/$backupCodes': typeof appProfileConfirmTotpTotpURIBackupCodesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
+  '/(app)': typeof appRouteRouteWithChildren
   '/goodbye': typeof GoodbyeRoute
   '/todos': typeof TodosRoute
-  '/login/backup-code': typeof LoginBackupCodeRoute
-  '/login/otp': typeof LoginOtpRoute
-  '/login/password-reset-or-magic-link': typeof LoginPasswordResetOrMagicLinkRoute
-  '/login/reset-password': typeof LoginResetPasswordRoute
-  '/login/two-factor': typeof LoginTwoFactorRoute
-  '/profile/change-password': typeof ProfileChangePasswordRoute
-  '/profile/enable-two-factor': typeof ProfileEnableTwoFactorRoute
-  '/files/': typeof FilesIndexRoute
-  '/login/': typeof LoginIndexRoute
-  '/profile/': typeof ProfileIndexRoute
-  '/profile/confirm-totp/$totpURI/$backupCodes': typeof ProfileConfirmTotpTotpURIBackupCodesRoute
+  '/(app)/profile/change-password': typeof appProfileChangePasswordRoute
+  '/(app)/profile/enable-two-factor': typeof appProfileEnableTwoFactorRoute
+  '/(auth)/login/backup-code': typeof authLoginBackupCodeRoute
+  '/(auth)/login/otp': typeof authLoginOtpRoute
+  '/(auth)/login/password-reset-or-magic-link': typeof authLoginPasswordResetOrMagicLinkRoute
+  '/(auth)/login/reset-password': typeof authLoginResetPasswordRoute
+  '/(auth)/login/two-factor': typeof authLoginTwoFactorRoute
+  '/(app)/dashboard/': typeof appDashboardIndexRoute
+  '/(app)/files/': typeof appFilesIndexRoute
+  '/(app)/profile/': typeof appProfileIndexRoute
+  '/(auth)/login/': typeof authLoginIndexRoute
+  '/(app)/profile/confirm-totp/$totpURI/$backupCodes': typeof appProfileConfirmTotpTotpURIBackupCodesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/dashboard'
     | '/goodbye'
     | '/todos'
+    | '/profile/change-password'
+    | '/profile/enable-two-factor'
     | '/login/backup-code'
     | '/login/otp'
     | '/login/password-reset-or-magic-link'
     | '/login/reset-password'
     | '/login/two-factor'
-    | '/profile/change-password'
-    | '/profile/enable-two-factor'
+    | '/dashboard'
     | '/files'
-    | '/login'
     | '/profile'
+    | '/login'
     | '/profile/confirm-totp/$totpURI/$backupCodes'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/dashboard'
     | '/goodbye'
     | '/todos'
+    | '/profile/change-password'
+    | '/profile/enable-two-factor'
     | '/login/backup-code'
     | '/login/otp'
     | '/login/password-reset-or-magic-link'
     | '/login/reset-password'
     | '/login/two-factor'
-    | '/profile/change-password'
-    | '/profile/enable-two-factor'
+    | '/dashboard'
     | '/files'
-    | '/login'
     | '/profile'
+    | '/login'
     | '/profile/confirm-totp/$totpURI/$backupCodes'
   id:
     | '__root__'
     | '/'
-    | '/dashboard'
+    | '/(app)'
     | '/goodbye'
     | '/todos'
-    | '/login/backup-code'
-    | '/login/otp'
-    | '/login/password-reset-or-magic-link'
-    | '/login/reset-password'
-    | '/login/two-factor'
-    | '/profile/change-password'
-    | '/profile/enable-two-factor'
-    | '/files/'
-    | '/login/'
-    | '/profile/'
-    | '/profile/confirm-totp/$totpURI/$backupCodes'
+    | '/(app)/profile/change-password'
+    | '/(app)/profile/enable-two-factor'
+    | '/(auth)/login/backup-code'
+    | '/(auth)/login/otp'
+    | '/(auth)/login/password-reset-or-magic-link'
+    | '/(auth)/login/reset-password'
+    | '/(auth)/login/two-factor'
+    | '/(app)/dashboard/'
+    | '/(app)/files/'
+    | '/(app)/profile/'
+    | '/(auth)/login/'
+    | '/(app)/profile/confirm-totp/$totpURI/$backupCodes'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DashboardRoute: typeof DashboardRoute
+  appRouteRoute: typeof appRouteRouteWithChildren
   GoodbyeRoute: typeof GoodbyeRoute
   TodosRoute: typeof TodosRoute
-  LoginBackupCodeRoute: typeof LoginBackupCodeRoute
-  LoginOtpRoute: typeof LoginOtpRoute
-  LoginPasswordResetOrMagicLinkRoute: typeof LoginPasswordResetOrMagicLinkRoute
-  LoginResetPasswordRoute: typeof LoginResetPasswordRoute
-  LoginTwoFactorRoute: typeof LoginTwoFactorRoute
-  ProfileChangePasswordRoute: typeof ProfileChangePasswordRoute
-  ProfileEnableTwoFactorRoute: typeof ProfileEnableTwoFactorRoute
-  FilesIndexRoute: typeof FilesIndexRoute
-  LoginIndexRoute: typeof LoginIndexRoute
-  ProfileIndexRoute: typeof ProfileIndexRoute
-  ProfileConfirmTotpTotpURIBackupCodesRoute: typeof ProfileConfirmTotpTotpURIBackupCodesRoute
+  authLoginBackupCodeRoute: typeof authLoginBackupCodeRoute
+  authLoginOtpRoute: typeof authLoginOtpRoute
+  authLoginPasswordResetOrMagicLinkRoute: typeof authLoginPasswordResetOrMagicLinkRoute
+  authLoginResetPasswordRoute: typeof authLoginResetPasswordRoute
+  authLoginTwoFactorRoute: typeof authLoginTwoFactorRoute
+  authLoginIndexRoute: typeof authLoginIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -243,11 +247,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GoodbyeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
+    '/(app)': {
+      id: '/(app)'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof appRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -257,103 +261,128 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/profile/': {
-      id: '/profile/'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login/': {
-      id: '/login/'
+    '/(auth)/login/': {
+      id: '/(auth)/login/'
       path: '/login'
       fullPath: '/login'
-      preLoaderRoute: typeof LoginIndexRouteImport
+      preLoaderRoute: typeof authLoginIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/files/': {
-      id: '/files/'
+    '/(app)/profile/': {
+      id: '/(app)/profile/'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof appProfileIndexRouteImport
+      parentRoute: typeof appRouteRoute
+    }
+    '/(app)/files/': {
+      id: '/(app)/files/'
       path: '/files'
       fullPath: '/files'
-      preLoaderRoute: typeof FilesIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof appFilesIndexRouteImport
+      parentRoute: typeof appRouteRoute
     }
-    '/profile/enable-two-factor': {
-      id: '/profile/enable-two-factor'
-      path: '/profile/enable-two-factor'
-      fullPath: '/profile/enable-two-factor'
-      preLoaderRoute: typeof ProfileEnableTwoFactorRouteImport
-      parentRoute: typeof rootRouteImport
+    '/(app)/dashboard/': {
+      id: '/(app)/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof appDashboardIndexRouteImport
+      parentRoute: typeof appRouteRoute
     }
-    '/profile/change-password': {
-      id: '/profile/change-password'
-      path: '/profile/change-password'
-      fullPath: '/profile/change-password'
-      preLoaderRoute: typeof ProfileChangePasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login/two-factor': {
-      id: '/login/two-factor'
+    '/(auth)/login/two-factor': {
+      id: '/(auth)/login/two-factor'
       path: '/login/two-factor'
       fullPath: '/login/two-factor'
-      preLoaderRoute: typeof LoginTwoFactorRouteImport
+      preLoaderRoute: typeof authLoginTwoFactorRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/login/reset-password': {
-      id: '/login/reset-password'
+    '/(auth)/login/reset-password': {
+      id: '/(auth)/login/reset-password'
       path: '/login/reset-password'
       fullPath: '/login/reset-password'
-      preLoaderRoute: typeof LoginResetPasswordRouteImport
+      preLoaderRoute: typeof authLoginResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/login/password-reset-or-magic-link': {
-      id: '/login/password-reset-or-magic-link'
+    '/(auth)/login/password-reset-or-magic-link': {
+      id: '/(auth)/login/password-reset-or-magic-link'
       path: '/login/password-reset-or-magic-link'
       fullPath: '/login/password-reset-or-magic-link'
-      preLoaderRoute: typeof LoginPasswordResetOrMagicLinkRouteImport
+      preLoaderRoute: typeof authLoginPasswordResetOrMagicLinkRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/login/otp': {
-      id: '/login/otp'
+    '/(auth)/login/otp': {
+      id: '/(auth)/login/otp'
       path: '/login/otp'
       fullPath: '/login/otp'
-      preLoaderRoute: typeof LoginOtpRouteImport
+      preLoaderRoute: typeof authLoginOtpRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/login/backup-code': {
-      id: '/login/backup-code'
+    '/(auth)/login/backup-code': {
+      id: '/(auth)/login/backup-code'
       path: '/login/backup-code'
       fullPath: '/login/backup-code'
-      preLoaderRoute: typeof LoginBackupCodeRouteImport
+      preLoaderRoute: typeof authLoginBackupCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/profile/confirm-totp/$totpURI/$backupCodes': {
-      id: '/profile/confirm-totp/$totpURI/$backupCodes'
+    '/(app)/profile/enable-two-factor': {
+      id: '/(app)/profile/enable-two-factor'
+      path: '/profile/enable-two-factor'
+      fullPath: '/profile/enable-two-factor'
+      preLoaderRoute: typeof appProfileEnableTwoFactorRouteImport
+      parentRoute: typeof appRouteRoute
+    }
+    '/(app)/profile/change-password': {
+      id: '/(app)/profile/change-password'
+      path: '/profile/change-password'
+      fullPath: '/profile/change-password'
+      preLoaderRoute: typeof appProfileChangePasswordRouteImport
+      parentRoute: typeof appRouteRoute
+    }
+    '/(app)/profile/confirm-totp/$totpURI/$backupCodes': {
+      id: '/(app)/profile/confirm-totp/$totpURI/$backupCodes'
       path: '/profile/confirm-totp/$totpURI/$backupCodes'
       fullPath: '/profile/confirm-totp/$totpURI/$backupCodes'
-      preLoaderRoute: typeof ProfileConfirmTotpTotpURIBackupCodesRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof appProfileConfirmTotpTotpURIBackupCodesRouteImport
+      parentRoute: typeof appRouteRoute
     }
   }
 }
 
+interface appRouteRouteChildren {
+  appProfileChangePasswordRoute: typeof appProfileChangePasswordRoute
+  appProfileEnableTwoFactorRoute: typeof appProfileEnableTwoFactorRoute
+  appDashboardIndexRoute: typeof appDashboardIndexRoute
+  appFilesIndexRoute: typeof appFilesIndexRoute
+  appProfileIndexRoute: typeof appProfileIndexRoute
+  appProfileConfirmTotpTotpURIBackupCodesRoute: typeof appProfileConfirmTotpTotpURIBackupCodesRoute
+}
+
+const appRouteRouteChildren: appRouteRouteChildren = {
+  appProfileChangePasswordRoute: appProfileChangePasswordRoute,
+  appProfileEnableTwoFactorRoute: appProfileEnableTwoFactorRoute,
+  appDashboardIndexRoute: appDashboardIndexRoute,
+  appFilesIndexRoute: appFilesIndexRoute,
+  appProfileIndexRoute: appProfileIndexRoute,
+  appProfileConfirmTotpTotpURIBackupCodesRoute:
+    appProfileConfirmTotpTotpURIBackupCodesRoute,
+}
+
+const appRouteRouteWithChildren = appRouteRoute._addFileChildren(
+  appRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DashboardRoute: DashboardRoute,
+  appRouteRoute: appRouteRouteWithChildren,
   GoodbyeRoute: GoodbyeRoute,
   TodosRoute: TodosRoute,
-  LoginBackupCodeRoute: LoginBackupCodeRoute,
-  LoginOtpRoute: LoginOtpRoute,
-  LoginPasswordResetOrMagicLinkRoute: LoginPasswordResetOrMagicLinkRoute,
-  LoginResetPasswordRoute: LoginResetPasswordRoute,
-  LoginTwoFactorRoute: LoginTwoFactorRoute,
-  ProfileChangePasswordRoute: ProfileChangePasswordRoute,
-  ProfileEnableTwoFactorRoute: ProfileEnableTwoFactorRoute,
-  FilesIndexRoute: FilesIndexRoute,
-  LoginIndexRoute: LoginIndexRoute,
-  ProfileIndexRoute: ProfileIndexRoute,
-  ProfileConfirmTotpTotpURIBackupCodesRoute:
-    ProfileConfirmTotpTotpURIBackupCodesRoute,
+  authLoginBackupCodeRoute: authLoginBackupCodeRoute,
+  authLoginOtpRoute: authLoginOtpRoute,
+  authLoginPasswordResetOrMagicLinkRoute:
+    authLoginPasswordResetOrMagicLinkRoute,
+  authLoginResetPasswordRoute: authLoginResetPasswordRoute,
+  authLoginTwoFactorRoute: authLoginTwoFactorRoute,
+  authLoginIndexRoute: authLoginIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

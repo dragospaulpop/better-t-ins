@@ -31,7 +31,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { authClient } from "@/lib/auth-client";
 import RecaptchaNotice from "./-components/recaptcha-notice";
 
-export const Route = createFileRoute("/login/password-reset-or-magic-link")({
+export const Route = createFileRoute("/(auth)/login/password-reset-or-magic-link")({
   component: RouteComponent,
   beforeLoad: async () => {
     const session = await authClient.getSession();

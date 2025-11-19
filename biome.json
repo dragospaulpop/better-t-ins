@@ -25,6 +25,9 @@
   "extends": ["ultracite"],
   "linter": {
     "rules": {
+      "performance": {
+        "noImgElement": "off"
+      },
       "nursery": {
         "useConsistentTypeDefinitions": "off"
       }

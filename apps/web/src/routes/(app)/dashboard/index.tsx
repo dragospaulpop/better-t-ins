@@ -1,24 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import ErrorComponent from "@/components/error";
 import Loader from "@/components/loader";
-import { authClient } from "@/lib/auth-client";
 import { trpc } from "@/utils/trpc";
 
-export const Route = createFileRoute("/dashboard")({
+export const Route = createFileRoute("/(app)/dashboard/")({
   component: RouteComponent,
-  beforeLoad: async () => {
-    const session = await authClient.getSession();
-    const canAccess = session.data?.user.emailVerified;
-    if (!canAccess) {
-      redirect({
-        to: "/login",
-        replace: true,
-        throw: true,
-      });
-    }
-    return { session };
-  },
 });
 
 function RouteComponent() {

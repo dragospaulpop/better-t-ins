@@ -1,9 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { authClient } from "@/lib/auth-client";
 import { trpc } from "@/utils/trpc";
 
 export const Route = createFileRoute("/")({
   component: HomeComponent,
+  beforeLoad: async () => {
+    const session = await authClient.getSession();
+    const canAccess = session.data?.user.emailVerified;
+    if (!canAccess) {
+      redirect({
+        to: "/login",
+        replace: true,
+        throw: true,
+      });
+    }
+    redirect({
+      to: "/dashboard",
+      replace: true,
+      throw: true,
+    });
+  },
 });
 
 const TITLE_TEXT = "INS DOWNLOADER";

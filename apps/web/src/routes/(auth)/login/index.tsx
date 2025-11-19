@@ -1,13 +1,14 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { LogInIcon, UserPlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import AppTitle from "@/components/app-title";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { authClient } from "@/lib/auth-client";
-import SignInForm from "@/routes/login/-components/sign-in-form";
-import SignUpForm from "@/routes/login/-components/sign-up-form";
-import VerifyEmailForm from "@/routes/login/-components/verify-email-form";
+import SignInForm from "@/routes/(auth)/login/-components/sign-in-form";
+import SignUpForm from "@/routes/(auth)/login/-components/sign-up-form";
+import VerifyEmailForm from "@/routes/(auth)/login/-components/verify-email-form";
 
-export const Route = createFileRoute("/login/")({
+export const Route = createFileRoute("/(auth)/login/")({
   component: RouteComponent,
   beforeLoad: async () => {
     const session = await authClient.getSession();
@@ -59,6 +60,7 @@ function RouteComponent() {
   return (
     <div className="grid place-items-center p-2">
       <div className="flex h-full max-h-1/2 w-full max-w-sm flex-col gap-6">
+        <AppTitle />
         <Tabs
           defaultValue={tab}
           onValueChange={(value) => {

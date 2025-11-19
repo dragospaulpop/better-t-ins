@@ -19,8 +19,8 @@ import generatePassword, {
   isStrongEnough,
   passwordStrength,
 } from "@/utils/password-generator";
-import Loader from "../../../components/loader";
-import { Button } from "../../../components/ui/button";
+import Loader from "../../../../components/loader";
+import { Button } from "../../../../components/ui/button";
 import {
   Card,
   CardContent,
@@ -28,24 +28,24 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../../../components/ui/card";
+} from "../../../../components/ui/card";
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from "../../../components/ui/field";
+} from "../../../../components/ui/field";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-} from "../../../components/ui/input-group";
+} from "../../../../components/ui/input-group";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "../../../components/ui/tooltip";
+} from "../../../../components/ui/tooltip";
 import RecaptchaNotice from "./recaptcha-notice";
 
 const MIN_PASSWORD_LENGTH_USER = 8;

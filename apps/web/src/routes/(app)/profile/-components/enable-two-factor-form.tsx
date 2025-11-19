@@ -4,17 +4,17 @@ import { EyeIcon, Loader, Loader2Icon, LockIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
-import { authClient } from "@/lib/auth-client";
-import { Button } from "../../../components/ui/button";
-import { Field, FieldError, FieldGroup } from "../../../components/ui/field";
+import { Button } from "@/components/ui/button";
+import { Field, FieldError, FieldGroup } from "@/components/ui/field";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-} from "../../../components/ui/input-group";
-import { Label } from "../../../components/ui/label";
-import { Tooltip, TooltipTrigger } from "../../../components/ui/tooltip";
+} from "@/components/ui/input-group";
+import { Label } from "@/components/ui/label";
+import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
+import { authClient } from "@/lib/auth-client";
 
 const MIN_PASSWORD_LENGTH = 1;
 

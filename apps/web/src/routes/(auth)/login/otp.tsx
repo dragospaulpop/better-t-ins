@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/input-otp";
 import { authClient } from "@/lib/auth-client";
 
-export const Route = createFileRoute("/login/otp")({
+export const Route = createFileRoute("/(auth)/login/otp")({
   component: RouteComponent,
 });
 

@@ -7,7 +7,6 @@ import {
   useRouterState,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import Header from "@/components/header";
 import Loader from "@/components/loader";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -62,9 +61,12 @@ function RootComponent() {
           scriptProps={{ async: true, defer: true, appendTo: "body" }}
           useRecaptchaNet
         >
-          <div className="grid h-svh grid-rows-[auto_1fr]">
-            <Header />
-            {isFetching ? <Loader /> : <Outlet />}
+          <div className="flex min-h-screen w-full bg-background">
+            <div className="flex flex-1 flex-col">
+              <main className="flex-1 p-0">
+                {isFetching ? <Loader /> : <Outlet />}
+              </main>
+            </div>
           </div>
         </GoogleReCaptchaProvider>
         <Toaster richColors />

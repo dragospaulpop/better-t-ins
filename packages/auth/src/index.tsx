@@ -40,6 +40,7 @@ export const auth = betterAuth<BetterAuthOptions>({
     max: 10,
     window: 60, // 1 minute
     customRules: {
+      "/get-session": false,
       "/sign-in/email": {
         window: 10,
         max: 3,

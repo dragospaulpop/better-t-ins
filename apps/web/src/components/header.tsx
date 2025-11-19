@@ -1,30 +1,35 @@
-import { Link } from "@tanstack/react-router";
+import { Bell, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ModeToggle } from "./mode-toggle";
 import UserMenu from "./user-menu";
 
 export default function Header() {
-  const links = [
-    { to: "/", label: "Home" },
-    { to: "/dashboard", label: "Dashboard" },
-    { to: "/todos", label: "Todos" },
-    { to: "/files", label: "Files" },
-  ] as const;
-
   return (
-    <div>
-      <div className="flex flex-row items-center justify-between border-b px-2 py-2 dark:border-gray-800">
-        <nav className="flex gap-4 text-lg">
-          {links.map(({ to, label }) => (
-            <Link key={to} to={to}>
-              {label}
-            </Link>
-          ))}
-        </nav>
-        <div className="flex items-center gap-2">
-          <ModeToggle />
-          <UserMenu />
+    <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-card px-6">
+      <SidebarTrigger />
+
+      <div className="flex flex-1 items-center gap-4">
+        <div className="relative w-full max-w-md">
+          <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            className="pl-10"
+            placeholder="Search files, folders, users..."
+            type="search"
+          />
         </div>
       </div>
-    </div>
+
+      <div className="flex items-center gap-2">
+        <Button size="icon" variant="ghost">
+          <Bell className="h-5 w-5" />
+        </Button>
+
+        <ModeToggle />
+
+        <UserMenu />
+      </div>
+    </header>
   );
 }

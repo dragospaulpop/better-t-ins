@@ -1,7 +1,7 @@
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
-import { ArrowLeftIcon, Loader2Icon } from "lucide-react";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
+import { Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import z from "zod";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -25,19 +26,18 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { authClient } from "@/lib/auth-client";
 
-export const Route = createFileRoute("/login/backup-code")({
+export const Route = createFileRoute("/(auth)/login/two-factor")({
   component: RouteComponent,
 });
 
-const BACKUP_CODE_LENGTH = 10;
-const BACKUP_CODE_REGEXP = REGEXP_ONLY_DIGITS_AND_CHARS;
-
-const formSchema = z.object({
-  code: z.string().min(BACKUP_CODE_LENGTH, "Backup code must be 10 characters"),
-  trustDevice: z.boolean(),
-});
+const TOTP_CODE_LENGTH = 6;
 
 function RouteComponent() {
   const navigate = useNavigate();
@@ -48,18 +48,18 @@ function RouteComponent() {
       trustDevice: false,
     },
     onSubmit: async ({ value }) => {
-      await authClient.twoFactor.verifyBackupCode(
+      await authClient.twoFactor.verifyTotp(
         {
-          code: `${value.code.slice(0, BACKUP_CODE_LENGTH / 2)}-${value.code.slice(BACKUP_CODE_LENGTH / 2)}`,
-          disableSession: false,
+          code: value.code,
           trustDevice: value.trustDevice,
         },
         {
           onSuccess: () => {
             navigate({
-              to: "/dashboard",
+              to: "/profile",
+              replace: true,
             });
-            toast.success("Backup code verified successfully");
+            toast.success("Two-Factor Authentication verified successfully");
           },
           onError: (error) => {
             toast.error(error.error.message || error.error.statusText);
@@ -68,33 +68,20 @@ function RouteComponent() {
       );
     },
     validators: {
-      onSubmit: formSchema,
+      onSubmit: z.object({
+        code: z.string().min(TOTP_CODE_LENGTH, "Code must be 6 digits"),
+        trustDevice: z.boolean(),
+      }),
     },
   });
+
   return (
     <div className="grid place-items-center p-2">
-      <Card className="w-full sm:max-w-lg">
+      <Card className="w-full sm:max-w-md">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <Button
-              onClick={() => {
-                navigate({
-                  to: "..",
-                });
-              }}
-              variant="ghost"
-            >
-              <ArrowLeftIcon />
-              Back
-            </Button>
-
-            <CardTitle className="flex-1 text-center">
-              Enter Backup Code
-            </CardTitle>
-          </div>
+          <CardTitle>Two-Factor Authentication</CardTitle>
           <CardDescription>
-            Login with one of the backup codes you saved when you enabled
-            two-factor authentication.
+            Enter the code from your authenticator app
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -117,54 +104,40 @@ function RouteComponent() {
                         autoFocus
                         containerClassName="justify-center"
                         id={field.name}
-                        maxLength={BACKUP_CODE_LENGTH}
+                        maxLength={6}
                         name={field.name}
                         onBlur={field.handleBlur}
                         onChange={(value) => field.handleChange(value)}
-                        pattern={BACKUP_CODE_REGEXP}
+                        pattern={REGEXP_ONLY_DIGITS}
                         value={field.state.value}
                       >
                         <InputOTPGroup>
                           <InputOTPSlot
-                            className="h-8 w-8 md:h-10 md:w-10"
+                            className="h-12 w-12 md:h-14 md:w-14"
                             index={0}
                           />
                           <InputOTPSlot
-                            className="h-8 w-8 md:h-10 md:w-10"
+                            className="h-12 w-12 md:h-14 md:w-14"
                             index={1}
                           />
                           <InputOTPSlot
-                            className="h-8 w-8 md:h-10 md:w-10"
+                            className="h-12 w-12 md:h-14 md:w-14"
                             index={2}
                           />
+                        </InputOTPGroup>
+                        <InputOTPSeparator />
+                        <InputOTPGroup>
                           <InputOTPSlot
-                            className="h-8 w-8 md:h-10 md:w-10"
+                            className="h-12 w-12 md:h-14 md:w-14"
                             index={3}
                           />
                           <InputOTPSlot
-                            className="h-8 w-8 md:h-10 md:w-10"
+                            className="h-12 w-12 md:h-14 md:w-14"
                             index={4}
                           />
-                          <InputOTPSeparator />
                           <InputOTPSlot
-                            className="h-8 w-8 md:h-10 md:w-10"
+                            className="h-12 w-12 md:h-14 md:w-14"
                             index={5}
-                          />
-                          <InputOTPSlot
-                            className="h-8 w-8 md:h-10 md:w-10"
-                            index={6}
-                          />
-                          <InputOTPSlot
-                            className="h-8 w-8 md:h-10 md:w-10"
-                            index={7}
-                          />
-                          <InputOTPSlot
-                            className="h-8 w-8 md:h-10 md:w-10"
-                            index={8}
-                          />
-                          <InputOTPSlot
-                            className="h-8 w-8 md:h-10 md:w-10"
-                            index={9}
                           />
                         </InputOTPGroup>
                       </InputOTP>
@@ -211,6 +184,63 @@ function RouteComponent() {
             </FieldGroup>
           </form>
         </CardContent>
+        <CardFooter>
+          <Field orientation="horizontal">
+            <FieldLabel htmlFor="sign-up">
+              No access to your authenticator app?
+            </FieldLabel>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={() => {
+                    navigate({
+                      to: "/login/backup-code",
+                      from: "/login/two-factor",
+                    });
+                  }}
+                  variant="link"
+                >
+                  Backup codes
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                Try backup codes that were generated when you enabled two-factor
+                authentication
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={() => {
+                    authClient.twoFactor.sendOtp(
+                      {},
+                      {
+                        onSuccess: () => {
+                          toast.success("OTP code sent successfully");
+                          navigate({
+                            to: "/login/otp",
+                            from: "/login/two-factor",
+                          });
+                        },
+                        onError: (error) => {
+                          toast.error(
+                            error.error.message || error.error.statusText
+                          );
+                        },
+                      }
+                    );
+                  }}
+                  variant="link"
+                >
+                  OTP
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                Email a one-time password (OTP) code to your email address
+              </TooltipContent>
+            </Tooltip>
+          </Field>
+        </CardFooter>
       </Card>
     </div>
   );

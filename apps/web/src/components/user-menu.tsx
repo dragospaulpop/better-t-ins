@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
+import { UserIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,9 +31,12 @@ export default function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">{session.user.name}</Button>
+        <Button variant="outline">
+          <UserIcon className="size-4" />
+          {session.user.name}
+        </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-card">
+      <DropdownMenuContent className="bg-card p-2">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
 
@@ -51,7 +55,7 @@ export default function UserMenu() {
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Button
-            className="w-full"
+            className="w-full text-destructive"
             onClick={() => {
               authClient.signOut({
                 fetchOptions: {
@@ -63,7 +67,7 @@ export default function UserMenu() {
                 },
               });
             }}
-            variant="destructive"
+            variant="ghost"
           >
             Sign Out
           </Button>

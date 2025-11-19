@@ -89,8 +89,5 @@ export default async function protect(c: Context): Promise<ArcjetDecision> {
       .protect(c.req.raw, { userId });
   }
   // For all other auth requests
-  return aj
-    .withRule(detectBot(botOptions))
-    .withRule(slidingWindow(rateLimitOptions))
-    .protect(c.req.raw, { userId });
+  return aj.withRule(detectBot(botOptions)).protect(c.req.raw, { userId });
 }

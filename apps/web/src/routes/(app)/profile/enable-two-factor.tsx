@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
 import EnableTwoFactorForm from "./-components/enable-two-factor-form";
 
-export const Route = createFileRoute("/profile/enable-two-factor")({
+export const Route = createFileRoute("/(app)/profile/enable-two-factor")({
   component: RouteComponent,
   beforeLoad: async () => {
     const session = await authClient.getSession();

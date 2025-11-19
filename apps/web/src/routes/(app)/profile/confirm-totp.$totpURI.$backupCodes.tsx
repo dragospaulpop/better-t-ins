@@ -41,7 +41,7 @@ import { authClient } from "@/lib/auth-client";
 const TOTP_CODE_LENGTH = 6;
 
 export const Route = createFileRoute(
-  "/profile/confirm-totp/$totpURI/$backupCodes"
+  "/(app)/profile/confirm-totp/$totpURI/$backupCodes"
 )({
   component: RouteComponent,
   beforeLoad: async () => {

@@ -3,21 +3,21 @@ import { CheckIcon, CopyIcon, EyeIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { queryClient, trpc } from "@/utils/trpc";
-import Loader from "../../../components/loader";
-import { Badge } from "../../../components/ui/badge";
-import { Button } from "../../../components/ui/button";
+import Loader from "../../../../components/loader";
+import { Badge } from "../../../../components/ui/badge";
+import { Button } from "../../../../components/ui/button";
 import {
   Item,
   ItemActions,
   ItemContent,
   ItemDescription,
   ItemTitle,
-} from "../../../components/ui/item";
+} from "../../../../components/ui/item";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "../../../components/ui/tooltip";
+} from "../../../../components/ui/tooltip";
 
 const INVALIDATE_QUERY_TIMEOUT = 5000;
 const COPIED_TIMEOUT = 2000;

@@ -49,7 +49,7 @@ const tokenSchema = z.object({
   error: z.literal("INVALID_TOKEN").optional(),
 });
 
-export const Route = createFileRoute("/login/reset-password")({
+export const Route = createFileRoute("/(auth)/login/reset-password")({
   component: RouteComponent,
   validateSearch: tokenSchema,
   beforeLoad: ({ search }) => ({ token: search.token }),
