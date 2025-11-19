@@ -1,0 +1,27 @@
+{
+  "name": "@better-t-ins/storage",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "storage:start": "docker compose up -d",
+    "storage:stop": "docker compose stop",
+    "storage:down": "docker compose down"
+  },
+  "devDependencies": {
+    "tsdown": "catalog:"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "minio": "^8.0.3",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  }
+}

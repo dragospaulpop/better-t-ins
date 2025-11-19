@@ -20,7 +20,7 @@
     }
   },
   "scripts": {
-    "dev:all": "turbo run db:watch db:studio mail:watch email:dev dev --filter='@better-t-ins/db' --filter='@better-t-ins/mail' --filter='server' --filter='web'",
+    "dev:all": "turbo run db:watch db:studio mail:watch email:dev storage:start dev --filter='@better-t-ins/db' --filter='@better-t-ins/mail' --filter='@better-t-ins/storage' --filter='server' --filter='web'",
     "check": "biome check --write .",
     "ruler:apply": "bunx @intellectronica/ruler@latest apply --local-only",
     "dev": "turbo dev",
@@ -41,7 +41,10 @@
     "mail:watch": "turbo -F @better-t-ins/mail mail:watch",
     "mail:stop": "turbo -F @better-t-ins/mail mail:stop",
     "mail:down": "turbo -F @better-t-ins/mail mail:down",
-    "email:dev": "turbo -F @better-t-ins/mail email:dev"
+    "email:dev": "turbo -F @better-t-ins/mail email:dev",
+    "storage:start": "turbo -F @better-t-ins/storage storage:start",
+    "storage:stop": "turbo -F @better-t-ins/storage storage:stop",
+    "storage:down": "turbo -F @better-t-ins/storage storage:down"
   },
   "dependencies": {
     "dotenv": "^17.2.2",

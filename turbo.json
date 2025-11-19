@@ -68,6 +68,18 @@
     "email:dev": {
       "cache": false,
       "persistent": true
+    },
+    "storage:start": {
+      "cache": false,
+      "persistent": true
+    },
+    "storage:stop": {
+      "cache": false,
+      "persistent": true
+    },
+    "storage:down": {
+      "cache": false,
+      "persistent": true
     }
   }
 }
