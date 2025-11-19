@@ -3,6 +3,8 @@ import { appRouter } from "@better-t-ins/api/routers/index";
 import { auth } from "@better-t-ins/auth";
 import { trpcServer } from "@hono/trpc-server";
 import "dotenv/config";
+import { router as uploadRouter } from "@better-t-ins/storage/router";
+import { handleRequest } from "@better-upload/server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
@@ -86,6 +88,8 @@ app.use(
     createContext: (_opts, context) => createContext({ context }),
   })
 );
+
+app.post("/upload", (c) => handleRequest(c.req.raw, uploadRouter));
 
 app.get("/", (c) => c.text("OK"));
 

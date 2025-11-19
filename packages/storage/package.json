@@ -5,6 +5,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./src/index.ts"
+    },
+    "./router": {
+      "types": "./dist/router.d.ts",
+      "default": "./src/router.ts"
     }
   },
   "scripts": {
@@ -20,8 +24,9 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "minio": "^8.0.3",
     "dotenv": "catalog:",
-    "zod": "catalog:"
+    "minio": "^8.0.3",
+    "zod": "catalog:",
+    "@better-t-ins/auth": "workspace:*"
   }
 }

@@ -15,6 +15,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfileIndexRouteImport } from './routes/profile/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
+import { Route as FilesIndexRouteImport } from './routes/files/index'
 import { Route as ProfileEnableTwoFactorRouteImport } from './routes/profile/enable-two-factor'
 import { Route as ProfileChangePasswordRouteImport } from './routes/profile/change-password'
 import { Route as LoginTwoFactorRouteImport } from './routes/login/two-factor'
@@ -52,6 +53,11 @@ const ProfileIndexRoute = ProfileIndexRouteImport.update({
 const LoginIndexRoute = LoginIndexRouteImport.update({
   id: '/login/',
   path: '/login/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FilesIndexRoute = FilesIndexRouteImport.update({
+  id: '/files/',
+  path: '/files/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileEnableTwoFactorRoute = ProfileEnableTwoFactorRouteImport.update({
@@ -109,6 +115,7 @@ export interface FileRoutesByFullPath {
   '/login/two-factor': typeof LoginTwoFactorRoute
   '/profile/change-password': typeof ProfileChangePasswordRoute
   '/profile/enable-two-factor': typeof ProfileEnableTwoFactorRoute
+  '/files': typeof FilesIndexRoute
   '/login': typeof LoginIndexRoute
   '/profile': typeof ProfileIndexRoute
   '/profile/confirm-totp/$totpURI/$backupCodes': typeof ProfileConfirmTotpTotpURIBackupCodesRoute
@@ -125,6 +132,7 @@ export interface FileRoutesByTo {
   '/login/two-factor': typeof LoginTwoFactorRoute
   '/profile/change-password': typeof ProfileChangePasswordRoute
   '/profile/enable-two-factor': typeof ProfileEnableTwoFactorRoute
+  '/files': typeof FilesIndexRoute
   '/login': typeof LoginIndexRoute
   '/profile': typeof ProfileIndexRoute
   '/profile/confirm-totp/$totpURI/$backupCodes': typeof ProfileConfirmTotpTotpURIBackupCodesRoute
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/login/two-factor': typeof LoginTwoFactorRoute
   '/profile/change-password': typeof ProfileChangePasswordRoute
   '/profile/enable-two-factor': typeof ProfileEnableTwoFactorRoute
+  '/files/': typeof FilesIndexRoute
   '/login/': typeof LoginIndexRoute
   '/profile/': typeof ProfileIndexRoute
   '/profile/confirm-totp/$totpURI/$backupCodes': typeof ProfileConfirmTotpTotpURIBackupCodesRoute
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/login/two-factor'
     | '/profile/change-password'
     | '/profile/enable-two-factor'
+    | '/files'
     | '/login'
     | '/profile'
     | '/profile/confirm-totp/$totpURI/$backupCodes'
@@ -176,6 +186,7 @@ export interface FileRouteTypes {
     | '/login/two-factor'
     | '/profile/change-password'
     | '/profile/enable-two-factor'
+    | '/files'
     | '/login'
     | '/profile'
     | '/profile/confirm-totp/$totpURI/$backupCodes'
@@ -192,6 +203,7 @@ export interface FileRouteTypes {
     | '/login/two-factor'
     | '/profile/change-password'
     | '/profile/enable-two-factor'
+    | '/files/'
     | '/login/'
     | '/profile/'
     | '/profile/confirm-totp/$totpURI/$backupCodes'
@@ -209,6 +221,7 @@ export interface RootRouteChildren {
   LoginTwoFactorRoute: typeof LoginTwoFactorRoute
   ProfileChangePasswordRoute: typeof ProfileChangePasswordRoute
   ProfileEnableTwoFactorRoute: typeof ProfileEnableTwoFactorRoute
+  FilesIndexRoute: typeof FilesIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
   ProfileIndexRoute: typeof ProfileIndexRoute
   ProfileConfirmTotpTotpURIBackupCodesRoute: typeof ProfileConfirmTotpTotpURIBackupCodesRoute
@@ -256,6 +269,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/files/': {
+      id: '/files/'
+      path: '/files'
+      fullPath: '/files'
+      preLoaderRoute: typeof FilesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile/enable-two-factor': {
@@ -329,6 +349,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginTwoFactorRoute: LoginTwoFactorRoute,
   ProfileChangePasswordRoute: ProfileChangePasswordRoute,
   ProfileEnableTwoFactorRoute: ProfileEnableTwoFactorRoute,
+  FilesIndexRoute: FilesIndexRoute,
   LoginIndexRoute: LoginIndexRoute,
   ProfileIndexRoute: ProfileIndexRoute,
   ProfileConfirmTotpTotpURIBackupCodesRoute:

@@ -16,6 +16,7 @@
     "@better-t-ins/api": "workspace:*",
     "@better-t-ins/auth": "workspace:*",
     "@better-t-ins/db": "workspace:*",
+    "@better-t-ins/storage": "workspace:*",
     "@hono/trpc-server": "^0.4.0",
     "@trpc/server": "catalog:",
     "better-auth": "catalog:",

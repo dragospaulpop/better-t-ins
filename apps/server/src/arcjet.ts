@@ -61,8 +61,8 @@ export default async function protect(c: Context): Promise<ArcjetDecision> {
   // allows limits to be applied across all devices and sessions (you could
   // also use the session ID). Otherwise, fall back to the IP address.
   let userId: string;
-  if (session?.user.id) {
-    userId = session.user.id;
+  if (session?.userId) {
+    userId = session.userId;
   } else {
     userId = findIp(c.req.raw) || "127.0.0.1"; // Fall back to local IP if none
   }

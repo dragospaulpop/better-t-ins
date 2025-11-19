@@ -47,6 +47,7 @@
     "storage:down": "turbo -F @better-t-ins/storage storage:down"
   },
   "dependencies": {
+    "@better-upload/server": "^3.0.3",
     "dotenv": "^17.2.2",
     "zod": "^4.1.11"
   },
