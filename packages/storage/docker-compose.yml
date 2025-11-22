@@ -1,4 +1,4 @@
-name: better-t-ins-storage
+name: better-t-ins
 
 services:
   minio:

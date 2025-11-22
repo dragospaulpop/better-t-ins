@@ -51,17 +51,13 @@ export default function MagicLinkEmail({ url }: MagicLinkEmailProps) {
                   not request this, please ignore this email.
                 </Text>
                 <Section className="flex items-center justify-center">
-                  <Text className="m-0 text-center font-bold text-accent text-sm">
-                    Magic link
-                  </Text>
-
                   <Text className="mx-0 my-2.5 text-center font-bold font-mono text-primary tracking-widest">
                     <Link
                       className="text-secondary text-sm underline"
                       href={url}
                       target="_blank"
                     >
-                      {url}
+                      Magic link
                     </Link>
                   </Text>
                   <Text className="m-0 text-center text-accent text-sm">

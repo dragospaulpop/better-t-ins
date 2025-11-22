@@ -31,7 +31,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { authClient } from "@/lib/auth-client";
 import RecaptchaNotice from "./-components/recaptcha-notice";
 
-export const Route = createFileRoute("/(auth)/login/password-reset-or-magic-link")({
+export const Route = createFileRoute(
+  "/(auth)/login/password-reset-or-magic-link"
+)({
   component: RouteComponent,
   beforeLoad: async () => {
     const session = await authClient.getSession();
@@ -59,7 +61,7 @@ function RouteComponent() {
       toast.error("Failed to verify reCAPTCHA");
       return null;
     }
-    const token = await executeRecaptcha("password-reset-or-magic-link");
+    const token = await executeRecaptcha("password_reset_or_magic_link");
     if (!token) {
       toast.error("Failed to verify reCAPTCHA");
       return null;

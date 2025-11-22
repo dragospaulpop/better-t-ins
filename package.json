@@ -21,6 +21,7 @@
   },
   "scripts": {
     "dev:all": "turbo run db:watch db:studio mail:watch email:dev storage:start dev --filter='@better-t-ins/db' --filter='@better-t-ins/mail' --filter='@better-t-ins/storage' --filter='server' --filter='web'",
+    "dev:down": "turbo run db:down mail:down storage:down",
     "check": "biome check --write .",
     "ruler:apply": "bunx @intellectronica/ruler@latest apply --local-only",
     "dev": "turbo dev",
