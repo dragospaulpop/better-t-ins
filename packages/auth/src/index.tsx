@@ -60,7 +60,7 @@ export const auth = betterAuth<BetterAuthOptions>({
       },
     },
   },
-  appName: "VerdeINS",
+  appName: env.data.APP_NAME,
   plugins: [
     twoFactor({
       otpOptions: {

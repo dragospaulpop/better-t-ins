@@ -8,11 +8,24 @@ import { handleRequest } from "@better-upload/server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import z from "zod";
 import protect from "./arcjet";
 
 const RATE_LIMIT_EXCEEDED_STATUS = 429;
 const EMAIL_INVALID_STATUS = 400;
 const FORBIDDEN_STATUS = 403;
+
+const envSchema = z.object({
+  CORS_ORIGIN: z.string(),
+});
+
+const env = envSchema.safeParse(process.env);
+
+if (!env.success) {
+  throw new Error("Invalid environment variables", {
+    cause: env.error,
+  });
+}
 
 const app = new Hono<{
   Variables: {
@@ -25,7 +38,7 @@ app.use(logger());
 app.use(
   "/*",
   cors({
-    origin: process.env.CORS_ORIGIN || "",
+    origin: env.data.CORS_ORIGIN,
     allowMethods: ["GET", "POST", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization", "x-captcha-response"],
     credentials: true,
