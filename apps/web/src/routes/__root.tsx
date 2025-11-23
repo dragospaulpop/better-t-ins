@@ -62,8 +62,8 @@ function RootComponent() {
           useRecaptchaNet
         >
           <div className="flex min-h-screen w-full bg-background">
-            <div className="flex flex-1 flex-col">
-              <main className="flex-1 p-0">
+            <div className="flex min-h-0 flex-1 flex-col">
+              <main className="min-h-0 flex-1 p-0">
                 {isFetching ? <Loader /> : <Outlet />}
               </main>
             </div>

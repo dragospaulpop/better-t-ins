@@ -5,6 +5,7 @@ import { useCallback } from "react";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { toast } from "sonner";
 import z from "zod";
+import AppTitle from "@/components/app-title";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -124,123 +125,130 @@ function RouteComponent() {
   });
 
   return (
-    <div className="grid place-items-center p-2">
-      <Card className="w-full sm:max-w-lg">
-        <CardHeader>
-          <CardAction>
-            <Button
-              onClick={() => {
-                navigate({
-                  to: "..",
-                });
-              }}
-              variant="ghost"
-            >
-              <ArrowLeftIcon />
-              Back
-            </Button>
-          </CardAction>
-          <CardTitle>Reset Password or Login with a magic link</CardTitle>
-          <CardDescription>
-            Enter your email to reset your password or login with a magic link.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              form.handleSubmit();
-            }}
-          >
-            <FieldGroup>
-              <form.Field name="email">
-                {(field) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid;
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                      <InputGroup>
-                        <InputGroupInput
-                          id={field.name}
-                          name={field.name}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                          placeholder="Your email"
-                          type="email"
-                          value={field.state.value}
-                        />
-                        <InputGroupAddon>
-                          <MailIcon />
-                        </InputGroupAddon>
-                      </InputGroup>
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  );
+    <div className="grid h-full place-items-center p-2">
+      <div>
+        <AppTitle />
+        <Card className="w-full sm:max-w-lg">
+          <CardHeader>
+            <CardAction>
+              <Button
+                onClick={() => {
+                  navigate({
+                    to: "..",
+                  });
                 }}
-              </form.Field>
-              <form.Field name="resetOrMagicLink">
-                {(field) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid;
-                  return (
-                    <FieldSet>
-                      <FieldLabel>Email type</FieldLabel>
-                      <FieldDescription>
-                        Select the type of email you want to receive.
-                      </FieldDescription>
-                      <RadioGroup
-                        defaultValue={field.state.value}
-                        onValueChange={(value) => field.handleChange(value)}
-                      >
-                        <Field orientation="horizontal">
-                          <RadioGroupItem id="reset" value="reset" />
-                          <FieldLabel className="font-normal" htmlFor="reset">
-                            Reset password
-                          </FieldLabel>
-                        </Field>
-                        <Field orientation="horizontal">
-                          <RadioGroupItem id="magic-link" value="magic-link" />
-                          <FieldLabel
-                            className="font-normal"
-                            htmlFor="magic-link"
-                          >
-                            Login with a magic link
-                          </FieldLabel>
-                        </Field>
+                variant="ghost"
+              >
+                <ArrowLeftIcon />
+                Back
+              </Button>
+            </CardAction>
+            <CardTitle>Reset Password or Login with a magic link</CardTitle>
+            <CardDescription>
+              Enter your email to reset your password or login with a magic
+              link.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                form.handleSubmit();
+              }}
+            >
+              <FieldGroup>
+                <form.Field name="email">
+                  {(field) => {
+                    const isInvalid =
+                      field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid}>
+                        <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                        <InputGroup>
+                          <InputGroupInput
+                            id={field.name}
+                            name={field.name}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            placeholder="Your email"
+                            type="email"
+                            value={field.state.value}
+                          />
+                          <InputGroupAddon>
+                            <MailIcon />
+                          </InputGroupAddon>
+                        </InputGroup>
                         {isInvalid && (
                           <FieldError errors={field.state.meta.errors} />
                         )}
-                      </RadioGroup>
-                    </FieldSet>
-                  );
-                }}
-              </form.Field>
-              <form.Subscribe>
-                {(state) => (
-                  <Button
-                    className="w-full"
-                    disabled={!state.canSubmit || state.isSubmitting}
-                    type="submit"
-                  >
-                    {state.isSubmitting ? (
-                      <Loader2Icon className="animate-spin" />
-                    ) : (
-                      "Send email"
-                    )}
-                  </Button>
-                )}
-              </form.Subscribe>
-            </FieldGroup>
-          </form>
-        </CardContent>
-        <CardFooter>
-          <RecaptchaNotice />
-        </CardFooter>
-      </Card>
+                      </Field>
+                    );
+                  }}
+                </form.Field>
+                <form.Field name="resetOrMagicLink">
+                  {(field) => {
+                    const isInvalid =
+                      field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <FieldSet>
+                        <FieldLabel>Email message type</FieldLabel>
+                        <FieldDescription>
+                          Select the type of email you want to receive.
+                        </FieldDescription>
+                        <RadioGroup
+                          defaultValue={field.state.value}
+                          onValueChange={(value) => field.handleChange(value)}
+                        >
+                          <Field orientation="horizontal">
+                            <RadioGroupItem id="reset" value="reset" />
+                            <FieldLabel className="font-normal" htmlFor="reset">
+                              Reset password
+                            </FieldLabel>
+                          </Field>
+                          <Field orientation="horizontal">
+                            <RadioGroupItem
+                              id="magic-link"
+                              value="magic-link"
+                            />
+                            <FieldLabel
+                              className="font-normal"
+                              htmlFor="magic-link"
+                            >
+                              Login with a magic link
+                            </FieldLabel>
+                          </Field>
+                          {isInvalid && (
+                            <FieldError errors={field.state.meta.errors} />
+                          )}
+                        </RadioGroup>
+                      </FieldSet>
+                    );
+                  }}
+                </form.Field>
+                <form.Subscribe>
+                  {(state) => (
+                    <Button
+                      className="w-full"
+                      disabled={!state.canSubmit || state.isSubmitting}
+                      type="submit"
+                    >
+                      {state.isSubmitting ? (
+                        <Loader2Icon className="animate-spin" />
+                      ) : (
+                        "Send email"
+                      )}
+                    </Button>
+                  )}
+                </form.Subscribe>
+              </FieldGroup>
+            </form>
+          </CardContent>
+          <CardFooter>
+            <RecaptchaNotice />
+          </CardFooter>
+        </Card>
+      </div>
     </div>
   );
 }

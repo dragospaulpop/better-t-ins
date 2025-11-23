@@ -58,8 +58,8 @@ function RouteComponent() {
   };
 
   return (
-    <div className="grid place-items-center p-2">
-      <div className="flex h-full max-h-1/2 w-full max-w-sm flex-col gap-6">
+    <div className="grid h-full min-h-0 place-items-center p-2">
+      <div className="flex w-full max-w-sm flex-col gap-6">
         <AppTitle />
         <Tabs
           defaultValue={tab}
