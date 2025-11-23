@@ -18,19 +18,22 @@ import {
 } from "better-auth/plugins";
 import { passkey } from "better-auth/plugins/passkey";
 import "dotenv/config";
+import z from "zod";
 
-const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY;
-const CORS_ORIGIN = process.env.CORS_ORIGIN;
-const DOMAIN = process.env.DOMAIN;
-const FRONTEND_URL = process.env.FRONTEND_URL;
-const APP_NAME = process.env.APP_NAME;
+const envSchema = z.object({
+  RECAPTCHA_SECRET_KEY: z.string(),
+  CORS_ORIGIN: z.string(),
+  DOMAIN: z.string(),
+  FRONTEND_URL: z.string(),
+  APP_NAME: z.string(),
+});
 
-if (!RECAPTCHA_SECRET_KEY) {
-  throw new Error("RECAPTCHA_SECRET_KEY is not set");
-}
+const env = envSchema.safeParse(process.env);
 
-if (!CORS_ORIGIN) {
-  throw new Error("CORS_ORIGIN is not set");
+if (!env.success) {
+  throw new Error("Invalid environment variables", {
+    cause: env.error,
+  });
 }
 
 export const auth = betterAuth<BetterAuthOptions>({
@@ -92,17 +95,17 @@ export const auth = betterAuth<BetterAuthOptions>({
         "This password has been compromised. Please choose a different password or request a password reset.",
     }),
     passkey({
-      rpID: DOMAIN,
-      rpName: APP_NAME,
-      origin: FRONTEND_URL,
+      rpID: env.data.DOMAIN,
+      rpName: env.data.APP_NAME,
+      origin: env.data.FRONTEND_URL,
     }),
     captcha({
       provider: "google-recaptcha", // or google-recaptcha, hcaptcha, captchafox
-      secretKey: RECAPTCHA_SECRET_KEY,
+      secretKey: env.data.RECAPTCHA_SECRET_KEY,
       minScore: 0.1,
     }),
   ],
-  trustedOrigins: [CORS_ORIGIN],
+  trustedOrigins: [env.data.CORS_ORIGIN],
 
   emailAndPassword: {
     enabled: true,
