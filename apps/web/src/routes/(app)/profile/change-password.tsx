@@ -13,7 +13,14 @@ import { toast } from "sonner";
 import z from "zod";
 import PasswordStrengthTooltip from "@/components/password-strength-tooltip";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Field,
   FieldError,
@@ -135,7 +142,7 @@ function RouteComponent() {
     <div className="grid place-items-center p-2">
       <Card className="w-full sm:max-w-lg">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <CardAction>
             <Button
               onClick={() => {
                 navigate({
@@ -147,10 +154,11 @@ function RouteComponent() {
               <ArrowLeftIcon />
               Back
             </Button>
-            <CardTitle className="flex-1 text-center">
-              Change Password
-            </CardTitle>
-          </div>
+          </CardAction>
+          <CardTitle>Change Password</CardTitle>
+          <CardDescription>
+            Enter your current password and a new password.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form

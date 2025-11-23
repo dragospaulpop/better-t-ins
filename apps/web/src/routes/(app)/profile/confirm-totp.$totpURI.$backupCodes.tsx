@@ -16,7 +16,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardAction,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -110,7 +112,7 @@ function RouteComponent() {
     <div className="grid place-items-start p-2">
       <Card className="mx-auto w-full sm:max-w-3xl">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <CardAction>
             <Button
               onClick={() => {
                 navigate({
@@ -122,10 +124,12 @@ function RouteComponent() {
               <ArrowLeftIcon />
               Back
             </Button>
-            <CardTitle className="flex-1 text-center">
-              Confirm Two-Factor Authentication
-            </CardTitle>
-          </div>
+          </CardAction>
+          <CardTitle>Confirm Two-Factor Authentication</CardTitle>
+          <CardDescription>
+            Enter the code from your authenticator app to confirm two-factor
+            authentication.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form

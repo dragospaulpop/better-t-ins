@@ -8,6 +8,7 @@ import z from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
@@ -126,7 +127,7 @@ function RouteComponent() {
     <div className="grid place-items-center p-2">
       <Card className="w-full sm:max-w-lg">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <CardAction>
             <Button
               onClick={() => {
                 navigate({
@@ -138,10 +139,8 @@ function RouteComponent() {
               <ArrowLeftIcon />
               Back
             </Button>
-            <CardTitle className="flex-1 text-center">
-              Reset Password or Login with a magic link
-            </CardTitle>
-          </div>
+          </CardAction>
+          <CardTitle>Reset Password or Login with a magic link</CardTitle>
           <CardDescription>
             Enter your email to reset your password or login with a magic link.
           </CardDescription>

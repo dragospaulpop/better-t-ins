@@ -1,7 +1,14 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { ArrowLeftIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
 import EnableTwoFactorForm from "./-components/enable-two-factor-form";
 
@@ -31,7 +38,7 @@ function RouteComponent() {
     <div className="grid place-items-start p-2">
       <Card className="mx-auto w-full sm:max-w-2xl">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <CardAction>
             <Button
               onClick={() => {
                 navigate({
@@ -44,10 +51,12 @@ function RouteComponent() {
               <ArrowLeftIcon />
               Back
             </Button>
-            <CardTitle className="flex-1 text-center">
-              Enable Two-Factor Authentication
-            </CardTitle>
-          </div>
+          </CardAction>
+          <CardTitle>Enable Two-Factor Authentication</CardTitle>
+          <CardDescription>
+            Enable two-factor authentication to add an extra layer of security
+            to your account.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <EnableTwoFactorForm />

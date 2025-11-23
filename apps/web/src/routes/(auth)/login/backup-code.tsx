@@ -7,6 +7,7 @@ import z from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -75,7 +76,7 @@ function RouteComponent() {
     <div className="grid place-items-center p-2">
       <Card className="w-full sm:max-w-lg">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <CardAction>
             <Button
               onClick={() => {
                 navigate({
@@ -87,11 +88,8 @@ function RouteComponent() {
               <ArrowLeftIcon />
               Back
             </Button>
-
-            <CardTitle className="flex-1 text-center">
-              Enter Backup Code
-            </CardTitle>
-          </div>
+          </CardAction>
+          <CardTitle>Enter Backup Code</CardTitle>
           <CardDescription>
             Login with one of the backup codes you saved when you enabled
             two-factor authentication.

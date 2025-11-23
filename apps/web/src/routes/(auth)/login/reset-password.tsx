@@ -15,6 +15,7 @@ import PasswordStrengthTooltip from "@/components/password-strength-tooltip";
 import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -131,7 +132,7 @@ function RouteComponent() {
     <div className="grid place-items-center p-2">
       <Card className="w-full sm:max-w-lg">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <CardAction>
             <Button
               onClick={() => {
                 navigate({
@@ -143,10 +144,8 @@ function RouteComponent() {
               <ArrowLeftIcon />
               Back
             </Button>
-            <CardTitle className="flex-1 text-center">
-              {error ? "Invalid Token" : "Reset Password"}
-            </CardTitle>
-          </div>
+          </CardAction>
+          <CardTitle>{error ? "Invalid Token" : "Reset Password"}</CardTitle>
           {!error && (
             <CardDescription>Enter your new password below.</CardDescription>
           )}
