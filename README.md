@@ -66,7 +66,8 @@ better-t-ins/
 ```
 
 ## Available Scripts
-
+- `bun dev:all`: Start all services and applications in development mode
+- `bun dev:down`: Stop all docker services
 - `bun dev`: Start all applications in development mode
 - `bun build`: Build all applications
 - `bun dev:web`: Start only the web application
@@ -75,3 +76,17 @@ better-t-ins/
 - `bun db:push`: Push schema changes to database
 - `bun db:studio`: Open database studio UI
 - `cd apps/web && bun generate-pwa-assets`: Generate PWA assets
+
+## HTTPS
+
+To enable HTTPS, you need to install mkcert and generate a self-signed certificate and key using the following command:
+
+```bash
+./generate-certs.sh
+```
+
+Also, to run the server with HTTPS, you need to run Caddy on the host machine with the following command:
+
+```bash
+caddy run --config Caddyfile
+```

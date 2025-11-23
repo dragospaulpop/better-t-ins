@@ -1,12 +1,16 @@
-import { VitePWA } from 'vite-plugin-pwa';
+import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
-import path from "node:path";
 import { defineConfig } from "vite";
+import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
-	plugins: [tailwindcss(), tanstackRouter({}), react(), VitePWA({
+  plugins: [
+    tailwindcss(),
+    tanstackRouter({}),
+    react(),
+    VitePWA({
       registerType: "autoUpdate",
       manifest: {
         name: "better-t-ins",
@@ -16,10 +20,20 @@ export default defineConfig({
       },
       pwaAssets: { disabled: false, config: true },
       devOptions: { enabled: true },
-    })],
-	resolve: {
-		alias: {
-			"@": path.resolve(__dirname, "./src"),
-		},
-	},
+    }),
+  ],
+  server: {
+    host: "0.0.0.0",
+    port: 3001,
+    allowedHosts: ["app.better-t-ins.test", "localhost"],
+    // https: {
+    //   key: "./.certs/app.better-t-ins.test+6-key.pem",
+    //   cert: "./.certs/app.better-t-ins.test+6.pem",
+    // },
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
 });

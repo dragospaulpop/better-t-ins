@@ -21,6 +21,9 @@ import "dotenv/config";
 
 const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY;
 const CORS_ORIGIN = process.env.CORS_ORIGIN;
+const DOMAIN = process.env.DOMAIN;
+const FRONTEND_URL = process.env.FRONTEND_URL;
+const APP_NAME = process.env.APP_NAME;
 
 if (!RECAPTCHA_SECRET_KEY) {
   throw new Error("RECAPTCHA_SECRET_KEY is not set");
@@ -88,10 +91,15 @@ export const auth = betterAuth<BetterAuthOptions>({
       customPasswordCompromisedMessage:
         "This password has been compromised. Please choose a different password or request a password reset.",
     }),
-    passkey(),
+    passkey({
+      rpID: DOMAIN,
+      rpName: APP_NAME,
+      origin: FRONTEND_URL,
+    }),
     captcha({
       provider: "google-recaptcha", // or google-recaptcha, hcaptcha, captchafox
       secretKey: RECAPTCHA_SECRET_KEY,
+      minScore: 0.1,
     }),
   ],
   trustedOrigins: [CORS_ORIGIN],
