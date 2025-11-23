@@ -23,6 +23,7 @@ import { Route as authLoginPasswordResetOrMagicLinkRouteImport } from './routes/
 import { Route as authLoginOtpRouteImport } from './routes/(auth)/login/otp'
 import { Route as authLoginBackupCodeRouteImport } from './routes/(auth)/login/backup-code'
 import { Route as appProfileEnableTwoFactorRouteImport } from './routes/(app)/profile/enable-two-factor'
+import { Route as appProfileDisableTwoFactorRouteImport } from './routes/(app)/profile/disable-two-factor'
 import { Route as appProfileChangePasswordRouteImport } from './routes/(app)/profile/change-password'
 import { Route as appProfileConfirmTotpTotpURIBackupCodesRouteImport } from './routes/(app)/profile/confirm-totp.$totpURI.$backupCodes'
 
@@ -97,6 +98,12 @@ const appProfileEnableTwoFactorRoute =
     path: '/profile/enable-two-factor',
     getParentRoute: () => appRouteRoute,
   } as any)
+const appProfileDisableTwoFactorRoute =
+  appProfileDisableTwoFactorRouteImport.update({
+    id: '/profile/disable-two-factor',
+    path: '/profile/disable-two-factor',
+    getParentRoute: () => appRouteRoute,
+  } as any)
 const appProfileChangePasswordRoute =
   appProfileChangePasswordRouteImport.update({
     id: '/profile/change-password',
@@ -115,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/goodbye': typeof GoodbyeRoute
   '/todos': typeof TodosRoute
   '/profile/change-password': typeof appProfileChangePasswordRoute
+  '/profile/disable-two-factor': typeof appProfileDisableTwoFactorRoute
   '/profile/enable-two-factor': typeof appProfileEnableTwoFactorRoute
   '/login/backup-code': typeof authLoginBackupCodeRoute
   '/login/otp': typeof authLoginOtpRoute
@@ -132,6 +140,7 @@ export interface FileRoutesByTo {
   '/goodbye': typeof GoodbyeRoute
   '/todos': typeof TodosRoute
   '/profile/change-password': typeof appProfileChangePasswordRoute
+  '/profile/disable-two-factor': typeof appProfileDisableTwoFactorRoute
   '/profile/enable-two-factor': typeof appProfileEnableTwoFactorRoute
   '/login/backup-code': typeof authLoginBackupCodeRoute
   '/login/otp': typeof authLoginOtpRoute
@@ -151,6 +160,7 @@ export interface FileRoutesById {
   '/goodbye': typeof GoodbyeRoute
   '/todos': typeof TodosRoute
   '/(app)/profile/change-password': typeof appProfileChangePasswordRoute
+  '/(app)/profile/disable-two-factor': typeof appProfileDisableTwoFactorRoute
   '/(app)/profile/enable-two-factor': typeof appProfileEnableTwoFactorRoute
   '/(auth)/login/backup-code': typeof authLoginBackupCodeRoute
   '/(auth)/login/otp': typeof authLoginOtpRoute
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/goodbye'
     | '/todos'
     | '/profile/change-password'
+    | '/profile/disable-two-factor'
     | '/profile/enable-two-factor'
     | '/login/backup-code'
     | '/login/otp'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/goodbye'
     | '/todos'
     | '/profile/change-password'
+    | '/profile/disable-two-factor'
     | '/profile/enable-two-factor'
     | '/login/backup-code'
     | '/login/otp'
@@ -205,6 +217,7 @@ export interface FileRouteTypes {
     | '/goodbye'
     | '/todos'
     | '/(app)/profile/change-password'
+    | '/(app)/profile/disable-two-factor'
     | '/(app)/profile/enable-two-factor'
     | '/(auth)/login/backup-code'
     | '/(auth)/login/otp'
@@ -331,6 +344,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appProfileEnableTwoFactorRouteImport
       parentRoute: typeof appRouteRoute
     }
+    '/(app)/profile/disable-two-factor': {
+      id: '/(app)/profile/disable-two-factor'
+      path: '/profile/disable-two-factor'
+      fullPath: '/profile/disable-two-factor'
+      preLoaderRoute: typeof appProfileDisableTwoFactorRouteImport
+      parentRoute: typeof appRouteRoute
+    }
     '/(app)/profile/change-password': {
       id: '/(app)/profile/change-password'
       path: '/profile/change-password'
@@ -350,6 +370,7 @@ declare module '@tanstack/react-router' {
 
 interface appRouteRouteChildren {
   appProfileChangePasswordRoute: typeof appProfileChangePasswordRoute
+  appProfileDisableTwoFactorRoute: typeof appProfileDisableTwoFactorRoute
   appProfileEnableTwoFactorRoute: typeof appProfileEnableTwoFactorRoute
   appDashboardIndexRoute: typeof appDashboardIndexRoute
   appFilesIndexRoute: typeof appFilesIndexRoute
@@ -359,6 +380,7 @@ interface appRouteRouteChildren {
 
 const appRouteRouteChildren: appRouteRouteChildren = {
   appProfileChangePasswordRoute: appProfileChangePasswordRoute,
+  appProfileDisableTwoFactorRoute: appProfileDisableTwoFactorRoute,
   appProfileEnableTwoFactorRoute: appProfileEnableTwoFactorRoute,
   appDashboardIndexRoute: appDashboardIndexRoute,
   appFilesIndexRoute: appFilesIndexRoute,

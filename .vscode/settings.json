@@ -24,6 +24,9 @@
   "[graphql]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
+  "[caddyfile]": {
+    "editor.defaultFormatter": "matthewpi.caddyfile-support"
+  },
   "typescript.tsdk": "node_modules/typescript/lib",
   "editor.formatOnSave": true,
   "editor.formatOnPaste": true,

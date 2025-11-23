@@ -190,7 +190,16 @@ function RouteComponent() {
             orientation="horizontal"
           >
             {session.data?.user.twoFactorEnabled ? (
-              <Button variant="destructive">Disable 2FA</Button>
+              <Button
+                onClick={() => {
+                  router.navigate({
+                    to: "/profile/disable-two-factor",
+                  });
+                }}
+                variant="destructive"
+              >
+                Disable 2FA
+              </Button>
             ) : (
               <Button
                 onClick={() => {

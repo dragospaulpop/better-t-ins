@@ -79,14 +79,29 @@ better-t-ins/
 
 ## HTTPS
 
-To enable HTTPS, you need to install mkcert and generate a self-signed certificate and key using the following command:
-
+To enable HTTPS, you need to:
+- install mkcert
+```bash
+brew install mkcert
+```
+- generate a self-signed certificate and key
 ```bash
 ./generate-certs.sh
 ```
 
-Also, to run the server with HTTPS, you need to run Caddy on the host machine with the following command:
-
+Also, to run the server with HTTPS, you need to:
+- install caddy
+[https://caddyserver.com/docs/install](https://caddyserver.com/docs/install#debian-ubuntu-raspbian)
+- prevent caddy from automatically running on system startup
+```bash
+sudo systemctl stop caddy
+sudo systemctl disable caddy
+```
+- allow caddy to use ports 80 and 443
+```bash
+sudo setcap cap_net_bind_service=+ep $(which caddy)
+```
+- run Caddy on the host machine:
 ```bash
 caddy run --config Caddyfile
 ```

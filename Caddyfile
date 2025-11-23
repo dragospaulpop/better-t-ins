@@ -1,43 +1,43 @@
 {
-  auto_https off
+	auto_https off
 }
 
 (app-cert) {
-  tls ./.certs/app.better-t-ins.test+6.pem \
-      ./.certs/app.better-t-ins.test+6-key.pem
+	tls ./.certs/app.better-t-ins.test+6.pem \
+ ./.certs/app.better-t-ins.test+6-key.pem
 }
 
 app.better-t-ins.test {
-  import app-cert
-  reverse_proxy localhost:3001 # Vite
+	import app-cert
+	reverse_proxy localhost:3001 # Vite
 }
 
 api.better-t-ins.test {
-  import app-cert
-  reverse_proxy localhost:3000 # Bun/Hono backend
+	import app-cert
+	reverse_proxy localhost:3000 # Bun/Hono backend
 }
 
 mail.better-t-ins.test {
-  import app-cert
-  reverse_proxy localhost:8025 # Mailhog Docker
+	import app-cert
+	reverse_proxy localhost:8025 # Mailhog Docker
 }
 
 storage.better-t-ins.test {
-  import app-cert
-  reverse_proxy localhost:9001 # MinIO Console
+	import app-cert
+	reverse_proxy localhost:9001 # MinIO Console
 }
 
 s3.better-t-ins.test {
-  import app-cert
-  reverse_proxy localhost:9000 # MinIO API
+	import app-cert
+	reverse_proxy localhost:9000 # MinIO API
 }
 
 drizzle-studio.better-t-ins.test {
-  import app-cert
-  reverse_proxy localhost:4983
+	import app-cert
+	reverse_proxy localhost:4983
 }
 
 react-email.better-t-ins.test {
-  import app-cert
-  reverse_proxy localhost:3030
+	import app-cert
+	reverse_proxy localhost:3030
 }
