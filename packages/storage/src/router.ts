@@ -43,7 +43,7 @@ const MAX_FILE_SIZE = B_IN_KB * KB_IN_MB * MB_IN_GB * MAX_GB;
 export const router: Router = {
   client: minio({
     region: config.data.region,
-    endpoint: `${config.data.useSSL ? "https://" : "http://"}${config.data.endpoint}:${config.data.port}`,
+    endpoint: `${config.data.useSSL ? "https" : "http"}://${config.data.endpoint}:${config.data.port}`,
     accessKeyId: config.data.accessKeyId,
     secretAccessKey: config.data.secretAccessKey,
   }),

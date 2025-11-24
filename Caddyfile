@@ -24,12 +24,20 @@ mail.better-t-ins.test {
 
 storage.better-t-ins.test {
 	import app-cert
-	reverse_proxy localhost:9001 # MinIO Console
+	reverse_proxy localhost:9001 {
+		header_up Host {host}
+		header_up X-Forwarded-Host {host}
+		header_up X-Forwarded-Proto https
+	}
 }
 
 s3.better-t-ins.test {
 	import app-cert
-	reverse_proxy localhost:9000 # MinIO API
+	reverse_proxy localhost:9000 {
+		header_up Host {host}
+		header_up X-Forwarded-Host {host}
+		header_up X-Forwarded-Proto https
+	}
 }
 
 drizzle-studio.better-t-ins.test {

@@ -7,6 +7,7 @@ import DisplayOptions from "./-components/display-options";
 import Folders from "./-components/folders";
 import SizeOptions from "./-components/size-options";
 import SortOptions from "./-components/sort-options";
+import { Uploader } from "./-components/uploader";
 
 export const Route = createFileRoute("/(app)/files/")({
   component: RouteComponent,
@@ -90,9 +91,9 @@ function RouteComponent() {
         />
       </div>
       {/* uploader */}
-      {/* <div className="flex min-h-full w-full flex-1 flex-col items-center justify-center">
+      <div className="flex w-full flex-0 flex-col items-center justify-center">
         <Uploader />
-      </div> */}
+      </div>
     </div>
   );
 }

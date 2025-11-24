@@ -13,6 +13,7 @@ services:
       MINIO_API_CORS_ALLOW_ORIGIN: ${MINIO_API_CORS_ALLOW_ORIGIN}
       MINIO_BROWSER_REDIRECT_URL: ${MINIO_BROWSER_REDIRECT_URL}
       MINIO_SERVER_URL: ${MINIO_SERVER_URL}
+      MINIO_CONSOLE_TLS_REDIRECT: "off"
     command: server /data --console-address ":${MINIO_CONSOLE_PORT}" --address ":${MINIO_PORT}"
     volumes:
       - minio_data:/data

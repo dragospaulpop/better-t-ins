@@ -15,6 +15,13 @@ const sizeReverseMap = {
   24: "lg",
 } as const;
 
+export const sizeClassMap: Record<Size, string> = {
+  xs: "size-12",
+  sm: "size-16",
+  md: "size-20",
+  lg: "size-24",
+};
+
 export type Size = keyof typeof sizeMap;
 export type SizeValue = (typeof sizeMap)[Size];
 export const getSizeValue = (size: Size): SizeValue => sizeMap[size];

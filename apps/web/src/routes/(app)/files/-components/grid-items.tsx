@@ -1,4 +1,4 @@
-import { FolderIcon, MoreVerticalIcon } from "lucide-react";
+import { MoreVerticalIcon } from "lucide-react";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,8 +8,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { FolderUploader } from "./folder-uploader";
 import { CustomIcon, type Item } from "./folders";
-import { getSizeValue, type Size } from "./size-options";
+import { type Size, sizeClassMap } from "./size-options";
 
 interface GridItemsProps {
   items: Item[];
@@ -67,10 +68,7 @@ export default function GridItems({
     [items, sortField, sortDirection, foldersFirst]
   );
 
-  const gridItemSize = useMemo(
-    () => `size-${getSizeValue(itemSize)}`,
-    [itemSize]
-  );
+  const gridItemSize = useMemo(() => sizeClassMap[itemSize], [itemSize]);
 
   const gridMinColSize = useMemo(() => {
     switch (itemSize) {
@@ -104,68 +102,87 @@ export default function GridItems({
 
   return (
     <div className={cn("grid w-full gap-4", gridMinColSize)}>
-      {sortedItems.map((item) => (
-        <div
-          className="group relative flex flex-col items-center gap-2 rounded-lg border border-transparent bg-card p-2 transition-all hover:border-tud-blue/50 hover:bg-tud-blue/25 hover:shadow-md hover:shadow-tud-green/25"
-          key={item.id}
-        >
-          <div className="relative">
-            {item.type === "folder" ? (
-              <FolderIcon
-                className={cn(
-                  "shrink-0 fill-tud-blue/75 dark:fill-tud-blue",
-                  gridItemSize
-                )}
-                strokeWidth={0}
-              />
-            ) : (
-              <CustomIcon
-                absoluteStrokeWidth={true}
-                className={cn("shrink-0", gridItemSize)}
-                extension={item.label as string}
-                strokeWidth={0.75}
-              />
-            )}
-            <div className="absolute inset-0 grid place-items-center">
-              <span
-                className={cn(
-                  "font-bold text-xs",
-                  item.type === "folder"
-                    ? "text-primary dark:text-primary-foreground"
-                    : "text-primary dark:text-primary-foreground"
-                )}
-              >
-                {/* {item.label} */}
-              </span>
-            </div>
-          </div>
-          <span
-            className={cn("line-clamp-2 break-all text-center", gridItemLabel)}
-          >
-            {item.name}
-          </span>
-          <div className="absolute top-1 right-1">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  className="opacity-0 transition-opacity group-hover:opacity-100"
-                  size="icon-sm"
-                  variant="ghost"
-                >
-                  <MoreVerticalIcon className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem>Open</DropdownMenuItem>
-                <DropdownMenuItem>Open in new tab</DropdownMenuItem>
-                <DropdownMenuItem>Download</DropdownMenuItem>
-                <DropdownMenuItem>Rename</DropdownMenuItem>
-                <DropdownMenuItem>Delete</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      ))}
+      {sortedItems.map((item) =>
+        item.type === "folder" ? (
+          <FolderItem
+            gridItemLabel={gridItemLabel}
+            gridItemSize={gridItemSize}
+            item={item}
+            key={item.id}
+          />
+        ) : (
+          <FileItem
+            gridItemLabel={gridItemLabel}
+            gridItemSize={gridItemSize}
+            item={item}
+            key={item.id}
+          />
+        )
+      )}
     </div>
+  );
+}
+
+function FileItem({
+  item,
+  gridItemSize,
+  gridItemLabel,
+}: {
+  item: Item;
+  gridItemSize: string;
+  gridItemLabel: string;
+}) {
+  return (
+    <div className="group relative flex flex-col items-center justify-between gap-2 rounded-lg border border-transparent bg-card p-2 transition-all hover:border-tud-blue/50 hover:bg-tud-blue/25 hover:shadow-md hover:shadow-tud-green/25">
+      <div className="relative">
+        <CustomIcon
+          absoluteStrokeWidth={true}
+          className={cn("shrink-0", gridItemSize)}
+          extension={item.label as string}
+          strokeWidth={0.75}
+        />
+      </div>
+      <span className={cn("line-clamp-2 break-all text-center", gridItemLabel)}>
+        {item.name}
+      </span>
+      <div className="absolute top-1 right-1">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              className="opacity-0 transition-opacity group-hover:opacity-100"
+              size="icon-sm"
+              variant="ghost"
+            >
+              <MoreVerticalIcon className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem>Open</DropdownMenuItem>
+            <DropdownMenuItem>Open in new tab</DropdownMenuItem>
+            <DropdownMenuItem>Download</DropdownMenuItem>
+            <DropdownMenuItem>Rename</DropdownMenuItem>
+            <DropdownMenuItem>Delete</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
+  );
+}
+
+function FolderItem({
+  item,
+  gridItemSize,
+  gridItemLabel,
+}: {
+  item: Item;
+  gridItemSize: string;
+  gridItemLabel: string;
+}) {
+  return (
+    <FolderUploader
+      gridItemLabel={gridItemLabel}
+      gridItemSize={gridItemSize}
+      item={item}
+    />
   );
 }

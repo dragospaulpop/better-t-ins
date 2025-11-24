@@ -88,9 +88,14 @@ brew install mkcert
 ```bash
 ./generate-certs.sh
 ```
-- add the entries to the host file (for wsl use the linux vm ip):
+- find the CA certificate in the `mkcert` directory and import it into your system's trust store (`chrome://settings/security`)
+```bash
+mkcert -CAROOT
+```
+- add the entries to the host file (for wsl use the linux vm ip by running `ip addr show eth0 | grep 'inet ' | awk '{ print $2; exit }'` - be advised, the ip might change when you restart the vm):
 ```text
-172.18.34.182 app.better-t-ins.test api.better-t-ins.test mail.better-t-ins.test s3.better-t-ins.test storage.better-t-ins.test drizzle-studio.better-t-ins.test react-email.better-t-ins.test db.better-t-ins.test
+<ip> app.better-t-ins.test api.better-t-ins.test mail.better-t-ins.test s3.better-t-ins.test storage.better-t-ins.test drizzle-studio.better-t-ins.test react-email.better-t-ins.test db.better-t-ins.test
+
 ```
 
 Also, to run the server with HTTPS, you need to:

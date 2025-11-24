@@ -1,4 +1,10 @@
-import { foreignKey, int, mysqlTable, varchar } from "drizzle-orm/mysql-core";
+import {
+  foreignKey,
+  int,
+  mysqlTable,
+  timestamp,
+  varchar,
+} from "drizzle-orm/mysql-core";
 import { user } from "./auth";
 
 export const folder = mysqlTable(
@@ -8,6 +14,8 @@ export const folder = mysqlTable(
     name: varchar("name", { length: 255 }).notNull(),
     parent_id: int("parent_id"),
     owner_id: varchar("owner_id", { length: 36 }).references(() => user.id),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
   },
   (table) => ({
     parentReference: foreignKey({
@@ -21,14 +29,17 @@ export const file = mysqlTable("file", {
   id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 255 }).notNull(),
   type: varchar("type", { length: 255 }).notNull(),
-  parent_id: int("parent_id").references(() => folder.id),
+  folder_id: int("folder_id").references(() => folder.id),
   owner_id: varchar("owner_id", { length: 36 }).references(() => user.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
 });
 
 export const history = mysqlTable("history", {
   id: int("id").primaryKey().autoincrement(),
   file_id: int("file_id").references(() => file.id),
   size: int("size").notNull(),
-  created_at: int("created_at").notNull(),
+  created_at: timestamp("created_at").notNull().defaultNow(),
+  updated_at: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
   author_id: varchar("author_id", { length: 36 }).references(() => user.id),
 });
