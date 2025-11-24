@@ -1,8 +1,9 @@
-import { Bell, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { UploadFeedbackProvider } from "@/hooks/use-upload-feedback";
 import { ModeToggle } from "./mode-toggle";
+import UploadNotifications from "./upload-notifications";
 import UserMenu from "./user-menu";
 
 export default function Header() {
@@ -22,9 +23,9 @@ export default function Header() {
       </div>
 
       <div className="flex items-center gap-2">
-        <Button size="icon" variant="ghost">
-          <Bell className="h-5 w-5" />
-        </Button>
+        <UploadFeedbackProvider>
+          <UploadNotifications />
+        </UploadFeedbackProvider>
 
         <ModeToggle />
 

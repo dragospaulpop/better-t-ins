@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { FolderPlusIcon, UploadIcon } from "lucide-react";
+import { UploadIcon } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { BreadcrumbNav } from "./-components/breadcrumb-nav";
+import CreateFolderDialog from "./-components/create-folder-dialog";
 import DisplayOptions from "./-components/display-options";
 import Folders from "./-components/folders";
 import SizeOptions from "./-components/size-options";
@@ -58,10 +59,7 @@ function RouteComponent() {
               <UploadIcon className="h-4 w-4" />
               Upload files
             </Button>
-            <Button size="sm" variant="outline">
-              <FolderPlusIcon className="h-4 w-4" />
-              Create folder
-            </Button>
+            <CreateFolderDialog />
           </div>
         </div>
         <div className="flex w-full flex-wrap items-center justify-between gap-4 lg:flex-nowrap">

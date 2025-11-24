@@ -114,3 +114,8 @@ sudo setcap cap_net_bind_service=+ep $(which caddy)
 ```bash
 caddy run --config Caddyfile
 ```
+
+## Drizzle Studio
+
+To open the Drizzle Studio, access `http://drizzle-studio.better-t-ins.test`
+Connection string: `mysql://user:password@better-t-ins-mysql/better-t-ins`

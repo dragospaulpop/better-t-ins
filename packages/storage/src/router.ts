@@ -4,6 +4,7 @@ import { auth } from "@better-t-ins/auth";
 import { RejectUpload, type Router, route } from "@better-upload/server";
 import { minio } from "@better-upload/server/clients";
 import z from "zod";
+import { storage } from ".";
 
 const configSchema = z.object({
   region: z.string(),
@@ -20,13 +21,13 @@ const configSchema = z.object({
 });
 
 const config = configSchema.safeParse({
-  region: process.env.MINIO_REGION,
-  endpoint: process.env.MINIO_ENDPOINT,
-  port: process.env.MINIO_PORT,
-  useSSL: process.env.MINIO_USE_SSL,
-  accessKeyId: process.env.MINIO_ACCESS_KEY,
-  secretAccessKey: process.env.MINIO_SECRET_KEY,
-  bucketName: process.env.MINIO_BUCKET_NAME,
+  region: process.env.MINIO_CLIENT_REGION,
+  endpoint: process.env.MINIO_CLIENT_ENDPOINT,
+  port: process.env.MINIO_CLIENT_PORT,
+  useSSL: process.env.MINIO_CLIENT_USE_SSL,
+  accessKeyId: process.env.MINIO_CLIENT_ACCESS_KEY,
+  secretAccessKey: process.env.MINIO_CLIENT_SECRET_KEY,
+  bucketName: process.env.MINIO_CLIENT_BUCKET_NAME,
 });
 
 if (!config.success) {
@@ -55,6 +56,7 @@ export const router: Router = {
         if (!session) {
           throw new RejectUpload("Unauthorized");
         }
+        await storage.ensureBucket();
       },
       multipleFiles: true,
       multipart: true,

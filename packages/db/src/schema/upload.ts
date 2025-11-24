@@ -3,6 +3,7 @@ import {
   int,
   mysqlTable,
   timestamp,
+  unique,
   varchar,
 } from "drizzle-orm/mysql-core";
 import { user } from "./auth";
@@ -17,12 +18,15 @@ export const folder = mysqlTable(
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
   },
-  (table) => ({
-    parentReference: foreignKey({
+  (table) => [
+    foreignKey({
       columns: [table.parent_id],
       foreignColumns: [table.id],
+      name: "folder_parent_id_folder_id_fk",
     }),
-  })
+    // fucking useless as mysql treats null as a different value / unknown for each combination
+    unique("unique_name").on(table.parent_id, table.owner_id, table.name),
+  ]
 );
 
 export const file = mysqlTable("file", {
@@ -30,7 +34,9 @@ export const file = mysqlTable("file", {
   name: varchar("name", { length: 255 }).notNull(),
   type: varchar("type", { length: 255 }).notNull(),
   folder_id: int("folder_id").references(() => folder.id),
-  owner_id: varchar("owner_id", { length: 36 }).references(() => user.id),
+  owner_id: varchar("owner_id", { length: 36 }).references(() => user.id, {
+    onDelete: "cascade",
+  }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
 });

@@ -100,8 +100,8 @@ export default function ListItems({
       <ItemGroup>
         {sortedItems.map((item, index) => (
           <Fragment key={item.id}>
-            <Item>
-              <ItemMedia className={cn(listItemSize)} variant="icon">
+            <Item size="sm">
+              <ItemMedia className={cn(listItemSize)}>
                 {item.type === "folder" ? (
                   <FolderIcon
                     className={cn(

@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import {
   FileArchiveIcon,
   FileAudioIcon,
@@ -7,6 +8,7 @@ import {
   FolderIcon,
   type LucideIcon,
 } from "lucide-react";
+import { trpc } from "@/utils/trpc";
 import GridItems from "./grid-items";
 import ListItems from "./list-items";
 import type { Size } from "./size-options";
@@ -76,7 +78,7 @@ export const mimeToReadable = (mime: string) => {
 const MAX_STRING_LENGTH = 50;
 const MIN_STRING_LENGTH = 4;
 const MAX_ITEMS = 50;
-const PROBABILITY_FOLDER = 0.5;
+
 const PROBABILITY_SPACE = 0.2;
 const LOWERCASE_LETTERS = "abcdefghijklmnopqrstuvwxyz";
 const ONE_YEAR_IN_MS = 31_536_000_000;
@@ -86,22 +88,21 @@ const MAX_DATE = Date.now();
 const MIN_DATE = Date.now() - ONE_YEAR_IN_MS;
 
 export type Item = {
-  id: number;
+  id: string | number;
   name: string;
   type: "folder" | "file";
   mime: string;
   size: number;
   date: Date;
-  label: string | number;
 };
 
-export const items: Item[] = new Array(MAX_ITEMS).fill(0).map((_, index) => {
-  const type = Math.random() < PROBABILITY_FOLDER ? "folder" : "file";
-  const fileCount = Math.floor(Math.random() * MAX_ITEMS);
+export const items: Item[] = new Array(MAX_ITEMS).fill(0).map((_, _index) => {
+  const type = "file";
+
   const fileType = fileTypes[Math.floor(Math.random() * fileTypes.length)];
 
   return {
-    id: index,
+    id: crypto.randomUUID(),
     name: (() => {
       const initialString = Array.from(
         {
@@ -125,11 +126,10 @@ export const items: Item[] = new Array(MAX_ITEMS).fill(0).map((_, index) => {
           spacedString += " ";
         }
       }
-      return `${spacedString}${type === "folder" ? "" : `.${fileType}`}`;
+      return `${spacedString}.${fileType}`;
     })(),
     type,
-    label: type === "folder" ? fileCount : fileType,
-    mime: type === "folder" ? "application/x-folder" : fileType,
+    mime: fileType,
     size: Math.floor(Math.random() * (MAX_SIZE - MIN_SIZE) + MIN_SIZE),
     date: new Date(Math.random() * (MAX_DATE - MIN_DATE) + MIN_DATE),
   };
@@ -150,13 +150,27 @@ export default function Folders({
   sortDirection,
   itemSize,
 }: FoldersProps) {
+  const folders = useQuery(trpc.folder.getAll.queryOptions());
+
+  const folderItems = folders.data?.map(
+    (folder) =>
+      ({
+        id: folder.id,
+        name: folder.name,
+        type: "folder",
+        mime: "application/x-folder",
+        size: 15,
+        date: new Date(folder.updatedAt),
+      }) as Item
+  );
+
   return (
     <div className="w-full">
       {displayMode === "grid" ? (
         <GridItems
           foldersFirst={foldersFirst}
           itemSize={itemSize}
-          items={items}
+          items={[...items, ...(folderItems ? folderItems : [])]}
           sortDirection={sortDirection}
           sortField={sortField}
         />

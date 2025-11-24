@@ -1,3 +1,4 @@
+import { passkey } from "@better-auth/passkey";
 import { db } from "@better-t-ins/db";
 // biome-ignore lint/performance/noNamespaceImport: this is a schema
 import * as schema from "@better-t-ins/db/schema/auth";
@@ -16,7 +17,6 @@ import {
   magicLink,
   twoFactor,
 } from "better-auth/plugins";
-import { passkey } from "better-auth/plugins/passkey";
 import "dotenv/config";
 import z from "zod";
 

@@ -37,6 +37,7 @@
     "@trpc/server": "catalog:",
     "@trpc/tanstack-react-query": "^11.5.0",
     "better-auth": "catalog:",
+    "@better-auth/passkey": "catalog:",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "input-otp": "^1.4.2",

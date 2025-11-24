@@ -1,18 +1,21 @@
 {
-	"compilerOptions": {
-		"strict": true,
-		"esModuleInterop": true,
-		"jsx": "react-jsx",
-		"target": "ESNext",
-		"module": "ESNext",
-		"moduleResolution": "Bundler",
-		"verbatimModuleSyntax": true,
-		"skipLibCheck": true,
-		"types": ["vite/client"],
-		"rootDirs": ["."],
-		"baseUrl": ".",
-		"paths": {
-			"@/*": ["./src/*"]
-		}
-	}
+  "compilerOptions": {
+    "strict": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
+    "types": ["vite/client"],
+    "rootDirs": ["."],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@better-t-ins/api/*": ["../../packages/api/src/*"],
+      "@better-t-ins/auth/*": ["../../packages/auth/src/*"],
+      "@better-t-ins/db/*": ["../../packages/db/src/*"]
+    }
+  }
 }

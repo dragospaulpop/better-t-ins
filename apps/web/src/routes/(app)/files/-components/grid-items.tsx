@@ -138,7 +138,7 @@ function FileItem({
         <CustomIcon
           absoluteStrokeWidth={true}
           className={cn("shrink-0", gridItemSize)}
-          extension={item.label as string}
+          extension={item.mime as string}
           strokeWidth={0.75}
         />
       </div>
