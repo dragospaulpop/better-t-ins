@@ -88,6 +88,10 @@ brew install mkcert
 ```bash
 ./generate-certs.sh
 ```
+- add the entries to the host file (for wsl use the linux vm ip):
+```text
+172.18.34.182 app.better-t-ins.test api.better-t-ins.test mail.better-t-ins.test s3.better-t-ins.test storage.better-t-ins.test drizzle-studio.better-t-ins.test react-email.better-t-ins.test db.better-t-ins.test
+```
 
 Also, to run the server with HTTPS, you need to:
 - install caddy
