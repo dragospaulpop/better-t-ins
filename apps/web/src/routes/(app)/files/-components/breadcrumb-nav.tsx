@@ -16,10 +16,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export function BreadcrumbDemo() {
+export function BreadcrumbNav() {
   return (
     <Breadcrumb>
-      <BreadcrumbList>
+      <BreadcrumbList className="flex-nowrap">
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
             <Link to="/">Home</Link>

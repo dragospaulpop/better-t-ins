@@ -6,42 +6,72 @@ import {
   FileVideoIcon,
   FolderIcon,
   type LucideIcon,
-  MoreVerticalIcon,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
+import GridItems from "./grid-items";
+import ListItems from "./list-items";
+import type { Size } from "./size-options";
 
 const fileIcons: Record<string, LucideIcon> = {
-  pdf: FileTextIcon,
-  docx: FileTextIcon,
-  txt: FileTextIcon,
-  png: FileImageIcon,
-  jpg: FileImageIcon,
-  mp4: FileVideoIcon,
-  mp3: FileAudioIcon,
-  zip: FileArchiveIcon,
-  rar: FileArchiveIcon,
-  "7z": FileArchiveIcon,
+  "application/x-folder": FolderIcon,
+  "application/pdf": FileTextIcon,
+  "application/msword": FileTextIcon,
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+    FileTextIcon,
+  "text/plain": FileTextIcon,
+  "image/png": FileImageIcon,
+  "image/jpeg": FileImageIcon,
+  "video/mp4": FileVideoIcon,
+  "audio/mpeg": FileAudioIcon,
+  "application/zip": FileArchiveIcon,
+  "application/rar": FileArchiveIcon,
+  "application/x-7z-compressed": FileArchiveIcon,
 };
 
 const fileTypes = [
-  "pdf",
-  "docx",
-  "txt",
-  "png",
-  "jpg",
-  "mp4",
-  "mp3",
-  "zip",
-  "rar",
-  "7z",
+  "application/x-folder",
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "text/plain",
+  "image/png",
+  "image/jpeg",
+  "video/mp4",
+  "audio/mpeg",
+  "application/zip",
+  "application/rar",
+  "application/x-7z-compressed",
 ];
+
+export const mimeToReadable = (mime: string) => {
+  switch (mime) {
+    case "application/x-folder":
+      return "Folder";
+    case "application/pdf":
+      return "PDF Document";
+    case "application/msword":
+      return "Word Document";
+    case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+      return "Word Document";
+    case "text/plain":
+      return "Text Document";
+    case "image/png":
+      return "PNG Image";
+    case "image/jpeg":
+      return "JPEG Image";
+    case "video/mp4":
+      return "MP4 Video";
+    case "audio/mpeg":
+      return "MP3 Audio";
+    case "application/zip":
+      return "ZIP Archive";
+    case "application/rar":
+      return "RAR Archive";
+    case "application/x-7z-compressed":
+      return "7Z Archive";
+    default:
+      return mime;
+  }
+};
 
 const MAX_STRING_LENGTH = 50;
 const MIN_STRING_LENGTH = 4;
@@ -49,8 +79,23 @@ const MAX_ITEMS = 50;
 const PROBABILITY_FOLDER = 0.5;
 const PROBABILITY_SPACE = 0.2;
 const LOWERCASE_LETTERS = "abcdefghijklmnopqrstuvwxyz";
+const ONE_YEAR_IN_MS = 31_536_000_000;
+const MAX_SIZE = 1_000_000_000;
+const MIN_SIZE = 100_000;
+const MAX_DATE = Date.now();
+const MIN_DATE = Date.now() - ONE_YEAR_IN_MS;
 
-const items = new Array(MAX_ITEMS).fill(0).map((_, index) => {
+export type Item = {
+  id: number;
+  name: string;
+  type: "folder" | "file";
+  mime: string;
+  size: number;
+  date: Date;
+  label: string | number;
+};
+
+export const items: Item[] = new Array(MAX_ITEMS).fill(0).map((_, index) => {
   const type = Math.random() < PROBABILITY_FOLDER ? "folder" : "file";
   const fileCount = Math.floor(Math.random() * MAX_ITEMS);
   const fileType = fileTypes[Math.floor(Math.random() * fileTypes.length)];
@@ -84,86 +129,63 @@ const items = new Array(MAX_ITEMS).fill(0).map((_, index) => {
     })(),
     type,
     label: type === "folder" ? fileCount : fileType,
+    mime: type === "folder" ? "application/x-folder" : fileType,
+    size: Math.floor(Math.random() * (MAX_SIZE - MIN_SIZE) + MIN_SIZE),
+    date: new Date(Math.random() * (MAX_DATE - MIN_DATE) + MIN_DATE),
   };
 });
 
-export default function Folders() {
+interface FoldersProps {
+  displayMode: "grid" | "list";
+  foldersFirst: boolean;
+  sortField: "name" | "type" | "size" | "date";
+  sortDirection: "asc" | "desc";
+  itemSize: Size;
+}
+
+export default function Folders({
+  displayMode,
+  foldersFirst,
+  sortField,
+  sortDirection,
+  itemSize,
+}: FoldersProps) {
   return (
-    <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] gap-2">
-      {items.map((item) => (
-        <div
-          className="group relative flex flex-col items-center gap-2 rounded-lg border border-transparent bg-card p-2 transition-all hover:border-tud-blue/50 hover:bg-tud-blue/25 hover:shadow-md hover:shadow-tud-green/25"
-          key={item.id}
-        >
-          <div className="relative">
-            {item.type === "folder" ? (
-              <FolderIcon
-                className="size-24 shrink-0 fill-tud-blue/75 dark:fill-tud-blue"
-                strokeWidth={0}
-              />
-            ) : (
-              <CustomIcon
-                absoluteStrokeWidth={true}
-                className="size-24 shrink-0"
-                extension={item.label as string}
-                strokeWidth={0.75}
-              />
-            )}
-            <div className="absolute inset-0 grid place-items-center">
-              <span
-                className={cn(
-                  "font-bold text-xs",
-                  item.type === "folder"
-                    ? "text-primary dark:text-primary-foreground"
-                    : "text-primary dark:text-primary-foreground"
-                )}
-              >
-                {/* {item.label} */}
-              </span>
-            </div>
-          </div>
-          <span className="line-clamp-2 break-all text-center text-sm">
-            {item.name}
-          </span>
-          <div className="absolute top-1 right-1">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  className="opacity-0 transition-opacity group-hover:opacity-100"
-                  size="icon-sm"
-                  variant="ghost"
-                >
-                  <MoreVerticalIcon className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem>Open</DropdownMenuItem>
-                <DropdownMenuItem>Open in new tab</DropdownMenuItem>
-                <DropdownMenuItem>Download</DropdownMenuItem>
-                <DropdownMenuItem>Rename</DropdownMenuItem>
-                <DropdownMenuItem>Delete</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      ))}
+    <div className="w-full">
+      {displayMode === "grid" ? (
+        <GridItems
+          foldersFirst={foldersFirst}
+          itemSize={itemSize}
+          items={items}
+          sortDirection={sortDirection}
+          sortField={sortField}
+        />
+      ) : (
+        <ListItems
+          foldersFirst={foldersFirst}
+          itemSize={itemSize}
+          items={items}
+          sortDirection={sortDirection}
+          sortField={sortField}
+        />
+      )}
     </div>
   );
 }
 
-type FileIconProps = {
+type CurstomIconProps = {
   extension: string;
   className?: string;
   strokeWidth?: number;
   absoluteStrokeWidth?: boolean;
 };
 
-function CustomIcon({
+export function CustomIcon({
   extension,
   className,
   strokeWidth,
   absoluteStrokeWidth = false,
-}: FileIconProps) {
+}: CurstomIconProps) {
   const IconComponent = fileIcons[extension.toLowerCase()] || FileTextIcon;
   return (
     // <div className="flex items-center justify-center rounded-md bg-tud-light-grey/15 dark:bg-tud-dark-grey/15">
