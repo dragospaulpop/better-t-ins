@@ -1,6 +1,6 @@
 import { revalidateLogic, useForm } from "@tanstack/react-form";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useParams } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
+import { getRouteApi, useParams } from "@tanstack/react-router";
 import { TRPCClientError } from "@trpc/client";
 import { FolderPlusIcon } from "lucide-react";
 import { useState } from "react";
@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/field";
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
 import { LoadingSwap } from "@/components/ui/loading-swap";
-import { trpc } from "@/utils/trpc";
 
 const MAX_FOLDER_NAME_LENGTH = 100;
 
@@ -33,13 +32,13 @@ const schema = z.object({
   name: z.string().min(1).max(MAX_FOLDER_NAME_LENGTH),
 });
 
+const routeApi = getRouteApi("/(app)/files/{-$parentId}");
+
 export default function CreateFolderDialog() {
   const [open, setOpen] = useState(false);
   const { parentId } = useParams({ strict: false });
-
-  const folders = useQuery(
-    trpc.folder.getAllByParentId.queryOptions({ parent_id: parentId })
-  );
+  const { trpc, queryClient } = routeApi.useRouteContext();
+  // const router = useRouter();
 
   const createMutation = useMutation(trpc.folder.create.mutationOptions());
   const validateMutation = useMutation(
@@ -60,7 +59,12 @@ export default function CreateFolderDialog() {
             parent_id: parentId,
           });
           toast.success("Folder created successfully");
-          folders.refetch();
+          await queryClient.invalidateQueries({
+            queryKey: trpc.folder.getAllByParentId.queryKey({
+              parent_id: parentId,
+            }),
+          });
+          // await router.invalidate();
           form.reset();
           setOpen(false);
           return null;
@@ -119,7 +123,7 @@ export default function CreateFolderDialog() {
                   try {
                     const folderExists = await validateMutation.mutateAsync({
                       name: value,
-                      parent_id: undefined,
+                      parent_id: parentId,
                     });
 
                     return folderExists

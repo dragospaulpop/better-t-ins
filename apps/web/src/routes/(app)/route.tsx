@@ -2,12 +2,17 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/app-sidebar";
 import Header from "@/components/header";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { authClient } from "@/lib/auth-client";
+
+const SESSION_STALE_TIME = 0;
 
 export const Route = createFileRoute("/(app)")({
   component: RouteComponent,
-  beforeLoad: async () => {
-    const session = await authClient.getSession();
+  beforeLoad: async ({ context }) => {
+    const session = await context.queryClient.fetchQuery({
+      queryKey: ["auth", "session"],
+      queryFn: () => context.authClient.getSession(),
+      staleTime: SESSION_STALE_TIME,
+    });
     const canAccess = session.data?.user.emailVerified;
     if (!canAccess) {
       redirect({

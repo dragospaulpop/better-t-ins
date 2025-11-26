@@ -1,9 +1,11 @@
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { UploadIcon } from "lucide-react";
 import { useCallback, useState } from "react";
 import Loader from "@/components/loader";
 import { Button } from "@/components/ui/button";
 import Whoops from "@/components/whoops";
+
 import { BreadcrumbNav } from "./-components/breadcrumb-nav";
 import CreateFolderDialog from "./-components/create-folder-dialog";
 import DisplayOptions from "./-components/display-options";
@@ -20,7 +22,7 @@ export const Route = createFileRoute("/(app)/files/{-$parentId}")({
     const [folders, ancestors] = await Promise.all([
       queryClient.ensureQueryData(
         trpc.folder.getAllByParentId.queryOptions({
-          parent_id: parentId || null,
+          parent_id: parentId,
         })
       ),
       queryClient.ensureQueryData(
@@ -61,9 +63,20 @@ export const Route = createFileRoute("/(app)/files/{-$parentId}")({
 });
 
 function RouteComponent() {
-  const { folders: rawFolders, ancestors } = Route.useLoaderData();
+  const { parentId } = Route.useParams();
+  const { trpc } = Route.useRouteContext();
+  const { data: rawFolders = [] } = useQuery(
+    trpc.folder.getAllByParentId.queryOptions({
+      parent_id: parentId,
+    })
+  );
+  const { data: ancestors = [] } = useQuery(
+    trpc.folder.getAncestors.queryOptions({
+      id: parentId,
+    })
+  );
 
-  const folders = rawFolders.map((folder) => ({
+  const folders = rawFolders?.map((folder) => ({
     ...folder,
     createdAt: new Date(folder.createdAt),
     updatedAt: new Date(folder.updatedAt),

@@ -15,10 +15,12 @@ import { FormDevtoolsPanel } from "@tanstack/react-form-devtools";
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
+import type { authClient } from "@/lib/auth-client";
 
 export interface RouterAppContext {
   trpc: typeof trpc;
   queryClient: QueryClient;
+  authClient: typeof authClient;
 }
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
