@@ -19,3 +19,8 @@ export const db = drizzle({
     uri: env.data.DATABASE_URL,
   },
 });
+
+// biome-ignore lint/performance/noBarrelFile: O.M.F.G.!!!
+export * from "drizzle-orm";
+
+export type { MySql2Database } from "drizzle-orm/mysql2";

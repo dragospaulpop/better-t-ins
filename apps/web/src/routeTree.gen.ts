@@ -15,7 +15,6 @@ import { Route as appRouteRouteImport } from './routes/(app)/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as authLoginIndexRouteImport } from './routes/(auth)/login/index'
 import { Route as appProfileIndexRouteImport } from './routes/(app)/profile/index'
-import { Route as appFilesIndexRouteImport } from './routes/(app)/files/index'
 import { Route as appDashboardIndexRouteImport } from './routes/(app)/dashboard/index'
 import { Route as authLoginTwoFactorRouteImport } from './routes/(auth)/login/two-factor'
 import { Route as authLoginResetPasswordRouteImport } from './routes/(auth)/login/reset-password'
@@ -25,6 +24,7 @@ import { Route as authLoginBackupCodeRouteImport } from './routes/(auth)/login/b
 import { Route as appProfileEnableTwoFactorRouteImport } from './routes/(app)/profile/enable-two-factor'
 import { Route as appProfileDisableTwoFactorRouteImport } from './routes/(app)/profile/disable-two-factor'
 import { Route as appProfileChangePasswordRouteImport } from './routes/(app)/profile/change-password'
+import { Route as appFilesChar123ParentIdChar125RouteImport } from './routes/(app)/files/{-$parentId}'
 import { Route as appProfileConfirmTotpTotpURIBackupCodesRouteImport } from './routes/(app)/profile/confirm-totp.$totpURI.$backupCodes'
 
 const TodosRoute = TodosRouteImport.update({
@@ -54,11 +54,6 @@ const authLoginIndexRoute = authLoginIndexRouteImport.update({
 const appProfileIndexRoute = appProfileIndexRouteImport.update({
   id: '/profile/',
   path: '/profile/',
-  getParentRoute: () => appRouteRoute,
-} as any)
-const appFilesIndexRoute = appFilesIndexRouteImport.update({
-  id: '/files/',
-  path: '/files/',
   getParentRoute: () => appRouteRoute,
 } as any)
 const appDashboardIndexRoute = appDashboardIndexRouteImport.update({
@@ -110,6 +105,12 @@ const appProfileChangePasswordRoute =
     path: '/profile/change-password',
     getParentRoute: () => appRouteRoute,
   } as any)
+const appFilesChar123ParentIdChar125Route =
+  appFilesChar123ParentIdChar125RouteImport.update({
+    id: '/files/{-$parentId}',
+    path: '/files/{-$parentId}',
+    getParentRoute: () => appRouteRoute,
+  } as any)
 const appProfileConfirmTotpTotpURIBackupCodesRoute =
   appProfileConfirmTotpTotpURIBackupCodesRouteImport.update({
     id: '/profile/confirm-totp/$totpURI/$backupCodes',
@@ -121,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/goodbye': typeof GoodbyeRoute
   '/todos': typeof TodosRoute
+  '/files/{-$parentId}': typeof appFilesChar123ParentIdChar125Route
   '/profile/change-password': typeof appProfileChangePasswordRoute
   '/profile/disable-two-factor': typeof appProfileDisableTwoFactorRoute
   '/profile/enable-two-factor': typeof appProfileEnableTwoFactorRoute
@@ -130,7 +132,6 @@ export interface FileRoutesByFullPath {
   '/login/reset-password': typeof authLoginResetPasswordRoute
   '/login/two-factor': typeof authLoginTwoFactorRoute
   '/dashboard': typeof appDashboardIndexRoute
-  '/files': typeof appFilesIndexRoute
   '/profile': typeof appProfileIndexRoute
   '/login': typeof authLoginIndexRoute
   '/profile/confirm-totp/$totpURI/$backupCodes': typeof appProfileConfirmTotpTotpURIBackupCodesRoute
@@ -139,6 +140,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/goodbye': typeof GoodbyeRoute
   '/todos': typeof TodosRoute
+  '/files/{-$parentId}': typeof appFilesChar123ParentIdChar125Route
   '/profile/change-password': typeof appProfileChangePasswordRoute
   '/profile/disable-two-factor': typeof appProfileDisableTwoFactorRoute
   '/profile/enable-two-factor': typeof appProfileEnableTwoFactorRoute
@@ -148,7 +150,6 @@ export interface FileRoutesByTo {
   '/login/reset-password': typeof authLoginResetPasswordRoute
   '/login/two-factor': typeof authLoginTwoFactorRoute
   '/dashboard': typeof appDashboardIndexRoute
-  '/files': typeof appFilesIndexRoute
   '/profile': typeof appProfileIndexRoute
   '/login': typeof authLoginIndexRoute
   '/profile/confirm-totp/$totpURI/$backupCodes': typeof appProfileConfirmTotpTotpURIBackupCodesRoute
@@ -159,6 +160,7 @@ export interface FileRoutesById {
   '/(app)': typeof appRouteRouteWithChildren
   '/goodbye': typeof GoodbyeRoute
   '/todos': typeof TodosRoute
+  '/(app)/files/{-$parentId}': typeof appFilesChar123ParentIdChar125Route
   '/(app)/profile/change-password': typeof appProfileChangePasswordRoute
   '/(app)/profile/disable-two-factor': typeof appProfileDisableTwoFactorRoute
   '/(app)/profile/enable-two-factor': typeof appProfileEnableTwoFactorRoute
@@ -168,7 +170,6 @@ export interface FileRoutesById {
   '/(auth)/login/reset-password': typeof authLoginResetPasswordRoute
   '/(auth)/login/two-factor': typeof authLoginTwoFactorRoute
   '/(app)/dashboard/': typeof appDashboardIndexRoute
-  '/(app)/files/': typeof appFilesIndexRoute
   '/(app)/profile/': typeof appProfileIndexRoute
   '/(auth)/login/': typeof authLoginIndexRoute
   '/(app)/profile/confirm-totp/$totpURI/$backupCodes': typeof appProfileConfirmTotpTotpURIBackupCodesRoute
@@ -179,6 +180,7 @@ export interface FileRouteTypes {
     | '/'
     | '/goodbye'
     | '/todos'
+    | '/files/{-$parentId}'
     | '/profile/change-password'
     | '/profile/disable-two-factor'
     | '/profile/enable-two-factor'
@@ -188,7 +190,6 @@ export interface FileRouteTypes {
     | '/login/reset-password'
     | '/login/two-factor'
     | '/dashboard'
-    | '/files'
     | '/profile'
     | '/login'
     | '/profile/confirm-totp/$totpURI/$backupCodes'
@@ -197,6 +198,7 @@ export interface FileRouteTypes {
     | '/'
     | '/goodbye'
     | '/todos'
+    | '/files/{-$parentId}'
     | '/profile/change-password'
     | '/profile/disable-two-factor'
     | '/profile/enable-two-factor'
@@ -206,7 +208,6 @@ export interface FileRouteTypes {
     | '/login/reset-password'
     | '/login/two-factor'
     | '/dashboard'
-    | '/files'
     | '/profile'
     | '/login'
     | '/profile/confirm-totp/$totpURI/$backupCodes'
@@ -216,6 +217,7 @@ export interface FileRouteTypes {
     | '/(app)'
     | '/goodbye'
     | '/todos'
+    | '/(app)/files/{-$parentId}'
     | '/(app)/profile/change-password'
     | '/(app)/profile/disable-two-factor'
     | '/(app)/profile/enable-two-factor'
@@ -225,7 +227,6 @@ export interface FileRouteTypes {
     | '/(auth)/login/reset-password'
     | '/(auth)/login/two-factor'
     | '/(app)/dashboard/'
-    | '/(app)/files/'
     | '/(app)/profile/'
     | '/(auth)/login/'
     | '/(app)/profile/confirm-totp/$totpURI/$backupCodes'
@@ -286,13 +287,6 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof appProfileIndexRouteImport
-      parentRoute: typeof appRouteRoute
-    }
-    '/(app)/files/': {
-      id: '/(app)/files/'
-      path: '/files'
-      fullPath: '/files'
-      preLoaderRoute: typeof appFilesIndexRouteImport
       parentRoute: typeof appRouteRoute
     }
     '/(app)/dashboard/': {
@@ -358,6 +352,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appProfileChangePasswordRouteImport
       parentRoute: typeof appRouteRoute
     }
+    '/(app)/files/{-$parentId}': {
+      id: '/(app)/files/{-$parentId}'
+      path: '/files/{-$parentId}'
+      fullPath: '/files/{-$parentId}'
+      preLoaderRoute: typeof appFilesChar123ParentIdChar125RouteImport
+      parentRoute: typeof appRouteRoute
+    }
     '/(app)/profile/confirm-totp/$totpURI/$backupCodes': {
       id: '/(app)/profile/confirm-totp/$totpURI/$backupCodes'
       path: '/profile/confirm-totp/$totpURI/$backupCodes'
@@ -369,21 +370,21 @@ declare module '@tanstack/react-router' {
 }
 
 interface appRouteRouteChildren {
+  appFilesChar123ParentIdChar125Route: typeof appFilesChar123ParentIdChar125Route
   appProfileChangePasswordRoute: typeof appProfileChangePasswordRoute
   appProfileDisableTwoFactorRoute: typeof appProfileDisableTwoFactorRoute
   appProfileEnableTwoFactorRoute: typeof appProfileEnableTwoFactorRoute
   appDashboardIndexRoute: typeof appDashboardIndexRoute
-  appFilesIndexRoute: typeof appFilesIndexRoute
   appProfileIndexRoute: typeof appProfileIndexRoute
   appProfileConfirmTotpTotpURIBackupCodesRoute: typeof appProfileConfirmTotpTotpURIBackupCodesRoute
 }
 
 const appRouteRouteChildren: appRouteRouteChildren = {
+  appFilesChar123ParentIdChar125Route: appFilesChar123ParentIdChar125Route,
   appProfileChangePasswordRoute: appProfileChangePasswordRoute,
   appProfileDisableTwoFactorRoute: appProfileDisableTwoFactorRoute,
   appProfileEnableTwoFactorRoute: appProfileEnableTwoFactorRoute,
   appDashboardIndexRoute: appDashboardIndexRoute,
-  appFilesIndexRoute: appFilesIndexRoute,
   appProfileIndexRoute: appProfileIndexRoute,
   appProfileConfirmTotpTotpURIBackupCodesRoute:
     appProfileConfirmTotpTotpURIBackupCodesRoute,

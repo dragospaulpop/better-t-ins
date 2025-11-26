@@ -1,4 +1,5 @@
 import type { UploadHookControl } from "@better-upload/client";
+import { useNavigate } from "@tanstack/react-router";
 import { FolderIcon, MoreVerticalIcon, UploadIcon } from "lucide-react";
 import { useId } from "react";
 import { useDropzone } from "react-dropzone";
@@ -36,6 +37,7 @@ export function FolderDropzone({
   gridItemLabel,
 }: UploadDropzoneProps) {
   const id = useId();
+  const navigate = useNavigate();
 
   const { getRootProps, getInputProps, isDragActive, inputRef } = useDropzone({
     onDrop: (files) => {
@@ -52,13 +54,22 @@ export function FolderDropzone({
   });
 
   return (
-    <div
+    <a
       className={cn(
         "group relative flex flex-col items-center justify-start gap-2 rounded-lg border border-transparent bg-card p-0 transition-all hover:border-tud-blue/50 hover:bg-tud-blue/25 hover:shadow-md hover:shadow-tud-green/25transition-colors",
         {
           "border-primary/80 border-dashed": isDragActive,
         }
       )}
+      href={"/files/{-$parentId}"}
+      onClick={(e) => e.preventDefault()}
+      onDoubleClick={(e) => {
+        e.preventDefault();
+        navigate({
+          to: "/files/{-$parentId}",
+          params: { parentId: String(item.id) },
+        });
+      }}
     >
       <div
         {...getRootProps()}
@@ -122,6 +133,6 @@ export function FolderDropzone({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </div>
+    </a>
   );
 }

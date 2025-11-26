@@ -32,5 +32,8 @@
         "useConsistentTypeDefinitions": "off"
       }
     }
+  },
+  "javascript": {
+    "globals": ["Bun"]
   }
 }

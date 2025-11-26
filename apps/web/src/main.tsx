@@ -22,7 +22,7 @@ if (!env.success) {
 
 const router = createRouter({
   routeTree,
-  defaultPreload: "intent",
+  defaultPreload: false,
   defaultPendingComponent: () => <Loader />,
   context: { trpc, queryClient },
   Wrap({ children }: { children: React.ReactNode }) {

@@ -1,6 +1,8 @@
-import { useForm } from "@tanstack/react-form";
+import { revalidateLogic, useForm } from "@tanstack/react-form";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { FolderPlusIcon, Loader2Icon } from "lucide-react";
+import { useParams } from "@tanstack/react-router";
+import { TRPCClientError } from "@trpc/client";
+import { FolderPlusIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -22,6 +24,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
+import { LoadingSwap } from "@/components/ui/loading-swap";
 import { trpc } from "@/utils/trpc";
 
 const MAX_FOLDER_NAME_LENGTH = 100;
@@ -32,38 +35,57 @@ const schema = z.object({
 
 export default function CreateFolderDialog() {
   const [open, setOpen] = useState(false);
+  const { parentId } = useParams({ strict: false });
 
-  const folders = useQuery(trpc.folder.getAll.queryOptions());
+  const folders = useQuery(
+    trpc.folder.getAllByParentId.queryOptions({ parent_id: parentId })
+  );
 
-  const createMutation = useMutation(
-    trpc.folder.create.mutationOptions({
-      onSuccess: () => {
-        folders.refetch();
-        setOpen(false);
-      },
-      onError: (e) => {
-        toast.error("Failed to create folder", {
-          description: e.message,
-        });
-      },
-    })
+  const createMutation = useMutation(trpc.folder.create.mutationOptions());
+  const validateMutation = useMutation(
+    trpc.folder.validateFolderName.mutationOptions()
   );
 
   const form = useForm({
     defaultValues: {
       name: "New folder",
     },
-    onSubmit: ({ value }) => {
-      createMutation.mutate(value);
-      form.reset();
-    },
+    validationLogic: revalidateLogic(),
     validators: {
       onSubmit: schema,
+      onSubmitAsync: async ({ value }) => {
+        try {
+          await createMutation.mutateAsync({
+            ...value,
+            parent_id: parentId,
+          });
+          toast.success("Folder created successfully");
+          folders.refetch();
+          form.reset();
+          setOpen(false);
+          return null;
+        } catch (e) {
+          const error = handleCreateFolderError(e);
+          return {
+            fields: {
+              name: { message: error },
+            },
+          };
+        }
+      },
     },
   });
 
   return (
-    <Dialog onOpenChange={setOpen} open={open}>
+    <Dialog
+      onOpenChange={(v) => {
+        if (!v) {
+          form.reset();
+        }
+        setOpen(v);
+      }}
+      open={open}
+    >
       <DialogTrigger asChild>
         <Button size="sm" variant="outline">
           <FolderPlusIcon className="h-4 w-4" />
@@ -85,10 +107,36 @@ export default function CreateFolderDialog() {
           }}
         >
           <FieldGroup className="">
-            <form.Field name="name">
+            <form.Field
+              name="name"
+              validators={{
+                onDynamicAsyncDebounceMs: 500,
+                onDynamicAsync: async ({ value }) => {
+                  if (!value) {
+                    return { message: "Name can't be empty" };
+                  }
+
+                  try {
+                    const folderExists = await validateMutation.mutateAsync({
+                      name: value,
+                      parent_id: undefined,
+                    });
+
+                    return folderExists
+                      ? { message: "Folder name already exists" }
+                      : undefined;
+                  } catch (e) {
+                    return {
+                      message: `Failed to validate folder name (${(e as Error)?.message})`,
+                    };
+                  }
+                },
+              }}
+            >
               {(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid;
+
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Name</FieldLabel>
@@ -124,11 +172,11 @@ export default function CreateFolderDialog() {
                     disabled={!state.canSubmit || state.isSubmitting}
                     type="submit"
                   >
-                    {state.isSubmitting ? (
-                      <Loader2Icon className="animate-spin" />
-                    ) : (
-                      "Create"
-                    )}
+                    <LoadingSwap
+                      isLoading={state.isSubmitting || state.isFieldsValidating}
+                    >
+                      Create
+                    </LoadingSwap>
                   </Button>
                 </DialogFooter>
               )}
@@ -138,4 +186,34 @@ export default function CreateFolderDialog() {
       </DialogContent>
     </Dialog>
   );
+}
+
+function handleCreateFolderError(e: unknown): string {
+  if (e instanceof TRPCClientError) {
+    if (e.data?.code === "UNAUTHORIZED") {
+      return "You are not authorized to create a folder";
+    }
+    if (e.data?.code === "BAD_REQUEST") {
+      try {
+        const error = JSON.parse(e.message as string) as {
+          code: string;
+          message: string;
+          path: string[];
+        }[];
+
+        return (
+          error?.[0]?.message ??
+          "Failed to create folder (no server error message)"
+        );
+      } catch (_) {
+        return "Failed to create folder (unknown error)";
+      }
+    }
+
+    if (e.data?.code === "INTERNAL_SERVER_ERROR") {
+      return e.message;
+    }
+    return `Failed to create folder (${e.data?.code} ${e.data?.message})`;
+  }
+  return `Failed to create folder (unknown error: ${(e as Error)?.message})`;
 }

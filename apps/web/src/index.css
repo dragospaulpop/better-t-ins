@@ -18,7 +18,9 @@ body {
   }
 }
 
-.grecaptcha-badge { visibility: hidden; }
+.grecaptcha-badge {
+  visibility: hidden;
+}
 
 :root {
   --radius: 0.625rem;

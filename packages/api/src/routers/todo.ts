@@ -1,6 +1,6 @@
-import { db } from "@better-t-ins/db";
+import { db, eq } from "@better-t-ins/db";
 import { todo } from "@better-t-ins/db/schema/todo";
-import { eq } from "drizzle-orm";
+
 import z from "zod";
 import { publicProcedure, router } from "../index";
 

@@ -19,28 +19,28 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-    networks:
-      - better-t-ins-network
+    # networks:
+    #   - better-t-ins-network
 
-  drizzle-gateway:
-    image: ghcr.io/drizzle-team/gateway:latest
-    container_name: better-t-ins-drizzle-gateway
-    environment:
-      PORT: 4983
-      STORE_PATH: /app
-    volumes:
-      - better-t-ins_drizzle_gateway_data:/app
-    ports:
-      - "4983:4983"
-    restart: unless-stopped
-    networks:
-      - better-t-ins-network
+  # drizzle-gateway:
+  #   image: ghcr.io/drizzle-team/gateway:latest
+  #   container_name: better-t-ins-drizzle-gateway
+  #   environment:
+  #     PORT: 4983
+  #     STORE_PATH: /app
+  #   volumes:
+  #     - better-t-ins_drizzle_gateway_data:/app
+  #   ports:
+  #     - "4983:4983"
+  #   restart: unless-stopped
+  #   networks:
+  #     - better-t-ins-network
 
 volumes:
   better-t-ins_mysql_data:
-  better-t-ins_drizzle_gateway_data:
+  # better-t-ins_drizzle_gateway_data:
 
-networks:
-  better-t-ins-network:
-    name: better-t-ins-network
-    driver: bridge
+# networks:
+#   better-t-ins-network:
+#     name: better-t-ins-network
+#     driver: bridge

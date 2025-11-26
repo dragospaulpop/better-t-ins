@@ -89,6 +89,7 @@ const MIN_DATE = Date.now() - ONE_YEAR_IN_MS;
 
 export type Item = {
   id: string | number;
+  parentId: string | number;
   name: string;
   type: "folder" | "file";
   mime: string;
@@ -103,6 +104,7 @@ export const items: Item[] = new Array(MAX_ITEMS).fill(0).map((_, _index) => {
 
   return {
     id: crypto.randomUUID(),
+    parentId: crypto.randomUUID(),
     name: (() => {
       const initialString = Array.from(
         {
@@ -141,6 +143,7 @@ interface FoldersProps {
   sortField: "name" | "type" | "size" | "date";
   sortDirection: "asc" | "desc";
   itemSize: Size;
+  parentId?: string;
 }
 
 export default function Folders({
@@ -149,8 +152,11 @@ export default function Folders({
   sortField,
   sortDirection,
   itemSize,
+  parentId,
 }: FoldersProps) {
-  const folders = useQuery(trpc.folder.getAll.queryOptions());
+  const folders = useQuery(
+    trpc.folder.getAllByParentId.queryOptions({ parent_id: parentId || null })
+  );
 
   const folderItems = folders.data?.map(
     (folder) =>

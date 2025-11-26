@@ -1,7 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { UploadIcon } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { trpcClient } from "@/utils/trpc";
 import { BreadcrumbNav } from "./-components/breadcrumb-nav";
 import CreateFolderDialog from "./-components/create-folder-dialog";
 import DisplayOptions from "./-components/display-options";
@@ -10,11 +11,36 @@ import SizeOptions from "./-components/size-options";
 import SortOptions from "./-components/sort-options";
 import { Uploader } from "./-components/uploader";
 
-export const Route = createFileRoute("/(app)/files/")({
+export const Route = createFileRoute("/(app)/files/{-$parentId}")({
   component: RouteComponent,
+  beforeLoad: async ({ params }) => {
+    const { parentId } = params;
+    try {
+      const exists = await trpcClient.folder.folderExists.query({
+        id: parentId,
+      });
+      if (!exists) {
+        redirect({
+          to: "/files/{-$parentId}",
+          params: { parentId: undefined },
+          replace: true,
+          throw: true,
+        });
+      }
+      return;
+    } catch (_) {
+      redirect({
+        to: "/files/{-$parentId}",
+        params: { parentId: undefined },
+        replace: true,
+        throw: true,
+      });
+    }
+  },
 });
 
 function RouteComponent() {
+  const { parentId } = Route.useParams();
   const [sortField, setSortField] = useState<"name" | "type" | "size" | "date">(
     "name"
   );
@@ -53,7 +79,7 @@ function RouteComponent() {
       {/* toolbar */}
       <div className="flex w-full flex-none flex-col gap-6 p-6">
         <div className="flex w-full flex-wrap items-center justify-between gap-4 lg:flex-nowrap">
-          <BreadcrumbNav />
+          <BreadcrumbNav id={parentId} />
           <div className="flex items-center gap-2">
             <Button size="sm" variant="outline">
               <UploadIcon className="h-4 w-4" />
@@ -84,6 +110,7 @@ function RouteComponent() {
           displayMode={displayMode}
           foldersFirst={foldersFirst}
           itemSize={itemSize}
+          parentId={parentId}
           sortDirection={sortDirection}
           sortField={sortField}
         />
