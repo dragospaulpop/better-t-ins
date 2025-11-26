@@ -3,9 +3,7 @@ import {
   createRootRouteWithContext,
   HeadContent,
   Outlet,
-  useRouterState,
 } from "@tanstack/react-router";
-import Loader from "@/components/loader";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import type { trpc } from "@/utils/trpc";
@@ -47,9 +45,9 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 function RootComponent() {
   const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
-  const isFetching = useRouterState({
-    select: (s) => s.isLoading,
-  });
+  // const isFetching = useRouterState({
+  //   select: (s) => s.isLoading,
+  // });
 
   return (
     <>
@@ -68,7 +66,7 @@ function RootComponent() {
           <div className="flex min-h-screen w-full bg-background">
             <div className="flex min-h-0 flex-1 flex-col">
               <main className="min-h-0 flex-1 p-0">
-                {isFetching ? <Loader /> : <Outlet />}
+                <Outlet />
               </main>
             </div>
           </div>

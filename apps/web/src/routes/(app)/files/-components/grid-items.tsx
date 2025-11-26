@@ -59,8 +59,8 @@ export default function GridItems({
             return sortDirection === "asc" ? a.size - b.size : b.size - a.size;
           case "date":
             return sortDirection === "asc"
-              ? a.date.getTime() - b.date.getTime()
-              : b.date.getTime() - a.date.getTime();
+              ? a.createdAt.getTime() - b.createdAt.getTime()
+              : b.createdAt.getTime() - a.createdAt.getTime();
           default:
             return 0;
         }

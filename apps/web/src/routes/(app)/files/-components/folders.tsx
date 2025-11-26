@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import type { Folder } from "@better-t-ins/db/schema/upload";
 import {
   FileArchiveIcon,
   FileAudioIcon,
@@ -8,7 +8,6 @@ import {
   FolderIcon,
   type LucideIcon,
 } from "lucide-react";
-import { trpc } from "@/utils/trpc";
 import GridItems from "./grid-items";
 import ListItems from "./list-items";
 import type { Size } from "./size-options";
@@ -94,7 +93,8 @@ export type Item = {
   type: "folder" | "file";
   mime: string;
   size: number;
-  date: Date;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export const items: Item[] = new Array(MAX_ITEMS).fill(0).map((_, _index) => {
@@ -133,7 +133,8 @@ export const items: Item[] = new Array(MAX_ITEMS).fill(0).map((_, _index) => {
     type,
     mime: fileType,
     size: Math.floor(Math.random() * (MAX_SIZE - MIN_SIZE) + MIN_SIZE),
-    date: new Date(Math.random() * (MAX_DATE - MIN_DATE) + MIN_DATE),
+    createdAt: new Date(Math.random() * (MAX_DATE - MIN_DATE) + MIN_DATE),
+    updatedAt: new Date(Math.random() * (MAX_DATE - MIN_DATE) + MIN_DATE),
   };
 });
 
@@ -143,7 +144,7 @@ interface FoldersProps {
   sortField: "name" | "type" | "size" | "date";
   sortDirection: "asc" | "desc";
   itemSize: Size;
-  parentId?: string;
+  folders: Folder[];
 }
 
 export default function Folders({
@@ -152,13 +153,9 @@ export default function Folders({
   sortField,
   sortDirection,
   itemSize,
-  parentId,
+  folders,
 }: FoldersProps) {
-  const folders = useQuery(
-    trpc.folder.getAllByParentId.queryOptions({ parent_id: parentId || null })
-  );
-
-  const folderItems = folders.data?.map(
+  const folderItems = folders.map(
     (folder) =>
       ({
         id: folder.id,
@@ -166,7 +163,8 @@ export default function Folders({
         type: "folder",
         mime: "application/x-folder",
         size: 15,
-        date: new Date(folder.updatedAt),
+        createdAt: folder.createdAt,
+        updatedAt: folder.updatedAt,
       }) as Item
   );
 

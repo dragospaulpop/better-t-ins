@@ -1,8 +1,9 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { UploadIcon } from "lucide-react";
 import { useCallback, useState } from "react";
+import Loader from "@/components/loader";
 import { Button } from "@/components/ui/button";
-import { trpcClient } from "@/utils/trpc";
+import Whoops from "@/components/whoops";
 import { BreadcrumbNav } from "./-components/breadcrumb-nav";
 import CreateFolderDialog from "./-components/create-folder-dialog";
 import DisplayOptions from "./-components/display-options";
@@ -13,12 +14,32 @@ import { Uploader } from "./-components/uploader";
 
 export const Route = createFileRoute("/(app)/files/{-$parentId}")({
   component: RouteComponent,
-  beforeLoad: async ({ params }) => {
+  pendingComponent: () => <Loader />,
+  errorComponent: () => <Whoops />,
+  loader: async ({ context: { trpc, queryClient }, params: { parentId } }) => {
+    const [folders, ancestors] = await Promise.all([
+      queryClient.ensureQueryData(
+        trpc.folder.getAllByParentId.queryOptions({
+          parent_id: parentId || null,
+        })
+      ),
+      queryClient.ensureQueryData(
+        trpc.folder.getAncestors.queryOptions({
+          id: parentId,
+        })
+      ),
+    ]);
+
+    return { folders, ancestors };
+  },
+  beforeLoad: async ({ context: { trpc, queryClient }, params }) => {
     const { parentId } = params;
     try {
-      const exists = await trpcClient.folder.folderExists.query({
-        id: parentId,
-      });
+      const exists = await queryClient.ensureQueryData(
+        trpc.folder.folderExists.queryOptions({
+          id: parentId,
+        })
+      );
       if (!exists) {
         redirect({
           to: "/files/{-$parentId}",
@@ -40,7 +61,14 @@ export const Route = createFileRoute("/(app)/files/{-$parentId}")({
 });
 
 function RouteComponent() {
-  const { parentId } = Route.useParams();
+  const { folders: rawFolders, ancestors } = Route.useLoaderData();
+
+  const folders = rawFolders.map((folder) => ({
+    ...folder,
+    createdAt: new Date(folder.createdAt),
+    updatedAt: new Date(folder.updatedAt),
+  }));
+
   const [sortField, setSortField] = useState<"name" | "type" | "size" | "date">(
     "name"
   );
@@ -79,7 +107,7 @@ function RouteComponent() {
       {/* toolbar */}
       <div className="flex w-full flex-none flex-col gap-6 p-6">
         <div className="flex w-full flex-wrap items-center justify-between gap-4 lg:flex-nowrap">
-          <BreadcrumbNav id={parentId} />
+          <BreadcrumbNav ancestors={ancestors} />
           <div className="flex items-center gap-2">
             <Button size="sm" variant="outline">
               <UploadIcon className="h-4 w-4" />
@@ -108,9 +136,9 @@ function RouteComponent() {
       <div className="w-full flex-1 overflow-y-auto p-6">
         <Folders
           displayMode={displayMode}
+          folders={folders}
           foldersFirst={foldersFirst}
           itemSize={itemSize}
-          parentId={parentId}
           sortDirection={sortDirection}
           sortField={sortField}
         />

@@ -1,5 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import type { Ancestors } from "@better-t-ins/api/lib/get-ancestors";
 import { Link } from "@tanstack/react-router";
+import { Fragment } from "react";
 import {
   Breadcrumb,
   BreadcrumbEllipsis,
@@ -14,19 +15,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { trpc } from "@/utils/trpc";
 
 interface BreadcrumbNavProps {
   id?: string;
+  ancestors?: Ancestors;
 }
 
-export function BreadcrumbNav({ id }: BreadcrumbNavProps) {
-  const ancestors = useQuery(
-    trpc.folder.getAncestors.queryOptions({ id: id || null })
-  );
-
-  const lastTwoAncestors = ancestors.data?.slice(-2);
-  const menuAncestors = ancestors.data?.slice(0, -2);
+export function BreadcrumbNav({ ancestors }: BreadcrumbNavProps) {
+  const lastTwoAncestors = ancestors?.slice(-2);
+  const menuAncestors = ancestors?.slice(0, -2);
 
   return (
     <Breadcrumb>
@@ -40,8 +37,8 @@ export function BreadcrumbNav({ id }: BreadcrumbNavProps) {
         </BreadcrumbItem>
         {ancestors && menuAncestors?.length ? (
           <>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
+            <BreadcrumbSeparator key="separator-ellipsis" />
+            <BreadcrumbItem key="item-ellipsis">
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center gap-1">
                   <BreadcrumbEllipsis className="size-4" />
@@ -65,10 +62,10 @@ export function BreadcrumbNav({ id }: BreadcrumbNavProps) {
         ) : null}
         {ancestors && lastTwoAncestors?.length ? (
           <>
-            <BreadcrumbSeparator />
+            <BreadcrumbSeparator key="separator-last-two" />
             {lastTwoAncestors.map((ancestor, index) => (
-              <>
-                <BreadcrumbItem key={ancestor.id}>
+              <Fragment key={ancestor.id}>
+                <BreadcrumbItem>
                   <BreadcrumbLink asChild>
                     <Link
                       params={{ parentId: ancestor.id.toString() }}
@@ -78,10 +75,8 @@ export function BreadcrumbNav({ id }: BreadcrumbNavProps) {
                     </Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
-                {index < lastTwoAncestors.length - 1 && (
-                  <BreadcrumbSeparator key={`separator-${ancestor.id}`} />
-                )}
-              </>
+                {index < lastTwoAncestors.length - 1 && <BreadcrumbSeparator />}
+              </Fragment>
             ))}
           </>
         ) : null}

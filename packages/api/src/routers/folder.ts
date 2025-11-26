@@ -29,7 +29,8 @@ export const folderRouter = router({
             eq(folder.owner_id, userId),
             createFolderParentCondition(parentId)
           )
-        );
+        )
+        .orderBy(folder.name);
     }),
 
   validateFolderName: protectedProcedure

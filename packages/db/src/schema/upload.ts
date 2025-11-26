@@ -31,6 +31,8 @@ export const folder = mysqlTable(
   ]
 );
 
+export type Folder = typeof folder.$inferSelect;
+
 export const folderClosure = mysqlTable(
   "folder_closure",
   {

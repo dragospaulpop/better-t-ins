@@ -14,3 +14,5 @@ export async function getAncestors(db: MySql2Database, id: number) {
     .where(eq(folderClosure.descendant, id))
     .orderBy(desc(folderClosure.depth));
 }
+
+export type Ancestors = Awaited<ReturnType<typeof getAncestors>>;
