@@ -1,15 +1,18 @@
-import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import {
+  useQueryErrorResetBoundary,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
+import { createFileRoute, redirect, useRouter } from "@tanstack/react-router";
 import { UploadIcon } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Loader from "@/components/loader";
 import { Button } from "@/components/ui/button";
 import Whoops from "@/components/whoops";
-
 import { BreadcrumbNav } from "./-components/breadcrumb-nav";
 import CreateFolderDialog from "./-components/create-folder-dialog";
 import DisplayOptions from "./-components/display-options";
 import Folders from "./-components/folders";
+import RefreshButton from "./-components/refresh-button";
 import SizeOptions from "./-components/size-options";
 import SortOptions from "./-components/sort-options";
 import { Uploader } from "./-components/uploader";
@@ -17,7 +20,21 @@ import { Uploader } from "./-components/uploader";
 export const Route = createFileRoute("/(app)/files/{-$parentId}")({
   component: RouteComponent,
   pendingComponent: () => <Loader />,
-  errorComponent: () => <Whoops />,
+  errorComponent: ({ error }) => {
+    const router = useRouter();
+    const queryErrorResetBoundary = useQueryErrorResetBoundary();
+
+    useEffect(() => {
+      // Reset the query error boundary
+      queryErrorResetBoundary.reset();
+    }, [queryErrorResetBoundary]);
+
+    const retry = () => {
+      router.invalidate();
+    };
+
+    return <Whoops error={error} retry={retry} />;
+  },
   loader: async ({ context: { trpc, queryClient }, params: { parentId } }) => {
     const [folders, ancestors] = await Promise.all([
       queryClient.ensureQueryData(
@@ -64,13 +81,13 @@ export const Route = createFileRoute("/(app)/files/{-$parentId}")({
 
 function RouteComponent() {
   const { parentId } = Route.useParams();
-  const { trpc } = Route.useRouteContext();
-  const { data: rawFolders = [] } = useQuery(
+  const { trpc, queryClient } = Route.useRouteContext();
+  const { data: rawFolders = [] } = useSuspenseQuery(
     trpc.folder.getAllByParentId.queryOptions({
       parent_id: parentId,
     })
   );
-  const { data: ancestors = [] } = useQuery(
+  const { data: ancestors = [] } = useSuspenseQuery(
     trpc.folder.getAncestors.queryOptions({
       id: parentId,
     })
@@ -96,6 +113,30 @@ function RouteComponent() {
     },
     []
   );
+
+  const refresh = useCallback(async () => {
+    try {
+      // Use refetchQueries instead of invalidateQueries to wait for the result
+      // This actually waits for the fetch to complete (or fail)
+      await queryClient.refetchQueries({
+        queryKey: trpc.folder.getAllByParentId.queryKey({
+          parent_id: parentId,
+        }),
+      });
+      // Also refetch ancestors
+      await queryClient.refetchQueries({
+        queryKey: trpc.folder.getAncestors.queryKey({
+          id: parentId,
+        }),
+      });
+    } catch {
+      // refetchQueries throws if the query fails
+      // The QueryCache.onError will handle showing the toast
+      // We catch here to prevent unhandled promise rejection
+    }
+    // Note: We don't need router.invalidate() here because useSuspenseQuery
+    // will automatically re-render when the query data changes
+  }, [queryClient, parentId, trpc]);
 
   const handleSortBy = useCallback(
     (newField: "name" | "type" | "size" | "date") => {
@@ -130,14 +171,17 @@ function RouteComponent() {
           </div>
         </div>
         <div className="flex w-full flex-wrap items-center justify-between gap-4 lg:flex-nowrap">
-          <SortOptions
-            foldersFirst={foldersFirst}
-            handleSortBy={handleSortBy}
-            handleSortDirection={handleSortDirection}
-            setFoldersFirst={setFoldersFirst}
-            sortDirection={sortDirection}
-            sortField={sortField}
-          />
+          <div className="flex items-center gap-2">
+            <RefreshButton refresh={refresh} />
+            <SortOptions
+              foldersFirst={foldersFirst}
+              handleSortBy={handleSortBy}
+              handleSortDirection={handleSortDirection}
+              setFoldersFirst={setFoldersFirst}
+              sortDirection={sortDirection}
+              sortField={sortField}
+            />
+          </div>
           <SizeOptions handleItemSize={handleItemSize} itemSize={itemSize} />
           <DisplayOptions
             displayMode={displayMode}

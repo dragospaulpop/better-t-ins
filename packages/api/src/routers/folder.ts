@@ -6,13 +6,20 @@ import { getAncestors } from "../lib/get-ancestors";
 import { insertFolder } from "../lib/insert-folder";
 
 const MAX_FOLDER_NAME_LENGTH = 100;
-// const SLEEP_MS = 5000;
+// const SLEEP_MS = 2000;
+const BOO_HOO_PROBABILITY = 0.5;
 
 export const folderRouter = router({
   getAllByParentId: protectedProcedure
     .input(z.object({ parent_id: z.string().nullable().optional() }))
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
+
+      // await Bun.sleep(SLEEP_MS);
+
+      if (Math.random() > BOO_HOO_PROBABILITY) {
+        throw new Error("Boo-hoo");
+      }
 
       const parentId =
         Number.isNaN(input.parent_id) ||
