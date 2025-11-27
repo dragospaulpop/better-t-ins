@@ -18,7 +18,7 @@ import { authClient } from "@/lib/auth-client";
 import generatePassword, {
   isStrongEnough,
   passwordStrength,
-} from "@/utils/password-generator";
+} from "@/lib/password-generator";
 import Loader from "../../../../components/loader";
 import { Button } from "../../../../components/ui/button";
 import {

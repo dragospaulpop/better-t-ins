@@ -44,7 +44,7 @@ import { authClient } from "@/lib/auth-client";
 import generatePassword, {
   isStrongEnough,
   passwordStrength,
-} from "@/utils/password-generator";
+} from "@/lib/password-generator";
 
 const tokenSchema = z.object({
   token: z.string().optional(),

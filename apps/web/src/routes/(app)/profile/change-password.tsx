@@ -43,7 +43,7 @@ import { authClient } from "@/lib/auth-client";
 import generatePassword, {
   isStrongEnough,
   passwordStrength,
-} from "@/utils/password-generator";
+} from "@/lib/password-generator";
 
 export const Route = createFileRoute("/(app)/profile/change-password")({
   component: RouteComponent,

@@ -4,8 +4,8 @@ import ReactDOM from "react-dom/client";
 import z from "zod";
 import Loader from "./components/loader";
 import { authClient } from "./lib/auth-client";
+import { queryClient, trpc } from "./lib/trpc";
 import { routeTree } from "./routeTree.gen";
-import { queryClient, trpc } from "./utils/trpc";
 
 const envSchema = z.object({
   VITE_SERVER_URL: z.string(),

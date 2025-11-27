@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { trpc } from "@/utils/trpc";
+import { trpc } from "@/lib/trpc";
 
 export const Route = createFileRoute("/todos")({
   component: TodosRoute,

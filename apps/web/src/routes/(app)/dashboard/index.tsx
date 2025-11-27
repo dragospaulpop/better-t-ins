@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import ErrorComponent from "@/components/error";
 import Loader from "@/components/loader";
-import { trpc } from "@/utils/trpc";
+import { trpc } from "@/lib/trpc";
 
 export const Route = createFileRoute("/(app)/dashboard/")({
   component: RouteComponent,

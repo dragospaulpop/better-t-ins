@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CheckIcon, CopyIcon, EyeIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { queryClient, trpc } from "@/utils/trpc";
+import { queryClient, trpc } from "@/lib/trpc";
 import Loader from "../../../../components/loader";
 import { Badge } from "../../../../components/ui/badge";
 import { Button } from "../../../../components/ui/button";
