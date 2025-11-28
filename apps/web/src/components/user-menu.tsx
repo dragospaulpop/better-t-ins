@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { UserIcon } from "lucide-react";
 import {
   DropdownMenu,
@@ -8,19 +8,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { authClient } from "@/lib/auth-client";
+
+import { useSession, useSignOut } from "@/lib/auth-hooks";
 import { Button } from "./ui/button";
+import { LoadingSwap } from "./ui/loading-swap";
 import { Skeleton } from "./ui/skeleton";
 
 export default function UserMenu() {
   const navigate = useNavigate();
-  const { data: session, isPending } = authClient.useSession();
+  const router = useRouter();
+  const { user, isPending } = useSession();
+  const { mutate: signOut, isPending: isSignOutPending } = useSignOut();
 
   if (isPending) {
     return <Skeleton className="h-9 w-24" />;
   }
 
-  if (!session) {
+  if (!user) {
     return (
       <Button asChild variant="outline">
         <Link to="/login">Sign In</Link>
@@ -33,7 +37,7 @@ export default function UserMenu() {
       <DropdownMenuTrigger asChild>
         <Button variant="outline">
           <UserIcon className="size-4" />
-          {session.user.name}
+          {user.name}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="bg-card p-2">
@@ -50,26 +54,26 @@ export default function UserMenu() {
             }}
             variant="ghost"
           >
-            {session.user.email}
+            {user.email}
           </Button>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Button
             className="w-full text-destructive"
+            disabled={isSignOutPending}
             onClick={() => {
-              authClient.signOut({
-                fetchOptions: {
+              signOut(
+                {},
+                {
                   onSuccess: () => {
-                    navigate({
-                      to: "/",
-                    });
+                    router.invalidate();
                   },
-                },
-              });
+                }
+              );
             }}
             variant="ghost"
           >
-            Sign Out
+            <LoadingSwap isLoading={isSignOutPending}>Sign Out</LoadingSwap>
           </Button>
         </DropdownMenuItem>
       </DropdownMenuContent>

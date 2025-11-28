@@ -4,7 +4,6 @@ import {
   ArrowLeftIcon,
   EyeIcon,
   EyeOffIcon,
-  Loader2Icon,
   LockIcon,
   RotateCcwKeyIcon,
 } from "lucide-react";
@@ -33,13 +32,15 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { LoadingSwap } from "@/components/ui/loading-swap";
 import { Progress } from "@/components/ui/progress";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { authClient } from "@/lib/auth-client";
+import { getAuthErrorMessage } from "@/lib/auth-error";
+import { useChangePassword } from "@/lib/auth-hooks";
 import generatePassword, {
   isStrongEnough,
   passwordStrength,
@@ -95,6 +96,8 @@ const PASSWORD_STRENGTH_TO_COLOR = {
 };
 
 function RouteComponent() {
+  const { mutate: changePassword, isPending: isChangePasswordPending } =
+    useChangePassword();
   const navigate = useNavigate();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [passwordStrengthValue, setPasswordStrengthValue] = useState(0);
@@ -113,8 +116,8 @@ function RouteComponent() {
       newPassword: "",
       confirmNewPassword: "",
     },
-    onSubmit: async ({ value }) => {
-      await authClient.changePassword(
+    onSubmit: ({ value }) => {
+      changePassword(
         {
           newPassword: value.newPassword,
           currentPassword: value.password,
@@ -128,7 +131,7 @@ function RouteComponent() {
             });
           },
           onError: (error) => {
-            toast.error(error.error.message || error.error.statusText);
+            toast.error(getAuthErrorMessage(error));
           },
         }
       );
@@ -371,11 +374,11 @@ function RouteComponent() {
                     disabled={!state.canSubmit || state.isSubmitting}
                     type="submit"
                   >
-                    {state.isSubmitting ? (
-                      <Loader2Icon className="animate-spin" />
-                    ) : (
-                      "Change Password"
-                    )}
+                    <LoadingSwap
+                      isLoading={state.isSubmitting || isChangePasswordPending}
+                    >
+                      Change Password
+                    </LoadingSwap>
                   </Button>
                 )}
               </form.Subscribe>

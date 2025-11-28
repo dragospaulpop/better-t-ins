@@ -1,7 +1,7 @@
+import { getRouteApi } from "@tanstack/react-router";
 import { ArrowLeftIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { authClient } from "@/lib/auth-client";
 import { Button } from "../../../../components/ui/button";
 import {
   Card,
@@ -15,6 +15,7 @@ import {
 const EMAIL_VERIFICATION_RESEND_INTERVAL = 30;
 const SECOND = 1000;
 
+const routerApi = getRouteApi("/(auth)/login/");
 export default function VerifyEmailForm({
   onSwitchToSignIn,
   email,
@@ -22,6 +23,7 @@ export default function VerifyEmailForm({
   onSwitchToSignIn: () => void;
   email: string;
 }) {
+  const { authClient } = routerApi.useRouteContext();
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | undefined>(
     undefined
   );

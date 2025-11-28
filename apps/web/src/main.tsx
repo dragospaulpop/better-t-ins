@@ -1,3 +1,4 @@
+import { AuthQueryProvider } from "@daveyplate/better-auth-tanstack";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import ReactDOM from "react-dom/client";
@@ -26,11 +27,6 @@ const router = createRouter({
   defaultPreload: "intent",
   defaultPendingComponent: () => <Loader />,
   context: { trpc, queryClient, authClient },
-  Wrap({ children }: { children: React.ReactNode }) {
-    return (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    );
-  },
 });
 
 declare module "@tanstack/react-router" {
@@ -47,5 +43,11 @@ if (!rootElement) {
 
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
-  root.render(<RouterProvider router={router} />);
+  root.render(
+    <QueryClientProvider client={queryClient}>
+      <AuthQueryProvider>
+        <RouterProvider router={router} />
+      </AuthQueryProvider>
+    </QueryClientProvider>
+  );
 }

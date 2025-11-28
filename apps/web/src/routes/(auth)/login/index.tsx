@@ -3,17 +3,19 @@ import { LogInIcon, UserPlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import AppTitle from "@/components/app-title";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { authClient } from "@/lib/auth-client";
+import { useSession } from "@/lib/auth-hooks";
+import { ensureSessionData } from "@/lib/auth-utils";
 import SignInForm from "@/routes/(auth)/login/-components/sign-in-form";
 import SignUpForm from "@/routes/(auth)/login/-components/sign-up-form";
 import VerifyEmailForm from "@/routes/(auth)/login/-components/verify-email-form";
 
 export const Route = createFileRoute("/(auth)/login/")({
   component: RouteComponent,
-  beforeLoad: async () => {
-    const session = await authClient.getSession();
+  beforeLoad: async ({ context }) => {
+    const sessionData = await ensureSessionData(context);
 
-    const canAccess = session.data?.user.emailVerified;
+    const canAccess = sessionData?.user.emailVerified;
+
     if (canAccess) {
       redirect({
         to: "/dashboard",
@@ -22,7 +24,7 @@ export const Route = createFileRoute("/(auth)/login/")({
       });
     }
 
-    return { session };
+    return { session: sessionData?.session, user: sessionData?.user };
   },
 });
 
@@ -31,16 +33,15 @@ function RouteComponent() {
     "sign-in"
   );
   const [email, setEmail] = useState<string>("");
-  const { data: session } = authClient.useSession();
+  const { user } = useSession();
 
   useEffect(() => {
-    const visibleTab =
-      session && !session?.user.emailVerified ? "verify-email" : "sign-in";
+    const visibleTab = user && !user.emailVerified ? "verify-email" : "sign-in";
     if (visibleTab === "verify-email") {
-      setEmail(session?.user.email || "");
+      setEmail(user?.email || "");
     }
     setTab(visibleTab);
-  }, [session]);
+  }, [user]);
 
   const handleSwitchToSignIn = () => {
     setTab("sign-in");

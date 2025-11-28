@@ -9,26 +9,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { authClient } from "@/lib/auth-client";
+import { ensureSessionData } from "@/lib/auth-utils";
 import DisableTwoFactorForm from "./-components/disable-two-factor-form";
 
 export const Route = createFileRoute("/(app)/profile/disable-two-factor")({
   component: RouteComponent,
-  beforeLoad: async () => {
-    const session = await authClient.getSession();
-    if (!session.data) {
-      redirect({
-        to: "/login",
-        throw: true,
-      });
-    }
-    if (!session.data?.user.twoFactorEnabled) {
+  beforeLoad: async ({ context }) => {
+    const sessionData = await ensureSessionData(context);
+
+    if (!sessionData?.user.twoFactorEnabled) {
       redirect({
         to: "/profile",
         throw: true,
       });
     }
-    return { session };
+    return { session: sessionData?.session, user: sessionData?.user };
   },
 });
 

@@ -15,6 +15,7 @@ import { FormDevtoolsPanel } from "@tanstack/react-form-devtools";
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
+import NotFound from "@/components/not-found";
 import type { authClient } from "@/lib/auth-client";
 
 export interface RouterAppContext {
@@ -25,6 +26,11 @@ export interface RouterAppContext {
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
   component: RootComponent,
+  notFoundComponent: () => (
+    <div className="flex h-full w-full items-center justify-center">
+      <NotFound />
+    </div>
+  ),
   head: () => ({
     meta: [
       {

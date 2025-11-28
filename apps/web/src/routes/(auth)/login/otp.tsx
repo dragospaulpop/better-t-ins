@@ -1,7 +1,8 @@
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
-import { ArrowLeftIcon, Loader2Icon } from "lucide-react";
+import { ArrowLeftIcon } from "lucide-react";
 import { toast } from "sonner";
 import z from "zod";
 import AppTitle from "@/components/app-title";
@@ -28,9 +29,25 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { authClient } from "@/lib/auth-client";
+import { LoadingSwap } from "@/components/ui/loading-swap";
+import { getAuthErrorMessage } from "@/lib/auth-error";
+import { useSendOtp, useVerifyOtp } from "@/lib/auth-hooks";
+import { ensureSessionData } from "@/lib/auth-utils";
 
 export const Route = createFileRoute("/(auth)/login/otp")({
+  beforeLoad: async ({ context }) => {
+    const sessionData = await ensureSessionData(context);
+
+    const canAccess = !sessionData?.user;
+
+    if (!canAccess) {
+      redirect({
+        to: "/dashboard",
+        replace: true,
+        throw: true,
+      });
+    }
+  },
   component: RouteComponent,
 });
 
@@ -44,6 +61,10 @@ const formSchema = z.object({
 
 function RouteComponent() {
   const navigate = useNavigate();
+  const { mutateAsync: verifyOtp, isPending: isVerifyOtpPending } =
+    useVerifyOtp();
+  const { mutate: sendOtp, isPending: isSendOtpPending } = useSendOtp();
+  const queryClient = useQueryClient();
 
   const form = useForm({
     defaultValues: {
@@ -51,23 +72,22 @@ function RouteComponent() {
       trustDevice: false,
     },
     onSubmit: async ({ value }) => {
-      await authClient.twoFactor.verifyOtp(
-        {
-          code: value.code,
-          trustDevice: value.trustDevice,
+      const { error } = await verifyOtp({
+        code: value.code,
+        trustDevice: value.trustDevice,
+        fetchOptions: {
+          throw: false,
         },
-        {
-          onSuccess: () => {
-            navigate({
-              to: "/dashboard",
-            });
-            toast.success("OTP code verified successfully");
-          },
-          onError: (error) => {
-            toast.error(error.error.message || error.error.statusText);
-          },
-        }
-      );
+      });
+
+      if (error) {
+        toast.error(error?.message || "Unknown error");
+        return;
+      }
+
+      toast.success("OTP code verified successfully");
+      await queryClient.resetQueries({ queryKey: ["session"] });
+      navigate({ to: "/profile", replace: true });
     },
     validators: {
       onSubmit: formSchema,
@@ -186,11 +206,11 @@ function RouteComponent() {
                       disabled={!state.canSubmit || state.isSubmitting}
                       type="submit"
                     >
-                      {state.isSubmitting ? (
-                        <Loader2Icon className="animate-spin" />
-                      ) : (
-                        "Verify Code"
-                      )}
+                      <LoadingSwap
+                        isLoading={state.isSubmitting || isVerifyOtpPending}
+                      >
+                        Verify Code
+                      </LoadingSwap>
                     </Button>
                   )}
                 </form.Subscribe>
@@ -201,16 +221,14 @@ function RouteComponent() {
             <Button
               className="flex-1"
               onClick={() => {
-                authClient.twoFactor.sendOtp(
+                sendOtp(
                   {},
                   {
                     onSuccess: () => {
                       toast.success("OTP code resent successfully");
                     },
                     onError: (error) => {
-                      toast.error(
-                        error.error.message || error.error.statusText
-                      );
+                      toast.error(getAuthErrorMessage(error));
                     },
                   }
                 );
@@ -218,7 +236,9 @@ function RouteComponent() {
               type="button"
               variant="link"
             >
-              Resend Code
+              <LoadingSwap isLoading={isSendOtpPending}>
+                Resend Code
+              </LoadingSwap>
             </Button>
           </CardFooter>
         </Card>

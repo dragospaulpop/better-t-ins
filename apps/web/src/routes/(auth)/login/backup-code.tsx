@@ -1,7 +1,12 @@
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  getRouteApi,
+  redirect,
+  useNavigate,
+} from "@tanstack/react-router";
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
-import { ArrowLeftIcon, Loader2Icon } from "lucide-react";
+import { ArrowLeftIcon } from "lucide-react";
 import { toast } from "sonner";
 import z from "zod";
 import AppTitle from "@/components/app-title";
@@ -27,9 +32,24 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { authClient } from "@/lib/auth-client";
+import { LoadingSwap } from "@/components/ui/loading-swap";
+import { ensureSessionData } from "@/lib/auth-utils";
 
+const routerApi = getRouteApi("/(auth)/login/backup-code");
 export const Route = createFileRoute("/(auth)/login/backup-code")({
+  beforeLoad: async ({ context }) => {
+    const sessionData = await ensureSessionData(context);
+
+    const canAccess = !sessionData?.user;
+
+    if (!canAccess) {
+      redirect({
+        to: "/dashboard",
+        replace: true,
+        throw: true,
+      });
+    }
+  },
   component: RouteComponent,
 });
 
@@ -42,6 +62,7 @@ const formSchema = z.object({
 });
 
 function RouteComponent() {
+  const { authClient } = routerApi.useRouteContext();
   const navigate = useNavigate();
 
   const form = useForm({
@@ -201,11 +222,9 @@ function RouteComponent() {
                       disabled={!state.canSubmit || state.isSubmitting}
                       type="submit"
                     >
-                      {state.isSubmitting ? (
-                        <Loader2Icon className="animate-spin" />
-                      ) : (
-                        "Verify Code"
-                      )}
+                      <LoadingSwap isLoading={state.isSubmitting}>
+                        Verify Code
+                      </LoadingSwap>
                     </Button>
                   )}
                 </form.Subscribe>

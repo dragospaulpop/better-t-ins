@@ -1,6 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
-import { EyeIcon, Loader, Loader2Icon, LockIcon } from "lucide-react";
+import { EyeIcon, Loader, LockIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
@@ -13,35 +13,39 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
+import { LoadingSwap } from "@/components/ui/loading-swap";
 import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
-import { authClient } from "@/lib/auth-client";
+import { getAuthErrorMessage } from "@/lib/auth-error";
+import { useEnable2FA, useSession } from "@/lib/auth-hooks";
 
 const MIN_PASSWORD_LENGTH = 1;
 
 export default function EnableTwoFactorForm() {
+  const { mutate: enable2FA, isPending: isEnable2FAPending } = useEnable2FA();
   const navigate = useNavigate({
     from: "/profile/enable-two-factor",
   });
-  const { isPending } = authClient.useSession();
+  const { isPending } = useSession();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const form = useForm({
     defaultValues: {
       password: "",
     },
-    onSubmit: async ({ value }) => {
-      await authClient.twoFactor.enable(
+    onSubmit: ({ value }) => {
+      enable2FA(
         {
           password: value.password,
           issuer: "VerdeINS",
         },
         {
-          onSuccess: ({ data }) => {
+          onSuccess: (data) => {
+            const response = data as { totpURI: string; backupCodes: string };
             navigate({
               to: "/profile/confirm-totp/$totpURI/$backupCodes",
               params: {
-                totpURI: data.totpURI,
-                backupCodes: data.backupCodes,
+                totpURI: response.totpURI,
+                backupCodes: response.backupCodes,
               },
             });
             toast.success(
@@ -49,7 +53,7 @@ export default function EnableTwoFactorForm() {
             );
           },
           onError: (error) => {
-            toast.error(error.error.message || error.error.statusText);
+            toast.error(getAuthErrorMessage(error));
           },
         }
       );
@@ -129,11 +133,11 @@ export default function EnableTwoFactorForm() {
                   disabled={!state.canSubmit || state.isSubmitting}
                   type="submit"
                 >
-                  {state.isSubmitting ? (
-                    <Loader2Icon className="animate-spin" />
-                  ) : (
-                    "Enable Two-Factor Authentication"
-                  )}
+                  <LoadingSwap
+                    isLoading={state.isSubmitting || isEnable2FAPending}
+                  >
+                    Enable Two-Factor Authentication
+                  </LoadingSwap>
                 </Button>
               </Field>
             )}

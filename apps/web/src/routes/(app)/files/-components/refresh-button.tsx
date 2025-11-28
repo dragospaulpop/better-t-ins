@@ -2,7 +2,6 @@ import { RefreshCwIcon } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LoadingSwap } from "@/components/ui/loading-swap";
-import { cn } from "@/lib/utils";
 
 interface RefreshButtonProps {
   refresh: () => Promise<void>;

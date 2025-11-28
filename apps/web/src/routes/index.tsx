@@ -9,13 +9,14 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { authClient } from "@/lib/auth-client";
+import { ensureSessionData } from "@/lib/auth-utils";
 
 export const Route = createFileRoute("/")({
   component: HomeComponent,
-  beforeLoad: async () => {
-    const session = await authClient.getSession();
-    const canAccess = session.data?.user.emailVerified;
+  beforeLoad: async ({ context }) => {
+    const sessionData = await ensureSessionData(context);
+    const canAccess = sessionData?.user.emailVerified;
+
     if (!canAccess) {
       redirect({
         to: "/login",

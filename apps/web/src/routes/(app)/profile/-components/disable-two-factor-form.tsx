@@ -1,6 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
-import { EyeIcon, Loader, Loader2Icon, LockIcon } from "lucide-react";
+import { EyeIcon, Loader, LockIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
@@ -13,24 +13,28 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
+import { LoadingSwap } from "@/components/ui/loading-swap";
 import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
-import { authClient } from "@/lib/auth-client";
+import { getAuthErrorMessage } from "@/lib/auth-error";
+import { useDisable2FA, useSession } from "@/lib/auth-hooks";
 
 const MIN_PASSWORD_LENGTH = 1;
 
 export default function DisableTwoFactorForm() {
+  const { mutate: disable2FA, isPending: isDisable2FAPending } =
+    useDisable2FA();
   const navigate = useNavigate({
     from: "/profile/enable-two-factor",
   });
-  const { isPending } = authClient.useSession();
+  const { isPending } = useSession();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const form = useForm({
     defaultValues: {
       password: "",
     },
-    onSubmit: async ({ value }) => {
-      await authClient.twoFactor.disable(
+    onSubmit: ({ value }) => {
+      disable2FA(
         {
           password: value.password,
         },
@@ -42,7 +46,7 @@ export default function DisableTwoFactorForm() {
             toast.success("Two-Factor Authentication disabled successfully");
           },
           onError: (error) => {
-            toast.error(error.error.message || error.error.statusText);
+            toast.error(getAuthErrorMessage(error));
           },
         }
       );
@@ -123,11 +127,11 @@ export default function DisableTwoFactorForm() {
                   type="submit"
                   variant="destructive"
                 >
-                  {state.isSubmitting ? (
-                    <Loader2Icon className="animate-spin" />
-                  ) : (
-                    "Disable Two-Factor Authentication"
-                  )}
+                  <LoadingSwap
+                    isLoading={state.isSubmitting || isDisable2FAPending}
+                  >
+                    Disable Two-Factor Authentication
+                  </LoadingSwap>
                 </Button>
               </Field>
             )}

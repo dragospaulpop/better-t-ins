@@ -5,7 +5,6 @@ import {
   ArrowLeftIcon,
   CheckIcon,
   CopyIcon,
-  Loader2Icon,
   TriangleAlertIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -38,25 +37,29 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { authClient } from "@/lib/auth-client";
+import { LoadingSwap } from "@/components/ui/loading-swap";
+import { getAuthErrorMessage } from "@/lib/auth-error";
+import { useVerify2FA } from "@/lib/auth-hooks";
 
 const TOTP_CODE_LENGTH = 6;
 
 export const Route = createFileRoute(
   "/(app)/profile/confirm-totp/$totpURI/$backupCodes"
 )({
-  component: RouteComponent,
-  beforeLoad: async () => {
-    const session = await authClient.getSession();
-    if (!session.data) {
-      redirect({
-        to: "/login",
-        throw: true,
-      });
+  beforeLoad: ({ params }) => {
+    const { totpURI, backupCodes } = params;
+    if (totpURI && backupCodes) {
+      return {
+        totpURI,
+        backupCodes,
+      };
     }
-
-    return { session };
+    redirect({
+      to: "/profile",
+      throw: true,
+    });
   },
+  component: RouteComponent,
 });
 
 const COPIED_TIMEOUT = 2000;
@@ -65,6 +68,7 @@ function RouteComponent() {
   const { totpURI, backupCodes } = Route.useParams();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
+  const { mutate: verify2FA, isPending: isVerify2FAPending } = useVerify2FA();
 
   useEffect(() => {
     if (copied) {
@@ -80,8 +84,8 @@ function RouteComponent() {
       code: "",
       trustDevice: false,
     },
-    onSubmit: async ({ value }) => {
-      await authClient.twoFactor.verifyTotp(
+    onSubmit: ({ value }) => {
+      verify2FA(
         {
           code: value.code,
           trustDevice: value.trustDevice,
@@ -95,7 +99,7 @@ function RouteComponent() {
             toast.success("Two-Factor Authentication verified successfully");
           },
           onError: (error) => {
-            toast.error(error.error.message || error.error.statusText);
+            toast.error(getAuthErrorMessage(error));
           },
         }
       );
@@ -242,11 +246,11 @@ function RouteComponent() {
                         disabled={!state.canSubmit || state.isSubmitting}
                         type="submit"
                       >
-                        {state.isSubmitting ? (
-                          <Loader2Icon className="animate-spin" />
-                        ) : (
-                          "Verify Code"
-                        )}
+                        <LoadingSwap
+                          isLoading={state.isSubmitting || isVerify2FAPending}
+                        >
+                          Verify
+                        </LoadingSwap>
                       </Button>
                     )}
                   </form.Subscribe>

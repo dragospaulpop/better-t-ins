@@ -1,7 +1,7 @@
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
-import { Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import z from "zod";
 import AppTitle from "@/components/app-title";
@@ -27,14 +27,30 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { LoadingSwap } from "@/components/ui/loading-swap";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { authClient } from "@/lib/auth-client";
+import { getAuthErrorMessage } from "@/lib/auth-error";
+import { useSendOtp, useVerifyTotp } from "@/lib/auth-hooks";
+import { ensureSessionData } from "@/lib/auth-utils";
 
 export const Route = createFileRoute("/(auth)/login/two-factor")({
+  beforeLoad: async ({ context }) => {
+    const sessionData = await ensureSessionData(context);
+
+    const canAccess = !sessionData?.user;
+
+    if (!canAccess) {
+      redirect({
+        to: "/dashboard",
+        replace: true,
+        throw: true,
+      });
+    }
+  },
   component: RouteComponent,
 });
 
@@ -42,6 +58,10 @@ const TOTP_CODE_LENGTH = 6;
 
 function RouteComponent() {
   const navigate = useNavigate();
+  const { mutateAsync: verifyTotp, isPending: isVerifyTotpPending } =
+    useVerifyTotp();
+  const { mutate: sendOtp, isPending: isSendOtpPending } = useSendOtp();
+  const queryClient = useQueryClient();
 
   const form = useForm({
     defaultValues: {
@@ -49,24 +69,22 @@ function RouteComponent() {
       trustDevice: false,
     },
     onSubmit: async ({ value }) => {
-      await authClient.twoFactor.verifyTotp(
-        {
-          code: value.code,
-          trustDevice: value.trustDevice,
+      const { error } = await verifyTotp({
+        code: value.code,
+        trustDevice: value.trustDevice,
+        fetchOptions: {
+          throw: false,
         },
-        {
-          onSuccess: () => {
-            navigate({
-              to: "/profile",
-              replace: true,
-            });
-            toast.success("Two-Factor Authentication verified successfully");
-          },
-          onError: (error) => {
-            toast.error(error.error.message || error.error.statusText);
-          },
-        }
-      );
+      });
+
+      if (error) {
+        toast.error(error?.message || "Unknown error");
+        return;
+      }
+
+      toast.success("Two-Factor Authentication verified successfully");
+      await queryClient.resetQueries({ queryKey: ["session"] });
+      navigate({ to: "/profile", replace: true });
     },
     validators: {
       onSubmit: z.object({
@@ -176,11 +194,11 @@ function RouteComponent() {
                       disabled={!state.canSubmit || state.isSubmitting}
                       type="submit"
                     >
-                      {state.isSubmitting ? (
-                        <Loader2Icon className="animate-spin" />
-                      ) : (
-                        "Verify Code"
-                      )}
+                      <LoadingSwap
+                        isLoading={state.isSubmitting || isVerifyTotpPending}
+                      >
+                        Verify Code
+                      </LoadingSwap>
                     </Button>
                   )}
                 </form.Subscribe>
@@ -215,7 +233,7 @@ function RouteComponent() {
                 <TooltipTrigger asChild>
                   <Button
                     onClick={() => {
-                      authClient.twoFactor.sendOtp(
+                      sendOtp(
                         {},
                         {
                           onSuccess: () => {
@@ -226,16 +244,14 @@ function RouteComponent() {
                             });
                           },
                           onError: (error) => {
-                            toast.error(
-                              error.error.message || error.error.statusText
-                            );
+                            toast.error(getAuthErrorMessage(error));
                           },
                         }
                       );
                     }}
                     variant="link"
                   >
-                    OTP
+                    <LoadingSwap isLoading={isSendOtpPending}>OTP</LoadingSwap>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom">

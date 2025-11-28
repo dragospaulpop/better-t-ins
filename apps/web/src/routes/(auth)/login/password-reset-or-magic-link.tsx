@@ -1,6 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { ArrowLeftIcon, Loader2Icon, MailIcon } from "lucide-react";
+import { ArrowLeftIcon, MailIcon } from "lucide-react";
 import { useCallback } from "react";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { toast } from "sonner";
@@ -29,24 +29,32 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { LoadingSwap } from "@/components/ui/loading-swap";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { authClient } from "@/lib/auth-client";
+import { getAuthErrorMessage } from "@/lib/auth-error";
+import { useRequestPasswordReset, useSendMagicLink } from "@/lib/auth-hooks";
+import { ensureSessionData } from "@/lib/auth-utils";
 import RecaptchaNotice from "./-components/recaptcha-notice";
 
 export const Route = createFileRoute(
   "/(auth)/login/password-reset-or-magic-link"
 )({
-  component: RouteComponent,
-  beforeLoad: async () => {
-    const session = await authClient.getSession();
-    if (session.data) {
+  beforeLoad: async ({ context }) => {
+    const sessionData = await ensureSessionData(context);
+
+    const canAccess = !sessionData?.user;
+
+    if (!canAccess) {
       redirect({
         to: "/dashboard",
+        replace: true,
         throw: true,
       });
     }
-    return { session };
+
+    return { session: sessionData?.session, user: sessionData?.user };
   },
+  component: RouteComponent,
 });
 
 const formSchema = z.object({
@@ -57,6 +65,12 @@ const formSchema = z.object({
 function RouteComponent() {
   const navigate = useNavigate();
   const { executeRecaptcha } = useGoogleReCaptcha();
+  const {
+    mutate: requestPasswordReset,
+    isPending: isRequestPasswordResetPending,
+  } = useRequestPasswordReset();
+  const { mutate: sendMagicLink, isPending: isSendMagicLinkPending } =
+    useSendMagicLink();
 
   const verifyRecaptcha = useCallback(async () => {
     if (!executeRecaptcha) {
@@ -83,27 +97,29 @@ function RouteComponent() {
           toast.error("Failed to verify reCAPTCHA");
           return;
         }
-        await authClient.requestPasswordReset(
+        requestPasswordReset(
           {
             email: value.email,
             redirectTo: `${window.location.origin}/login/reset-password`,
+            fetchOptions: {
+              headers: {
+                "x-captcha-response": token,
+              },
+            },
           },
           {
-            headers: {
-              "x-captcha-response": token,
-            },
             onSuccess: () => {
               toast.success(
                 "If this email exists in our system, check your email for the reset link"
               );
             },
             onError: (error) => {
-              toast.error(error.error.message || error.error.statusText);
+              toast.error(getAuthErrorMessage(error));
             },
           }
         );
       } else if (value.resetOrMagicLink === "magic-link") {
-        await authClient.signIn.magicLink(
+        await sendMagicLink(
           {
             email: value.email,
             callbackURL: `${window.location.origin}/dashboard`,
@@ -113,7 +129,7 @@ function RouteComponent() {
               toast.success("Magic link sent");
             },
             onError: (error) => {
-              toast.error(error.error.message || error.error.statusText);
+              toast.error(getAuthErrorMessage(error));
             },
           }
         );
@@ -233,11 +249,15 @@ function RouteComponent() {
                       disabled={!state.canSubmit || state.isSubmitting}
                       type="submit"
                     >
-                      {state.isSubmitting ? (
-                        <Loader2Icon className="animate-spin" />
-                      ) : (
-                        "Send email"
-                      )}
+                      <LoadingSwap
+                        isLoading={
+                          state.isSubmitting ||
+                          isRequestPasswordResetPending ||
+                          isSendMagicLinkPending
+                        }
+                      >
+                        Send email
+                      </LoadingSwap>
                     </Button>
                   )}
                 </form.Subscribe>

@@ -1,10 +1,9 @@
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeftIcon,
   EyeIcon,
   EyeOffIcon,
-  Loader2Icon,
   LockIcon,
   RotateCcwKeyIcon,
 } from "lucide-react";
@@ -34,13 +33,14 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { LoadingSwap } from "@/components/ui/loading-swap";
 import { Progress } from "@/components/ui/progress";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { authClient } from "@/lib/auth-client";
+import { useResetPassword } from "@/lib/auth-hooks";
 import generatePassword, {
   isStrongEnough,
   passwordStrength,
@@ -54,7 +54,22 @@ const tokenSchema = z.object({
 export const Route = createFileRoute("/(auth)/login/reset-password")({
   component: RouteComponent,
   validateSearch: tokenSchema,
-  beforeLoad: ({ search }) => ({ token: search.token }),
+  beforeLoad: async ({ search, context }) => {
+    const sessionData = await ensureSessionData(context);
+
+    const canAccess = !sessionData?.user;
+
+    if (!canAccess) {
+      redirect({
+        to: "/dashboard",
+        replace: true,
+        throw: true,
+      });
+    }
+    return {
+      token: search.token,
+    };
+  },
 });
 
 const MIN_PASSWORD_LENGTH_USER = 8;
@@ -85,11 +100,16 @@ const formSchema = z.object({
     ),
 });
 
+import { getAuthErrorMessage } from "@/lib/auth-error";
+import { ensureSessionData } from "@/lib/auth-utils";
+
 function RouteComponent() {
   const { token, error } = Route.useSearch();
   const navigate = useNavigate();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [passwordStrengthValue, setPasswordStrengthValue] = useState(0);
+  const { mutate: resetPassword, isPending: isResetPasswordPending } =
+    useResetPassword();
 
   const generateRandomPassword = () => {
     const randomLength =
@@ -103,8 +123,8 @@ function RouteComponent() {
     defaultValues: {
       password: "",
     },
-    onSubmit: async ({ value }) => {
-      await authClient.resetPassword(
+    onSubmit: ({ value }) => {
+      resetPassword(
         {
           token,
           newPassword: value.password,
@@ -117,9 +137,7 @@ function RouteComponent() {
             });
           },
           onError: (resetError) => {
-            toast.error(
-              resetError.error.message || resetError.error.statusText
-            );
+            toast.error(getAuthErrorMessage(resetError));
           },
         }
       );
@@ -131,7 +149,7 @@ function RouteComponent() {
 
   return (
     <div className="grid h-full place-items-center p-2">
-      <div>
+      <div className="w-full max-w-md">
         <AppTitle />
         <Card className="w-full sm:max-w-lg">
           <CardHeader>
@@ -262,11 +280,13 @@ function RouteComponent() {
                         disabled={!state.canSubmit || state.isSubmitting}
                         type="submit"
                       >
-                        {state.isSubmitting ? (
-                          <Loader2Icon className="animate-spin" />
-                        ) : (
-                          "Change Password"
-                        )}
+                        <LoadingSwap
+                          isLoading={
+                            state.isSubmitting || isResetPasswordPending
+                          }
+                        >
+                          Change Password
+                        </LoadingSwap>
                       </Button>
                     )}
                   </form.Subscribe>

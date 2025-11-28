@@ -1,18 +1,17 @@
 import { useForm } from "@tanstack/react-form";
-import { Link, useNavigate } from "@tanstack/react-router";
-import {
-  EyeIcon,
-  EyeOffIcon,
-  Loader2Icon,
-  LockIcon,
-  MailIcon,
-} from "lucide-react";
+import { Link, useNavigate, useRouter } from "@tanstack/react-router";
+import { EyeIcon, EyeOffIcon, LockIcon, MailIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { toast } from "sonner";
 import z from "zod";
-import { authClient } from "@/lib/auth-client";
-import Loader from "../../../../components/loader";
+import { LoadingSwap } from "@/components/ui/loading-swap";
+import { getAuthErrorCode, getAuthErrorMessage } from "@/lib/auth-error";
+import {
+  useSendVerificationEmail,
+  useSignIn,
+  useSignInPasskey,
+} from "@/lib/auth-hooks";
 import { Button } from "../../../../components/ui/button";
 import {
   Card,
@@ -53,9 +52,16 @@ export default function SignInForm({
   const navigate = useNavigate({
     from: "/",
   });
-  const { isPending } = authClient.useSession();
+  const { mutate: signIn, isPending: isSignInPending } = useSignIn();
+  const {
+    mutate: sendVerificationEmail,
+    isPending: isSendVerificationEmailPending,
+  } = useSendVerificationEmail();
+  const { mutate: signInPasskey } = useSignInPasskey();
+
+  const router = useRouter();
+
   const [isPassWordVisible, setIsPassWordVisible] = useState(false);
-  const { refetch } = authClient.useSession();
   const { executeRecaptcha } = useGoogleReCaptcha();
 
   const verifyRecaptcha = useCallback(async () => {
@@ -82,21 +88,26 @@ export default function SignInForm({
         toast.error("Failed to verify reCAPTCHA");
         return;
       }
-      await authClient.signIn.email(
+      signIn(
         {
           email: value.email,
           password: value.password,
+          fetchOptions: {
+            headers: {
+              "x-captcha-response": token,
+            },
+          },
         },
         {
-          headers: {
-            // "x-captcha-response": `${token}test`,
-            "x-captcha-response": token,
-          },
-
           onSuccess: ({ data }) => {
-            if (data.emailNotVerified) {
-              onSwitchToVerifyEmail(data.email);
-            } else if (data.twoFactorRedirect) {
+            const result = data as {
+              emailNotVerified: boolean;
+              twoFactorRedirect: boolean;
+              email: string;
+            };
+            if (result.emailNotVerified) {
+              onSwitchToVerifyEmail(result.email);
+            } else if (result.twoFactorRedirect) {
               navigate({
                 to: "/login/two-factor",
               });
@@ -113,14 +124,17 @@ export default function SignInForm({
             }
           },
           onError: (error) => {
-            if (error?.error?.code === "EMAIL_NOT_VERIFIED") {
+            const authErrorMessage = getAuthErrorMessage(error);
+            const authErrorCode = getAuthErrorCode(error);
+
+            if (authErrorCode === "EMAIL_NOT_VERIFIED") {
               toast.error(
                 "Email not verified. Check your email for a verification link.",
                 {
                   action: {
                     label: "Resend email",
                     onClick: () => {
-                      authClient.sendVerificationEmail(
+                      sendVerificationEmail(
                         {
                           email: value.email,
                           callbackURL: `${window.location.origin}/dashboard`,
@@ -130,10 +144,7 @@ export default function SignInForm({
                             toast.success("Verification email sent");
                           },
                           onError: (emailError) => {
-                            toast.error(
-                              emailError.error.message ||
-                                emailError.error.statusText
-                            );
+                            toast.error(getAuthErrorMessage(emailError));
                           },
                         }
                       );
@@ -142,7 +153,7 @@ export default function SignInForm({
                 }
               );
             } else {
-              toast.error(error.error.message || error.error.statusText, {
+              toast.error(authErrorMessage, {
                 testId: "email-error",
               });
             }
@@ -165,27 +176,20 @@ export default function SignInForm({
       toast.error("Conditional mediation is not available");
       return;
     }
-    authClient.signIn.passkey(
+    signInPasskey(
       {
         autoFill: true,
       },
       {
         onSuccess: () => {
-          refetch();
-          navigate({
-            to: "/dashboard",
-          });
+          router.invalidate();
         },
         onError: (error) => {
-          toast.error(error.error.message || error.error.statusText);
+          toast.error(getAuthErrorMessage(error));
         },
       }
     );
-  }, [navigate, refetch]);
-
-  if (isPending) {
-    return <Loader />;
-  }
+  }, [signInPasskey, router]);
 
   return (
     <Card className="w-full sm:max-w-md">
@@ -301,11 +305,15 @@ export default function SignInForm({
                     disabled={!state.canSubmit || state.isSubmitting}
                     type="submit"
                   >
-                    {state.isSubmitting ? (
-                      <Loader2Icon className="animate-spin" />
-                    ) : (
-                      "Sign In"
-                    )}
+                    <LoadingSwap
+                      isLoading={
+                        state.isSubmitting ||
+                        isSignInPending ||
+                        isSendVerificationEmailPending
+                      }
+                    >
+                      Sign In
+                    </LoadingSwap>
                   </Button>
                 </Field>
               )}

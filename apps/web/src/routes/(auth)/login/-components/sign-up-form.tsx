@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import { useNavigate } from "@tanstack/react-router";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import {
   EyeIcon,
   EyeOffIcon,
@@ -13,8 +13,9 @@ import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { toast } from "sonner";
 import z from "zod";
 import PasswordStrengthTooltip from "@/components/password-strength-tooltip";
+import { LoadingSwap } from "@/components/ui/loading-swap";
 import { Progress } from "@/components/ui/progress";
-import { authClient } from "@/lib/auth-client";
+import { useSession } from "@/lib/auth-hooks";
 import generatePassword, {
   isStrongEnough,
   passwordStrength,
@@ -84,6 +85,7 @@ const formSchema = z
     message: "Passwords do not match",
   });
 
+const routerApi = getRouteApi("/(auth)/login/");
 export default function SignUpForm({
   onSwitchToSignIn,
 }: {
@@ -92,7 +94,8 @@ export default function SignUpForm({
   const navigate = useNavigate({
     from: "/",
   });
-  const { isPending } = authClient.useSession();
+  const { isPending } = useSession();
+  const { authClient } = routerApi.useRouteContext();
   const [isPassWordVisible, setIsPassWordVisible] = useState(false);
   const [passwordStrengthValue, setPasswordStrengthValue] = useState(0);
   const { executeRecaptcha } = useGoogleReCaptcha();
@@ -409,7 +412,9 @@ export default function SignUpForm({
                     disabled={!state.canSubmit || state.isSubmitting}
                     type="submit"
                   >
-                    {state.isSubmitting ? "Submitting..." : "Sign Up"}
+                    <LoadingSwap isLoading={state.isSubmitting}>
+                      Sign Up
+                    </LoadingSwap>
                   </Button>
                 </Field>
               )}
