@@ -52,7 +52,7 @@ export default function SignInForm({
   const navigate = useNavigate({
     from: "/",
   });
-  const { mutate: signIn, isPending: isSignInPending } = useSignIn();
+  const { mutateAsync: signIn, isPending: isSignInPending } = useSignIn();
   const {
     mutate: sendVerificationEmail,
     isPending: isSendVerificationEmailPending,
@@ -88,7 +88,7 @@ export default function SignInForm({
         toast.error("Failed to verify reCAPTCHA");
         return;
       }
-      signIn(
+      const {error, data} = await signIn(
         {
           email: value.email,
           password: value.password,
@@ -105,6 +105,7 @@ export default function SignInForm({
               twoFactorRedirect: boolean;
               email: string;
             };
+            console.log(result);
             if (result.emailNotVerified) {
               onSwitchToVerifyEmail(result.email);
             } else if (result.twoFactorRedirect) {
