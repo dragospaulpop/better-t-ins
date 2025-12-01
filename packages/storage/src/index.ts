@@ -32,7 +32,7 @@ export const createStorageClient = (config?: Partial<StorageConfig>) => {
   });
 
   if (!parsedConfig.success) {
-    throw new Error("Invalid config");
+    throw new Error(`Invalid config: ${parsedConfig.error}`);
   }
 
   const clientConfig: Record<string, unknown> = {

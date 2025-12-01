@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeftIcon,
   EyeIcon,
@@ -10,8 +10,8 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
-import AppTitle from "@/components/app-title";
 import PasswordStrengthTooltip from "@/components/password-strength-tooltip";
+import RouterError from "@/components/router-error";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -40,6 +40,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { getAuthErrorMessage } from "@/lib/auth-error";
 import { useResetPassword } from "@/lib/auth-hooks";
 import generatePassword, {
   isStrongEnough,
@@ -47,29 +48,24 @@ import generatePassword, {
 } from "@/lib/password-generator";
 
 const tokenSchema = z.object({
-  token: z.string().optional(),
+  token: z.string(),
   error: z.literal("INVALID_TOKEN").optional(),
 });
 
 export const Route = createFileRoute("/(auth)/login/reset-password")({
   component: RouteComponent,
   validateSearch: tokenSchema,
-  beforeLoad: async ({ search, context }) => {
-    const sessionData = await ensureSessionData(context);
-
-    const canAccess = !sessionData?.user;
-
-    if (!canAccess) {
-      redirect({
-        to: "/dashboard",
-        replace: true,
-        throw: true,
-      });
-    }
-    return {
-      token: search.token,
-    };
-  },
+  errorComponent: () => (
+    <RouterError
+      messages={[
+        "The token is invalid. Please click the link in the email or resend the reset password email.",
+      ]}
+      title="Invalid token"
+    />
+  ),
+  beforeLoad: ({ search }) => ({
+    token: search.token,
+  }),
 });
 
 const MIN_PASSWORD_LENGTH_USER = 8;
@@ -100,11 +96,9 @@ const formSchema = z.object({
     ),
 });
 
-import { getAuthErrorMessage } from "@/lib/auth-error";
-import { ensureSessionData } from "@/lib/auth-utils";
-
 function RouteComponent() {
-  const { token, error } = Route.useSearch();
+  const { token } = Route.useSearch();
+
   const navigate = useNavigate();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [passwordStrengthValue, setPasswordStrengthValue] = useState(0);
@@ -148,154 +142,135 @@ function RouteComponent() {
   });
 
   return (
-    <div className="grid h-full place-items-center p-2">
-      <div className="w-full max-w-md">
-        <AppTitle />
-        <Card className="w-full sm:max-w-lg">
-          <CardHeader>
-            <CardAction>
-              <Button
-                onClick={() => {
-                  navigate({
-                    to: "..",
-                  });
-                }}
-                variant="ghost"
-              >
-                <ArrowLeftIcon />
-                Back
-              </Button>
-            </CardAction>
-            <CardTitle>{error ? "Invalid Token" : "Reset Password"}</CardTitle>
-            {!error && (
-              <CardDescription>Enter your new password below.</CardDescription>
-            )}
-          </CardHeader>
-          <CardContent>
-            {error && <div className="text-destructive">Invalid token</div>}
-            {token && (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  form.handleSubmit();
-                }}
-              >
-                <FieldGroup>
-                  <form.Field name="password">
-                    {(field) => {
-                      const isInvalid =
-                        field.state.meta.isTouched && !field.state.meta.isValid;
-                      return (
-                        <Field data-invalid={isInvalid}>
-                          <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                          <InputGroup>
-                            <InputGroupInput
-                              id={field.name}
-                              name={field.name}
-                              onBlur={field.handleBlur}
-                              onChange={(e) => {
-                                field.handleChange(e.target.value);
+    <Card className="w-full sm:max-w-lg">
+      <CardHeader>
+        <CardAction>
+          <Button
+            onClick={() => {
+              navigate({
+                to: "..",
+              });
+            }}
+            variant="ghost"
+          >
+            <ArrowLeftIcon />
+            Back
+          </Button>
+        </CardAction>
+        <CardTitle>Reset Password</CardTitle>
+
+        <CardDescription>Enter your new password below.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            form.handleSubmit();
+          }}
+        >
+          <FieldGroup>
+            <form.Field name="password">
+              {(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                    <InputGroup>
+                      <InputGroupInput
+                        id={field.name}
+                        name={field.name}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => {
+                          field.handleChange(e.target.value);
+                          setPasswordStrengthValue(
+                            passwordStrength(e.target.value)
+                          );
+                        }}
+                        placeholder="Your new password"
+                        type={isPasswordVisible ? "text" : "password"}
+                        value={field.state.value}
+                      />
+                      <InputGroupAddon>
+                        <LockIcon />
+                      </InputGroupAddon>
+                      <InputGroupAddon align="inline-end">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <InputGroupButton
+                              className="rounded-full"
+                              onClick={() => {
+                                const randomPassword = generateRandomPassword();
+                                field.handleChange(randomPassword);
                                 setPasswordStrengthValue(
-                                  passwordStrength(e.target.value)
+                                  passwordStrength(randomPassword)
                                 );
+                                form.setFieldValue("password", randomPassword);
                               }}
-                              placeholder="Your new password"
-                              type={isPasswordVisible ? "text" : "password"}
-                              value={field.state.value}
-                            />
-                            <InputGroupAddon>
-                              <LockIcon />
-                            </InputGroupAddon>
-                            <InputGroupAddon align="inline-end">
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <InputGroupButton
-                                    className="rounded-full"
-                                    onClick={() => {
-                                      const randomPassword =
-                                        generateRandomPassword();
-                                      field.handleChange(randomPassword);
-                                      setPasswordStrengthValue(
-                                        passwordStrength(randomPassword)
-                                      );
-                                      form.setFieldValue(
-                                        "password",
-                                        randomPassword
-                                      );
-                                    }}
-                                    size="icon-xs"
-                                  >
-                                    <RotateCcwKeyIcon />
-                                  </InputGroupButton>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  Generate random password
-                                </TooltipContent>
-                              </Tooltip>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <InputGroupButton
-                                    className="rounded-full"
-                                    onClick={() =>
-                                      setIsPasswordVisible(!isPasswordVisible)
-                                    }
-                                    size="icon-xs"
-                                  >
-                                    {isPasswordVisible ? (
-                                      <EyeOffIcon />
-                                    ) : (
-                                      <EyeIcon />
-                                    )}
-                                  </InputGroupButton>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  Toggle password visibility
-                                </TooltipContent>
-                              </Tooltip>
-                            </InputGroupAddon>
-                          </InputGroup>
-                          <div className="flex items-center gap-2">
-                            <Progress
-                              indicatorClassName={
-                                PASSWORD_STRENGTH_TO_COLOR[
-                                  passwordStrengthValue as keyof typeof PASSWORD_STRENGTH_TO_COLOR
-                                ] || "bg-muted-foreground"
+                              size="icon-xs"
+                            >
+                              <RotateCcwKeyIcon />
+                            </InputGroupButton>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            Generate random password
+                          </TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <InputGroupButton
+                              className="rounded-full"
+                              onClick={() =>
+                                setIsPasswordVisible(!isPasswordVisible)
                               }
-                              value={passwordStrengthValue}
-                            />
-                            <PasswordStrengthTooltip />
-                          </div>
-                          {isInvalid && (
-                            <FieldError errors={field.state.meta.errors} />
-                          )}
-                        </Field>
-                      );
-                    }}
-                  </form.Field>
-                  <form.Subscribe>
-                    {(state) => (
-                      <Button
-                        className="w-full"
-                        disabled={!state.canSubmit || state.isSubmitting}
-                        type="submit"
-                      >
-                        <LoadingSwap
-                          isLoading={
-                            state.isSubmitting || isResetPasswordPending
-                          }
-                        >
-                          Change Password
-                        </LoadingSwap>
-                      </Button>
+                              size="icon-xs"
+                            >
+                              {isPasswordVisible ? <EyeOffIcon /> : <EyeIcon />}
+                            </InputGroupButton>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            Toggle password visibility
+                          </TooltipContent>
+                        </Tooltip>
+                      </InputGroupAddon>
+                    </InputGroup>
+                    <div className="flex items-center gap-2">
+                      <Progress
+                        indicatorClassName={
+                          PASSWORD_STRENGTH_TO_COLOR[
+                            passwordStrengthValue as keyof typeof PASSWORD_STRENGTH_TO_COLOR
+                          ] || "bg-muted-foreground"
+                        }
+                        value={passwordStrengthValue}
+                      />
+                      <PasswordStrengthTooltip />
+                    </div>
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
                     )}
-                  </form.Subscribe>
-                </FieldGroup>
-              </form>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+                  </Field>
+                );
+              }}
+            </form.Field>
+            <form.Subscribe>
+              {(state) => (
+                <Button
+                  className="w-full"
+                  disabled={!state.canSubmit || state.isSubmitting}
+                  type="submit"
+                >
+                  <LoadingSwap
+                    isLoading={state.isSubmitting || isResetPasswordPending}
+                  >
+                    Change Password
+                  </LoadingSwap>
+                </Button>
+              )}
+            </form.Subscribe>
+          </FieldGroup>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

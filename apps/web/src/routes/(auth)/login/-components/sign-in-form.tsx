@@ -1,4 +1,5 @@
 import { useForm } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { EyeIcon, EyeOffIcon, LockIcon, MailIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -6,7 +7,7 @@ import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { toast } from "sonner";
 import z from "zod";
 import { LoadingSwap } from "@/components/ui/loading-swap";
-import { getAuthErrorCode, getAuthErrorMessage } from "@/lib/auth-error";
+import { getAuthErrorMessage } from "@/lib/auth-error";
 import {
   useSendVerificationEmail,
   useSignIn,
@@ -44,14 +45,9 @@ const MIN_PASSWORD_LENGTH = 8;
 
 export default function SignInForm({
   onSwitchToSignUp,
-  onSwitchToVerifyEmail,
 }: {
   onSwitchToSignUp: () => void;
-  onSwitchToVerifyEmail: (email: string) => void;
 }) {
-  const navigate = useNavigate({
-    from: "/",
-  });
   const { mutateAsync: signIn, isPending: isSignInPending } = useSignIn();
   const {
     mutate: sendVerificationEmail,
@@ -60,9 +56,12 @@ export default function SignInForm({
   const { mutate: signInPasskey } = useSignInPasskey();
 
   const router = useRouter();
+  const navigate = useNavigate();
 
   const [isPassWordVisible, setIsPassWordVisible] = useState(false);
   const { executeRecaptcha } = useGoogleReCaptcha();
+
+  const queryClient = useQueryClient();
 
   const verifyRecaptcha = useCallback(async () => {
     if (!executeRecaptcha) {
@@ -88,79 +87,54 @@ export default function SignInForm({
         toast.error("Failed to verify reCAPTCHA");
         return;
       }
-      const {error, data} = await signIn(
-        {
-          email: value.email,
-          password: value.password,
-          fetchOptions: {
-            headers: {
-              "x-captcha-response": token,
-            },
+      const { error, data } = await signIn({
+        email: value.email,
+        password: value.password,
+        fetchOptions: {
+          headers: {
+            "x-captcha-response": token,
           },
         },
-        {
-          onSuccess: ({ data }) => {
-            const result = data as {
-              emailNotVerified: boolean;
-              twoFactorRedirect: boolean;
-              email: string;
-            };
-            console.log(result);
-            if (result.emailNotVerified) {
-              onSwitchToVerifyEmail(result.email);
-            } else if (result.twoFactorRedirect) {
-              navigate({
-                to: "/login/two-factor",
-              });
-              toast.success(
-                "Please se your authenticator app to complete the sign in process"
-              );
-            } else {
-              navigate({
-                to: "/dashboard",
-              });
-              toast.success("Sign in successful", {
-                testId: "sign-in-success",
-              });
-            }
-          },
-          onError: (error) => {
-            const authErrorMessage = getAuthErrorMessage(error);
-            const authErrorCode = getAuthErrorCode(error);
+      });
 
-            if (authErrorCode === "EMAIL_NOT_VERIFIED") {
-              toast.error(
-                "Email not verified. Check your email for a verification link.",
-                {
-                  action: {
-                    label: "Resend email",
-                    onClick: () => {
-                      sendVerificationEmail(
-                        {
-                          email: value.email,
-                          callbackURL: `${window.location.origin}/dashboard`,
-                        },
-                        {
-                          onSuccess: () => {
-                            toast.success("Verification email sent");
-                          },
-                          onError: (emailError) => {
-                            toast.error(getAuthErrorMessage(emailError));
-                          },
-                        }
-                      );
+      if (error) {
+        if (error.code === "EMAIL_NOT_VERIFIED") {
+          toast.error(
+            "Email not verified. Check your email for a verification link.",
+            {
+              action: {
+                label: "Resend email",
+                onClick: () => {
+                  sendVerificationEmail(
+                    {
+                      email: value.email,
+                      callbackURL: `${window.location.origin}/dashboard`,
                     },
-                  },
-                }
-              );
-            } else {
-              toast.error(authErrorMessage, {
-                testId: "email-error",
-              });
+                    {
+                      onSuccess: () => {
+                        toast.success("Verification email sent");
+                      },
+                      onError: (emailError) => {
+                        toast.error(getAuthErrorMessage(emailError));
+                      },
+                    }
+                  );
+                },
+              },
             }
-          },
+          );
+        } else {
+          toast.error(error.message);
         }
-      );
+      } else if (data?.twoFactorRedirect) {
+        navigate({
+          to: "/login/two-factor",
+          replace: true,
+        });
+      } else {
+        await queryClient.resetQueries({ queryKey: ["session"] });
+        router.invalidate();
+      }
     },
     validators: {
       onSubmit: z.object({
@@ -182,7 +156,8 @@ export default function SignInForm({
         autoFill: true,
       },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
+          await queryClient.resetQueries({ queryKey: ["session"] });
           router.invalidate();
         },
         onError: (error) => {
@@ -190,7 +165,7 @@ export default function SignInForm({
         },
       }
     );
-  }, [signInPasskey, router]);
+  }, [signInPasskey, router, queryClient]);
 
   return (
     <Card className="w-full sm:max-w-md">

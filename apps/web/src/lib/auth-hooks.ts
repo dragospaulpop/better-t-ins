@@ -87,6 +87,16 @@ function useSignIn(options?: Partial<AuthQueryOptions>) {
   });
 }
 
+function useSignUp(options?: Partial<AuthQueryOptions>) {
+  const { sessionKey: queryKey } = useContext(AuthQueryContext);
+
+  return useAuthMutation({
+    queryKey,
+    mutationFn: authClient.signUp.email,
+    options,
+  });
+}
+
 function useSendVerificationEmail(options?: Partial<AuthQueryOptions>) {
   const { sessionKey: queryKey } = useContext(AuthQueryContext);
 
@@ -123,6 +133,16 @@ function useVerifyOtp(options?: Partial<AuthQueryOptions>) {
   return useAuthMutation({
     queryKey,
     mutationFn: authClient.twoFactor.verifyOtp,
+    options,
+  });
+}
+
+function useVerifyBackupCode(options?: Partial<AuthQueryOptions>) {
+  const { sessionKey: queryKey } = useContext(AuthQueryContext);
+
+  return useAuthMutation({
+    queryKey,
+    mutationFn: authClient.twoFactor.verifyBackupCode,
     options,
   });
 }
@@ -211,10 +231,12 @@ export {
   useVerify2FA,
   useSignOut,
   useSignIn,
+  useSignUp,
   useSendVerificationEmail,
   useSignInPasskey,
   useVerifyTotp,
   useSendOtp,
+  useVerifyBackupCode,
   useVerifyOtp,
   useSendMagicLink,
   useRequestPasswordReset,

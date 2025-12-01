@@ -31,7 +31,7 @@ const config = configSchema.safeParse({
 });
 
 if (!config.success) {
-  throw new Error("Invalid config");
+  throw new Error(`Invalid config: ${config.error}`);
 }
 
 const MAX_FILES = 100;

@@ -35,10 +35,11 @@ export const queryClient = new QueryClient({
   },
   queryCache: new QueryCache({
     onError: (error, query) => {
-      // Only show toast for background refetch errors
+      // Only show toast for background refetch errorssdfsdf
       // Initial load errors are handled by route error boundaries
       // We check if the query has data - if it does, this is a background refetch error
-      if (query.state.data !== undefined) {
+
+      if (query?.state?.data !== undefined) {
         if (
           (error as TRPCClientError<AppRouter>)?.data?.code ===
           UNAUTHORIZED_ERROR_CODE

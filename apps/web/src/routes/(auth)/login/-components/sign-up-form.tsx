@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import { getRouteApi, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import {
   EyeIcon,
   EyeOffIcon,
@@ -15,7 +15,12 @@ import z from "zod";
 import PasswordStrengthTooltip from "@/components/password-strength-tooltip";
 import { LoadingSwap } from "@/components/ui/loading-swap";
 import { Progress } from "@/components/ui/progress";
-import { useSession } from "@/lib/auth-hooks";
+import { getAuthErrorMessage } from "@/lib/auth-error";
+import {
+  useSendVerificationEmail,
+  useSession,
+  useSignUp,
+} from "@/lib/auth-hooks";
 import generatePassword, {
   isStrongEnough,
   passwordStrength,
@@ -85,7 +90,6 @@ const formSchema = z
     message: "Passwords do not match",
   });
 
-const routerApi = getRouteApi("/(auth)/login/");
 export default function SignUpForm({
   onSwitchToSignIn,
 }: {
@@ -95,10 +99,11 @@ export default function SignUpForm({
     from: "/",
   });
   const { isPending } = useSession();
-  const { authClient } = routerApi.useRouteContext();
   const [isPassWordVisible, setIsPassWordVisible] = useState(false);
   const [passwordStrengthValue, setPasswordStrengthValue] = useState(0);
   const { executeRecaptcha } = useGoogleReCaptcha();
+  const { mutateAsync: signUp, isPending: isSignUpPending } = useSignUp();
+  const { mutate: sendVerificationEmail } = useSendVerificationEmail();
 
   const generateRandomPassword = () => {
     const randomLength =
@@ -134,42 +139,37 @@ export default function SignUpForm({
         toast.error("Failed to verify reCAPTCHA");
         return;
       }
-      await authClient.signUp.email(
-        {
-          email: value.email,
-          password: value.password,
-          name: value.name,
-        },
-        {
+      const { error } = await signUp({
+        email: value.email,
+        password: value.password,
+        name: value.name,
+        fetchOptions: {
           headers: {
             "x-captcha-response": token,
           },
+        },
+      });
 
+      if (error) {
+        toast.error(error.message || error.statusText);
+        return;
+      }
+      sendVerificationEmail(
+        {
+          email: value.email,
+          callbackURL: `${window.location.origin}/dashboard`,
+        },
+        {
           onSuccess: () => {
-            authClient.sendVerificationEmail(
-              {
-                email: value.email,
-                callbackURL: `${window.location.origin}/dashboard`,
-              },
-              {
-                onSuccess: () => {
-                  navigate({
-                    to: "/login",
-                  });
-                  toast.success(
-                    "Sign up successful. Check your email for a verification link."
-                  );
-                },
-                onError: (emailError) => {
-                  toast.error(
-                    emailError.error.message || emailError.error.statusText
-                  );
-                },
-              }
+            navigate({
+              to: "/login",
+            });
+            toast.success(
+              "Sign up successful. Check your email for a verification link."
             );
           },
-          onError: (error) => {
-            toast.error(error.error.message || error.error.statusText);
+          onError: (emailError) => {
+            toast.error(getAuthErrorMessage(emailError));
           },
         }
       );
@@ -409,10 +409,14 @@ export default function SignUpForm({
                 <Field>
                   <Button
                     className="w-full"
-                    disabled={!state.canSubmit || state.isSubmitting}
+                    disabled={
+                      !state.canSubmit || state.isSubmitting || isSignUpPending
+                    }
                     type="submit"
                   >
-                    <LoadingSwap isLoading={state.isSubmitting}>
+                    <LoadingSwap
+                      isLoading={state.isSubmitting || isSignUpPending}
+                    >
                       Sign Up
                     </LoadingSwap>
                   </Button>

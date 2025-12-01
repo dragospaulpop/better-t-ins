@@ -16,6 +16,7 @@ import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import NotFound from "@/components/not-found";
+import RouterError from "@/components/router-error";
 import type { authClient } from "@/lib/auth-client";
 
 export interface RouterAppContext {
@@ -26,6 +27,11 @@ export interface RouterAppContext {
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
   component: RootComponent,
+  errorComponent: () => (
+    <div className="flex h-screen w-screen items-center justify-center bg-background">
+      <RouterError messages={["An error occured"]} title="An error occured" />
+    </div>
+  ),
   notFoundComponent: () => (
     <div className="flex h-full w-full items-center justify-center">
       <NotFound />

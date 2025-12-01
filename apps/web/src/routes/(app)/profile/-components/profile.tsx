@@ -1,6 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { CheckCircleIcon, XIcon } from "lucide-react";
 import { toast } from "sonner";
+import { ActionButton } from "@/components/ui/action-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -80,30 +81,40 @@ export default function Profile() {
           orientation="horizontal"
         >
           {user && (
-            <Button
-              onClick={() => {
-                deleteUser(
-                  {
-                    callbackURL: `${window.location.origin}/goodbye`,
-                  },
-                  {
-                    onSuccess: () => {
-                      toast.success(
-                        "Account deletion process started. Check your email for a verification link."
-                      );
+            <ActionButton
+              action={() =>
+                new Promise((resolve) => {
+                  deleteUser(
+                    {
+                      callbackURL: `${window.location.origin}/goodbye`,
                     },
-                    onError: (error) => {
-                      toast.error(getAuthErrorMessage(error));
-                    },
-                  }
-                );
-              }}
+                    {
+                      onSuccess: () => {
+                        resolve({
+                          error: false,
+                        });
+                        toast.success(
+                          "Account deletion process started. Check your email for a verification link."
+                        );
+                      },
+                      onError: (error) => {
+                        resolve({
+                          error: true,
+                          message: getAuthErrorMessage(error),
+                        });
+                        toast.error(getAuthErrorMessage(error));
+                      },
+                    }
+                  );
+                })
+              }
+              requireAreYouSure
               variant="destructive"
             >
               <LoadingSwap isLoading={isDeleteUserPending}>
                 Delete Account
               </LoadingSwap>
-            </Button>
+            </ActionButton>
           )}
           {user && (
             <Button
