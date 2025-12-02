@@ -14,6 +14,7 @@ import { Route as GoodbyeRouteImport } from './routes/goodbye'
 import { Route as appRouteRouteImport } from './routes/(app)/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
+import { Route as authNoMagicLinkSignupRouteImport } from './routes/(auth)/no-magic-link-signup'
 import { Route as authLoginRouteRouteImport } from './routes/(auth)/login/route'
 import { Route as authLoginIndexRouteImport } from './routes/(auth)/login/index'
 import { Route as appProfileIndexRouteImport } from './routes/(app)/profile/index'
@@ -51,6 +52,11 @@ const IndexRoute = IndexRouteImport.update({
 const authVerifyEmailRoute = authVerifyEmailRouteImport.update({
   id: '/(auth)/verify-email',
   path: '/verify-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authNoMagicLinkSignupRoute = authNoMagicLinkSignupRouteImport.update({
+  id: '/(auth)/no-magic-link-signup',
+  path: '/no-magic-link-signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const authLoginRouteRoute = authLoginRouteRouteImport.update({
@@ -135,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/goodbye': typeof GoodbyeRoute
   '/todos': typeof TodosRoute
   '/login': typeof authLoginRouteRouteWithChildren
+  '/no-magic-link-signup': typeof authNoMagicLinkSignupRoute
   '/verify-email': typeof authVerifyEmailRoute
   '/files/{-$parentId}': typeof appFilesChar123ParentIdChar125Route
   '/profile/change-password': typeof appProfileChangePasswordRoute
@@ -154,6 +161,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/goodbye': typeof GoodbyeRoute
   '/todos': typeof TodosRoute
+  '/no-magic-link-signup': typeof authNoMagicLinkSignupRoute
   '/verify-email': typeof authVerifyEmailRoute
   '/files/{-$parentId}': typeof appFilesChar123ParentIdChar125Route
   '/profile/change-password': typeof appProfileChangePasswordRoute
@@ -176,6 +184,7 @@ export interface FileRoutesById {
   '/goodbye': typeof GoodbyeRoute
   '/todos': typeof TodosRoute
   '/(auth)/login': typeof authLoginRouteRouteWithChildren
+  '/(auth)/no-magic-link-signup': typeof authNoMagicLinkSignupRoute
   '/(auth)/verify-email': typeof authVerifyEmailRoute
   '/(app)/files/{-$parentId}': typeof appFilesChar123ParentIdChar125Route
   '/(app)/profile/change-password': typeof appProfileChangePasswordRoute
@@ -198,6 +207,7 @@ export interface FileRouteTypes {
     | '/goodbye'
     | '/todos'
     | '/login'
+    | '/no-magic-link-signup'
     | '/verify-email'
     | '/files/{-$parentId}'
     | '/profile/change-password'
@@ -217,6 +227,7 @@ export interface FileRouteTypes {
     | '/'
     | '/goodbye'
     | '/todos'
+    | '/no-magic-link-signup'
     | '/verify-email'
     | '/files/{-$parentId}'
     | '/profile/change-password'
@@ -238,6 +249,7 @@ export interface FileRouteTypes {
     | '/goodbye'
     | '/todos'
     | '/(auth)/login'
+    | '/(auth)/no-magic-link-signup'
     | '/(auth)/verify-email'
     | '/(app)/files/{-$parentId}'
     | '/(app)/profile/change-password'
@@ -260,6 +272,7 @@ export interface RootRouteChildren {
   GoodbyeRoute: typeof GoodbyeRoute
   TodosRoute: typeof TodosRoute
   authLoginRouteRoute: typeof authLoginRouteRouteWithChildren
+  authNoMagicLinkSignupRoute: typeof authNoMagicLinkSignupRoute
   authVerifyEmailRoute: typeof authVerifyEmailRoute
 }
 
@@ -298,6 +311,13 @@ declare module '@tanstack/react-router' {
       path: '/verify-email'
       fullPath: '/verify-email'
       preLoaderRoute: typeof authVerifyEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/no-magic-link-signup': {
+      id: '/(auth)/no-magic-link-signup'
+      path: '/no-magic-link-signup'
+      fullPath: '/no-magic-link-signup'
+      preLoaderRoute: typeof authNoMagicLinkSignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(auth)/login': {
@@ -455,6 +475,7 @@ const rootRouteChildren: RootRouteChildren = {
   GoodbyeRoute: GoodbyeRoute,
   TodosRoute: TodosRoute,
   authLoginRouteRoute: authLoginRouteRouteWithChildren,
+  authNoMagicLinkSignupRoute: authNoMagicLinkSignupRoute,
   authVerifyEmailRoute: authVerifyEmailRoute,
 }
 export const routeTree = rootRouteImport

@@ -57,9 +57,7 @@ export const file = mysqlTable("file", {
   name: varchar("name", { length: 255 }).notNull(),
   type: varchar("type", { length: 255 }).notNull(),
   folder_id: int("folder_id").references(() => folder.id),
-  owner_id: varchar("owner_id", { length: 36 }).references(() => user.id, {
-    onDelete: "cascade",
-  }),
+  owner_id: varchar("owner_id", { length: 36 }).references(() => user.id),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
 });

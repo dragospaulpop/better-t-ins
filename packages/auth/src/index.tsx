@@ -1,7 +1,8 @@
 import { passkey } from "@better-auth/passkey";
-import { db } from "@better-t-ins/db";
+import { db, eq } from "@better-t-ins/db";
 // biome-ignore lint/performance/noNamespaceImport: this is a schema
 import * as schema from "@better-t-ins/db/schema/auth";
+import { file, folder } from "@better-t-ins/db/schema/upload";
 import { sendEmail } from "@better-t-ins/mail";
 import DeleteAccountEmail from "@better-t-ins/mail/emails/delete-account-email";
 import MagicLinkEmail from "@better-t-ins/mail/emails/magic-link-email";
@@ -89,6 +90,7 @@ export const auth = betterAuth<BetterAuthOptions>({
           text,
         });
       },
+      disableSignUp: true,
     }),
     haveIBeenPwned({
       customPasswordCompromisedMessage:
@@ -155,6 +157,18 @@ export const auth = betterAuth<BetterAuthOptions>({
           subject: "Confirm account deletion",
           html,
           text,
+        });
+      },
+      beforeDelete: async (user) => {
+        await db.transaction(async (tx) => {
+          await tx
+            .update(folder)
+            .set({ owner_id: null })
+            .where(eq(folder.owner_id, user.id));
+          await tx
+            .update(file)
+            .set({ owner_id: null })
+            .where(eq(file.owner_id, user.id));
         });
       },
     },

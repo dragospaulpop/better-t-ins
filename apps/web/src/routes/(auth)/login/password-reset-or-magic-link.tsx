@@ -106,6 +106,7 @@ function RouteComponent() {
           {
             email: value.email,
             callbackURL: `${window.location.origin}/dashboard`,
+            errorCallbackURL: `${window.location.origin}/no-magic-link-signup`,
           },
           {
             onSuccess: () => {
