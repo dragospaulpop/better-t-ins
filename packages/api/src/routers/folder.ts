@@ -2,8 +2,8 @@ import { and, db, eq, isNull } from "@better-t-ins/db";
 import { folder } from "@better-t-ins/db/schema/upload";
 import { z } from "zod";
 import { protectedProcedure, router } from "../index";
-import { getAncestors } from "../lib/get-ancestors";
-import { insertFolder } from "../lib/insert-folder";
+import { getAncestors } from "../lib/folders/get-ancestors";
+import { insertFolder } from "../lib/folders/insert-folder";
 
 const MAX_FOLDER_NAME_LENGTH = 100;
 // const SLEEP_MS = 2000;

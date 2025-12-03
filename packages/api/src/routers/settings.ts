@@ -1,4 +1,5 @@
 import { db } from "@better-t-ins/db";
+import { user } from "@better-t-ins/db/schema/auth";
 import { allowedHost } from "@better-t-ins/db/schema/settings";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
@@ -9,7 +10,17 @@ import { updateHost } from "../lib/settings/update-host";
 
 export const settingsRouter = router({
   getAllowedDomains: adminProcedure.query(async () => {
-    const allowedHosts = await db.select().from(allowedHost);
+    const allowedHosts = await db
+      .select({
+        host: allowedHost.host,
+        description: allowedHost.description,
+        enabled: allowedHost.enabled,
+        addedBy: user.name,
+        createdAt: allowedHost.createdAt,
+        updatedAt: allowedHost.updatedAt,
+      })
+      .from(allowedHost)
+      .leftJoin(user, eq(allowedHost.addedBy, user.id));
 
     return {
       allowedHosts,

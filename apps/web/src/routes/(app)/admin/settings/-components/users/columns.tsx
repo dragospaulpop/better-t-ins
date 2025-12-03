@@ -11,6 +11,7 @@ import {
   UserIcon,
   XCircleIcon,
 } from "lucide-react";
+import { toast } from "sonner";
 import { DataTableColumnHeader } from "@/components/data-table-column-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -105,7 +106,7 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const value = row.getValue("emailVerified");
       return (
-        <div className="text-center font-medium">
+        <div className="flex justify-center font-medium">
           {value ? (
             <CheckCircleIcon className="size-4 text-green-500" />
           ) : (
@@ -122,7 +123,7 @@ export const columns: ColumnDef<User>[] = [
       const value = row.getValue("image");
       const name = row.getValue("name") as string;
       return (
-        <div className="text-center font-medium">
+        <div className="flex justify-center font-medium">
           <Avatar>
             <AvatarImage src={value as string} />
             <AvatarFallback>{name?.charAt(0) ?? "?"}</AvatarFallback>
@@ -174,13 +175,13 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "twoFactorEnabled",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="2FA Enabled" />
+      <DataTableColumnHeader column={column} title="2FA" />
     ),
     cell: ({ row }) => {
       const value = row.getValue("twoFactorEnabled");
 
       return (
-        <div className="text-center font-medium">
+        <div className="flex justify-center font-medium">
           {value ? (
             <CheckCircleIcon className="size-4 text-green-500" />
           ) : (
@@ -198,7 +199,7 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const value = row.getValue("role");
       return (
-        <div className="text-center font-medium">
+        <div className="flex justify-center font-medium">
           {value === "admin" ? (
             <ShieldCheckIcon className="size-4 text-tud-blue" />
           ) : (
@@ -211,13 +212,13 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "banned",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Banned" />
+      <DataTableColumnHeader column={column} title="Active" />
     ),
     cell: ({ row }) => {
       const value = row.getValue("banned") as boolean;
 
       return (
-        <div className="text-center font-medium">
+        <div className="flex justify-center font-medium">
           {value ? (
             <OctagonMinusIcon className="size-4 text-red-500" />
           ) : (
@@ -295,7 +296,10 @@ export const columns: ColumnDef<User>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(userData.id)}
+              onClick={() => {
+                navigator.clipboard.writeText(userData.id);
+                toast.success("User ID copied to clipboard");
+              }}
             >
               Copy user ID
             </DropdownMenuItem>

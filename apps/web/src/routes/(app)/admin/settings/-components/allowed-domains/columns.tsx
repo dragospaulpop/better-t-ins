@@ -46,6 +46,11 @@ import {
 } from "@/components/ui/field";
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
 import { LoadingSwap } from "@/components/ui/loading-swap";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { queryClient, trpc } from "@/lib/trpc";
 
 export const columns: ColumnDef<AllowedHost>[] = [
@@ -101,7 +106,7 @@ export const columns: ColumnDef<AllowedHost>[] = [
     cell: ({ row }) => {
       const value = row.getValue("enabled");
       return (
-        <div className="text-center font-medium">
+        <div className="flex justify-center font-medium">
           {value ? (
             <CheckCircleIcon className="size-4 text-green-500" />
           ) : (
@@ -120,15 +125,20 @@ export const columns: ColumnDef<AllowedHost>[] = [
       const value = row.getValue("addedBy") as string | null;
 
       if (!value) {
-        return <div className="text-center font-medium">N/A</div>;
+        return <div className="text-center font-medium">n/a</div>;
       }
 
       return (
-        <div className="text-center font-medium">
-          <Avatar>
-            <AvatarImage src={value as string} />
-            <AvatarFallback>{value?.charAt(0) ?? "?"}</AvatarFallback>
-          </Avatar>
+        <div className="flex justify-center font-medium">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Avatar>
+                <AvatarImage src={value} />
+                <AvatarFallback>{value?.charAt(0) ?? "?"}</AvatarFallback>
+              </Avatar>
+            </TooltipTrigger>
+            <TooltipContent>{value}</TooltipContent>
+          </Tooltip>
         </div>
       );
     },
