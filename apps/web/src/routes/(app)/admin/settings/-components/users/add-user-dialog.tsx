@@ -392,7 +392,7 @@ export default function AddUserDialog() {
                         <LockIcon />
                       </InputGroupAddon>
                       <InputGroupAddon align="inline-end">
-                        <Tooltip open={true}>
+                        <Tooltip>
                           <TooltipTrigger asChild>
                             <InputGroupButton
                               className="rounded-full"

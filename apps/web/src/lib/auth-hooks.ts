@@ -232,6 +232,38 @@ function useRemoveUser(options?: Partial<AuthQueryOptions>) {
   });
 }
 
+function useSetUserRole(options?: Partial<AuthQueryOptions>) {
+  return useAuthMutation({
+    queryKey: ["list-users"], // Will auto-invalidate list on success
+    mutationFn: authClient.admin.setRole,
+    options,
+  });
+}
+
+function useSetUserPassword(options?: Partial<AuthQueryOptions>) {
+  return useAuthMutation({
+    queryKey: ["list-users"], // Will auto-invalidate list on success
+    mutationFn: authClient.admin.setUserPassword,
+    options,
+  });
+}
+
+function useBanUser(options?: Partial<AuthQueryOptions>) {
+  return useAuthMutation({
+    queryKey: ["list-users"], // Will auto-invalidate list on success
+    mutationFn: authClient.admin.banUser,
+    options,
+  });
+}
+
+function useUnbanUser(options?: Partial<AuthQueryOptions>) {
+  return useAuthMutation({
+    queryKey: ["list-users"], // Will auto-invalidate list on success
+    mutationFn: authClient.admin.unbanUser,
+    options,
+  });
+}
+
 export {
   useSession,
   usePrefetchSession,
@@ -271,4 +303,8 @@ export {
   useListUsers,
   useCreateUser,
   useRemoveUser,
+  useSetUserRole,
+  useSetUserPassword,
+  useBanUser,
+  useUnbanUser,
 };
