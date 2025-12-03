@@ -1,6 +1,7 @@
 import { protectedProcedure, publicProcedure, router } from "../index";
 import { folderRouter } from "./folder";
 import { profileRouter } from "./profile";
+import { settingsRouter } from "./settings";
 import { todoRouter } from "./todo";
 
 export const appRouter = router({
@@ -12,6 +13,7 @@ export const appRouter = router({
   todo: todoRouter,
   folder: folderRouter,
   profile: profileRouter,
+  settings: settingsRouter,
 });
 
 export type AppRouter = typeof appRouter;

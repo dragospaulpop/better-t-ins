@@ -1,9 +1,14 @@
-import { useQueryErrorResetBoundary } from "@tanstack/react-query";
+import type { AllowedHost } from "@better-t-ins/db/schema/settings";
+import {
+  useQueryErrorResetBoundary,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { GlobeIcon, Loader, UsersIcon } from "lucide-react";
 import { useEffect } from "react";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -12,9 +17,15 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Whoops from "@/components/whoops";
 import { ensureListUsersData } from "@/lib/auth-utils";
+import AddDomainDialog from "./-components/allowed-domains/add-domain-dialog";
 import AllowedDomainsTable from "./-components/allowed-domains-table";
 import type { User } from "./-components/users/columns";
 import UsersTable from "./-components/users-table";
+
+type SerializedAllowedHost = Omit<AllowedHost, "createdAt" | "updatedAt"> & {
+  createdAt: string;
+  updatedAt: string;
+};
 
 export const Route = createFileRoute("/(app)/admin/settings/")({
   pendingComponent: () => <Loader />,
@@ -34,14 +45,34 @@ export const Route = createFileRoute("/(app)/admin/settings/")({
     return <Whoops error={error} retry={retry} />;
   },
   loader: async ({ context }) => {
-    const { users } = await ensureListUsersData(context);
-    return { users: users as User[] };
+    const [{ users }, { allowedHosts }] = await Promise.all([
+      ensureListUsersData(context),
+      context.queryClient.ensureQueryData(
+        context.trpc.settings.getAllowedDomains.queryOptions()
+      ),
+    ]);
+    return {
+      users: users as User[],
+      serializedAllowedHosts: allowedHosts as SerializedAllowedHost[],
+    };
   },
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { trpc } = Route.useRouteContext();
   const { users } = Route.useLoaderData();
+  const { data: serializedAllowedHosts } = useSuspenseQuery(
+    trpc.settings.getAllowedDomains.queryOptions()
+  );
+
+  const allowedHosts = serializedAllowedHosts.allowedHosts.map(
+    (allowedHost) => ({
+      ...allowedHost,
+      createdAt: new Date(allowedHost.createdAt),
+      updatedAt: new Date(allowedHost.updatedAt),
+    })
+  );
 
   return (
     <div className="mt-4 grid w-full place-items-center overflow-hidden p-2">
@@ -70,8 +101,20 @@ function RouteComponent() {
           </Card>
         </TabsContent>
         <TabsContent className="w-full" value="allowed-domains">
-          <Card>
-            <AllowedDomainsTable />
+          <Card className="w-full min-w-0 overflow-hidden">
+            <CardHeader>
+              <CardAction>
+                <AddDomainDialog />
+              </CardAction>
+              <CardTitle>Hosts</CardTitle>
+              <CardDescription>
+                Manage allowed hosts and their permissions. This are the domains
+                that are allowed to sign up for an account.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="w-full min-w-0 overflow-hidden">
+              <AllowedDomainsTable data={allowedHosts} />
+            </CardContent>
           </Card>
         </TabsContent>
       </Tabs>

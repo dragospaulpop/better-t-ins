@@ -7,7 +7,7 @@ import {
 } from "drizzle-orm/mysql-core";
 import { user } from "./auth";
 
-export const allowedHosts = mysqlTable("allowed_hosts", {
+export const allowedHost = mysqlTable("allowed_host", {
   host: varchar("host", { length: 255 }).notNull().primaryKey(),
   description: text("description").notNull(),
   enabled: boolean("enabled").notNull().default(true),
@@ -19,5 +19,5 @@ export const allowedHosts = mysqlTable("allowed_hosts", {
     .notNull(),
 });
 
-export type AllowedHosts = typeof allowedHosts.$inferSelect;
-export type NewAllowedHosts = typeof allowedHosts.$inferInsert;
+export type AllowedHost = typeof allowedHost.$inferSelect;
+export type NewAllowedHost = typeof allowedHost.$inferInsert;

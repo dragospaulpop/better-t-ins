@@ -1,4 +1,5 @@
 import { initTRPC, TRPCError } from "@trpc/server";
+import type { UserWithRole } from "better-auth/plugins";
 import type { Context } from "./context";
 
 export const t = initTRPC.context<Context>().create();
@@ -19,6 +20,24 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
     ctx: {
       ...ctx,
       session: ctx.session,
+    },
+  });
+});
+
+export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
+  const user = ctx.session.user as UserWithRole;
+
+  if (user.role !== "admin") {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Admin access required",
+    });
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      user, // Now properly typed with role
     },
   });
 });

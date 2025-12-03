@@ -1,6 +1,6 @@
 import { revalidateLogic, useForm } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
-import { getRouteApi, useParams } from "@tanstack/react-router";
+import { getRouteApi } from "@tanstack/react-router";
 import { TRPCClientError } from "@trpc/client";
 import { FolderPlusIcon } from "lucide-react";
 import { useState } from "react";
@@ -25,29 +25,30 @@ import {
 } from "@/components/ui/field";
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
 import { LoadingSwap } from "@/components/ui/loading-swap";
-
-const MAX_FOLDER_NAME_LENGTH = 100;
+import { Switch } from "@/components/ui/switch";
 
 const schema = z.object({
-  name: z.string().min(1).max(MAX_FOLDER_NAME_LENGTH),
+  host: z.string().min(1).regex(z.regexes.domain, "Invalid host name"),
+  description: z.string().min(1),
+  enabled: z.boolean(),
 });
 
-const routeApi = getRouteApi("/(app)/files/{-$parentId}");
+const routeApi = getRouteApi("/(app)/admin/settings/");
 
-export default function CreateFolderDialog() {
+export default function AddDomainDialog() {
   const [open, setOpen] = useState(false);
-  const { parentId } = useParams({ strict: false });
   const { trpc, queryClient } = routeApi.useRouteContext();
-  // const router = useRouter();
 
-  const createMutation = useMutation(trpc.folder.create.mutationOptions());
+  const createMutation = useMutation(trpc.settings.create.mutationOptions());
   const validateMutation = useMutation(
-    trpc.folder.validateFolderName.mutationOptions()
+    trpc.settings.validateHostName.mutationOptions()
   );
 
   const form = useForm({
     defaultValues: {
-      name: "New folder",
+      host: "",
+      description: "",
+      enabled: true,
     },
     validationLogic: revalidateLogic(),
     validators: {
@@ -56,23 +57,19 @@ export default function CreateFolderDialog() {
         try {
           await createMutation.mutateAsync({
             ...value,
-            parent_id: parentId,
           });
-          toast.success("Folder created successfully");
+          toast.success("Host created successfully");
           await queryClient.invalidateQueries({
-            queryKey: trpc.folder.getAllByParentId.queryKey({
-              parent_id: parentId,
-            }),
+            queryKey: trpc.settings.getAllowedDomains.queryKey(),
           });
-          // await router.invalidate();
           form.reset();
           setOpen(false);
           return null;
         } catch (e) {
-          const error = handleCreateFolderError(e);
+          const error = handleCreateHostError(e);
           return {
             fields: {
-              name: { message: error },
+              host: { message: error },
             },
           };
         }
@@ -93,14 +90,14 @@ export default function CreateFolderDialog() {
       <DialogTrigger asChild>
         <Button size="sm" variant="outline">
           <FolderPlusIcon className="h-4 w-4" />
-          Create folder
+          Add host
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create folder</DialogTitle>
+          <DialogTitle>Add host</DialogTitle>
           <DialogDescription>
-            Create a new folder to store your files
+            Add a new host to the allowed domains list
           </DialogDescription>
         </DialogHeader>
         <form
@@ -112,26 +109,25 @@ export default function CreateFolderDialog() {
         >
           <FieldGroup className="">
             <form.Field
-              name="name"
+              name="host"
               validators={{
                 onDynamicAsyncDebounceMs: 500,
                 onDynamicAsync: async ({ value }) => {
                   if (!value) {
-                    return { message: "Name can't be empty" };
+                    return { message: "Host can't be empty" };
                   }
 
                   try {
-                    const folderExists = await validateMutation.mutateAsync({
-                      name: value,
-                      parent_id: parentId,
+                    const hostExists = await validateMutation.mutateAsync({
+                      host: value,
                     });
 
-                    return folderExists
-                      ? { message: "Folder name already exists" }
+                    return hostExists
+                      ? { message: "Host already exists" }
                       : undefined;
                   } catch (e) {
                     return {
-                      message: handleCreateFolderError(e),
+                      message: handleCreateHostError(e),
                     };
                   }
                 },
@@ -143,7 +139,7 @@ export default function CreateFolderDialog() {
 
                 return (
                   <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>Host</FieldLabel>
                     <InputGroup>
                       <InputGroupInput
                         aria-invalid={isInvalid}
@@ -152,11 +148,64 @@ export default function CreateFolderDialog() {
                         name={field.name}
                         onBlur={field.handleBlur}
                         onChange={(e) => field.handleChange(e.target.value)}
-                        placeholder="Folder name"
+                        placeholder="Host name"
                         type="text"
                         value={field.state.value}
                       />
                     </InputGroup>
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                );
+              }}
+            </form.Field>
+
+            <form.Field name="description">
+              {(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Description</FieldLabel>
+                    <InputGroup>
+                      <InputGroupInput
+                        aria-invalid={isInvalid}
+                        autoFocus
+                        id={field.name}
+                        name={field.name}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        placeholder="Description"
+                        type="text"
+                        value={field.state.value}
+                      />
+                    </InputGroup>
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                );
+              }}
+            </form.Field>
+
+            <form.Field name="enabled">
+              {(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+
+                return (
+                  <Field data-invalid={isInvalid} orientation="horizontal">
+                    <Switch
+                      checked={field.state.value}
+                      id={field.name}
+                      name={field.name}
+                      onCheckedChange={(value) =>
+                        field.handleChange(value as boolean)
+                      }
+                    />
+                    <FieldLabel htmlFor={field.name}>Enabled</FieldLabel>
                     {isInvalid && (
                       <FieldError errors={field.state.meta.errors} />
                     )}
@@ -179,7 +228,7 @@ export default function CreateFolderDialog() {
                     <LoadingSwap
                       isLoading={state.isSubmitting || state.isFieldsValidating}
                     >
-                      Create
+                      Add host
                     </LoadingSwap>
                   </Button>
                 </DialogFooter>
@@ -192,10 +241,10 @@ export default function CreateFolderDialog() {
   );
 }
 
-function handleCreateFolderError(e: unknown): string {
+function handleCreateHostError(e: unknown): string {
   if (e instanceof TRPCClientError) {
     if (e.data?.code === "UNAUTHORIZED") {
-      return "You are not authorized to create a folder";
+      return "You are not authorized to create a host";
     }
     if (e.data?.code === "BAD_REQUEST") {
       try {
@@ -207,17 +256,17 @@ function handleCreateFolderError(e: unknown): string {
 
         return (
           error?.[0]?.message ??
-          "Failed to create folder (no server error message)"
+          "Failed to create host (no server error message)"
         );
       } catch (_) {
-        return "Failed to create folder (unknown error)";
+        return "Failed to create host (unknown error)";
       }
     }
 
     if (e.data?.code === "INTERNAL_SERVER_ERROR") {
       return e.message;
     }
-    return `Failed to create folder (${e.data?.code} ${e.data?.message})`;
+    return `Failed to create host (${e.data?.code} ${e.data?.message})`;
   }
-  return `Failed to create folder (unknown error: ${(e as Error)?.message})`;
+  return `Failed to create host (unknown error: ${(e as Error)?.message})`;
 }

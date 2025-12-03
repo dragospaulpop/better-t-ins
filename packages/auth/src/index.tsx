@@ -4,7 +4,7 @@ import { passkey } from "@better-auth/passkey";
 import { and, db, eq } from "@better-t-ins/db";
 // biome-ignore lint/performance/noNamespaceImport: this is a schema
 import * as schema from "@better-t-ins/db/schema/auth";
-import { allowedHosts } from "@better-t-ins/db/schema/settings";
+import { allowedHost } from "@better-t-ins/db/schema/settings";
 import { file, folder } from "@better-t-ins/db/schema/upload";
 import { sendEmail } from "@better-t-ins/mail";
 import DeleteAccountEmail from "@better-t-ins/mail/emails/delete-account-email";
@@ -203,18 +203,18 @@ export const auth = betterAuth<BetterAuthOptions>({
         return;
       }
 
-      const [allowedHost] = await db
+      const [allowedHostRecord] = await db
         .select()
-        .from(allowedHosts)
+        .from(allowedHost)
         .where(
           and(
-            eq(allowedHosts.host, ctx.body?.email.split("@")[1]),
-            eq(allowedHosts.enabled, true)
+            eq(allowedHost.host, ctx.body?.email.split("@")[1]),
+            eq(allowedHost.enabled, true)
           )
         )
         .limit(1);
 
-      if (!allowedHost) {
+      if (!allowedHostRecord) {
         throw new APIError("BAD_REQUEST", {
           message: "Email must end with an allowed host",
         });
@@ -243,8 +243,29 @@ export const auth = betterAuth<BetterAuthOptions>({
 });
 
 // Infer the API type with plugins included
-export type AuthAPIWithPlugins = ReturnType<
+// export type AuthAPIWithPlugins = ReturnType<
+//   typeof betterAuth<
+//     BetterAuthOptions & {
+//       plugins: [ReturnType<typeof twoFactor>, ReturnType<typeof admin>];
+//     }
+//   >
+// >["api"];
+
+// Create separate API types for each plugin that adds methods you need
+type TwoFactorAPI = ReturnType<
   typeof betterAuth<
     BetterAuthOptions & { plugins: [ReturnType<typeof twoFactor>] }
   >
 >["api"];
+
+// Use the actual return type of admin() called with no args
+type AdminAPI = ReturnType<
+  typeof betterAuth<
+    BetterAuthOptions & {
+      plugins: [ReturnType<typeof admin<Record<string, never>>>];
+    }
+  >
+>["api"];
+
+// Intersect them to get all methods
+export type AuthAPIWithPlugins = TwoFactorAPI & AdminAPI;
