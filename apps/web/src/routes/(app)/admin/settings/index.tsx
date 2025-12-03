@@ -2,7 +2,13 @@ import { useQueryErrorResetBoundary } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { GlobeIcon, Loader, UsersIcon } from "lucide-react";
 import { useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Whoops from "@/components/whoops";
 import { ensureListUsersData } from "@/lib/auth-utils";
@@ -38,8 +44,8 @@ function RouteComponent() {
   const { users } = Route.useLoaderData();
 
   return (
-    <div className="mt-4 grid w-full place-items-center p-2">
-      <Tabs className="w-full" defaultValue="profile">
+    <div className="mt-4 grid w-full place-items-center overflow-hidden p-2">
+      <Tabs className="w-full min-w-0" defaultValue="profile">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="profile">
             <UsersIcon className="size-4" />
@@ -50,12 +56,15 @@ function RouteComponent() {
             <span className="hidden sm:block">Allowed domains</span>
           </TabsTrigger>
         </TabsList>
-        <TabsContent className="w-full" value="profile">
-          <Card className="w-full">
+        <TabsContent className="w-full min-w-0" value="profile">
+          <Card className="w-full min-w-0 overflow-hidden">
             <CardHeader>
               <CardTitle>Users</CardTitle>
+              <CardDescription>
+                Manage users and their permissions.
+              </CardDescription>
             </CardHeader>
-            <CardContent className="w-full">
+            <CardContent className="w-full min-w-0 overflow-hidden">
               <UsersTable data={users} />
             </CardContent>
           </Card>

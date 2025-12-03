@@ -57,7 +57,7 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="w-full max-w-full overflow-hidden">
+    <div className="w-full min-w-0 overflow-hidden">
       <div className="flex w-full items-center py-4">
         <Input
           className="max-w-sm"
@@ -67,7 +67,7 @@ export function DataTable<TData, TValue>({
         />
         <DataTableViewOptions table={table} />
       </div>
-      <div className="w-full overflow-x-auto rounded-md border">
+      <div className="min-w-0 overflow-x-auto rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -115,11 +115,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-muted-foreground text-sm">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
+      <div className="flex items-center justify-center space-x-2 py-4">
         <DataTablePagination table={table} />
       </div>
     </div>
