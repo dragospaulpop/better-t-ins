@@ -11,6 +11,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useSession } from "@/lib/auth-hooks";
 import AppTitle from "./app-title";
 
 const mainItems = [
@@ -19,14 +20,23 @@ const mainItems = [
 ];
 
 const adminItems = [
-  { title: "Teams", url: "/teams", icon: Users },
-  { title: "Permissions", url: "/permissions", icon: Shield },
+  { title: "Teams", url: "/admin/teams", icon: Users },
+  { title: "Permissions", url: "/admin/permissions", icon: Shield },
+  { title: "Activity", url: "/admin/activity", icon: Clock },
+  { title: "Settings", url: "/admin/settings", icon: Settings },
+];
+
+const userItems = [
   { title: "Activity", url: "/activity", icon: Clock },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
 export function AppSidebar() {
   const { open } = useSidebar();
+  const { user } = useSession();
+
+  const isAdmin = user?.role === "admin";
+  const items = isAdmin ? adminItems : userItems;
 
   return (
     <Sidebar collapsible="icon">
@@ -61,7 +71,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Administration</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {adminItems.map((item) => (
+              {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <Link

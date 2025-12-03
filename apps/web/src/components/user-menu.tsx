@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
-import { UserIcon } from "lucide-react";
+import { ShieldCheckIcon, UserIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,7 +36,8 @@ export default function UserMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline">
-          <UserIcon className="size-4" />
+          {user.role === "admin" && <ShieldCheckIcon className="size-4" />}
+          {user.role === "user" && <UserIcon className="size-4" />}
           {user.name}
         </Button>
       </DropdownMenuTrigger>

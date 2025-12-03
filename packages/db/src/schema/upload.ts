@@ -2,8 +2,6 @@ import {
   foreignKey,
   int,
   mysqlTable,
-  // biome-ignore lint/nursery/noDeprecatedImports: Using the non-deprecated overload
-  primaryKey as primaryKeyOut,
   timestamp,
   unique,
   varchar,
@@ -17,8 +15,11 @@ export const folder = mysqlTable(
     name: varchar("name", { length: 255 }).notNull(),
     parent_id: int("parent_id"),
     owner_id: varchar("owner_id", { length: 36 }).references(() => user.id),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+    createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { fsp: 3 })
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
   },
   (table) => [
     foreignKey({
@@ -36,6 +37,7 @@ export type Folder = typeof folder.$inferSelect;
 export const folderClosure = mysqlTable(
   "folder_closure",
   {
+    id: int("id").autoincrement().primaryKey(),
     ancestor: int("ancestor")
       .notNull()
       .references(() => folder.id),
@@ -45,10 +47,7 @@ export const folderClosure = mysqlTable(
     depth: int("depth").notNull(),
   },
   (table) => [
-    primaryKeyOut({
-      name: "folder_closure_pk",
-      columns: [table.ancestor, table.descendant],
-    }),
+    unique("folder_closure_unique").on(table.ancestor, table.descendant),
   ]
 );
 
@@ -58,15 +57,21 @@ export const file = mysqlTable("file", {
   type: varchar("type", { length: 255 }).notNull(),
   folder_id: int("folder_id").references(() => folder.id),
   owner_id: varchar("owner_id", { length: 36 }).references(() => user.id),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+  createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { fsp: 3 })
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
 });
 
 export const history = mysqlTable("history", {
   id: int("id").autoincrement().primaryKey(),
   file_id: int("file_id").references(() => file.id),
   size: int("size").notNull(),
-  created_at: timestamp("created_at").notNull().defaultNow(),
-  updated_at: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
   author_id: varchar("author_id", { length: 36 }).references(() => user.id),
+  createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { fsp: 3 })
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
 });

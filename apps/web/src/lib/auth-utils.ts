@@ -14,3 +14,15 @@ export async function ensureSessionData({
   });
   return sessionData;
 }
+
+export async function ensureListUsersData({
+  queryClient,
+  authClient,
+}: Pick<RouterAppContext, "queryClient" | "authClient">) {
+  const usersData = await queryClient.ensureQueryData({
+    queryKey: ["list-users"],
+    queryFn: () =>
+      authClient.admin.listUsers({ query: {}, fetchOptions: { throw: true } }),
+  });
+  return usersData;
+}

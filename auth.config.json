@@ -1,0 +1,316 @@
+{
+  "system": {
+    "platform": "linux",
+    "arch": "x64",
+    "version": "#1 SMP PREEMPT_DYNAMIC Thu Jun  5 18:30:46 UTC 2025",
+    "release": "6.6.87.2-microsoft-standard-WSL2",
+    "cpuCount": 20,
+    "cpuModel": "12th Gen Intel(R) Core(TM) i7-12700H",
+    "totalMemory": "15.46 GB",
+    "freeMemory": "11.06 GB"
+  },
+  "node": {
+    "version": "v22.20.0",
+    "env": "development"
+  },
+  "packageManager": {
+    "name": "bun",
+    "version": "1.3.1"
+  },
+  "frameworks": null,
+  "databases": [
+    {
+      "name": "mysql2",
+      "version": "^3.14.0"
+    },
+    {
+      "name": "drizzle",
+      "version": "catalog:"
+    }
+  ],
+  "betterAuth": {
+    "version": "catalog:",
+    "config": {
+      "rateLimit": {
+        "enabled": true,
+        "max": 10,
+        "window": 60,
+        "customRules": {
+          "/get-session": false,
+          "/sign-in/email": {
+            "window": 10,
+            "max": 3
+          }
+        }
+      },
+      "appName": "VerdeINS",
+      "plugins": [
+        {
+          "name": "two-factor",
+          "config": {
+            "id": "two-factor",
+            "endpoints": {},
+            "options": {
+              "otpOptions": {}
+            },
+            "hooks": {
+              "after": [
+                {}
+              ]
+            },
+            "schema": {
+              "user": {
+                "fields": {
+                  "twoFactorEnabled": {
+                    "type": "boolean",
+                    "required": false,
+                    "defaultValue": false,
+                    "input": false
+                  }
+                }
+              },
+              "twoFactor": {
+                "fields": {
+                  "secret": {
+                    "type": "string",
+                    "required": true,
+                    "returned": false,
+                    "index": true
+                  },
+                  "backupCodes": {
+                    "type": "string",
+                    "required": true,
+                    "returned": false
+                  },
+                  "userId": {
+                    "type": "string",
+                    "required": true,
+                    "returned": false,
+                    "references": {
+                      "model": "user",
+                      "field": "id"
+                    },
+                    "index": true
+                  }
+                }
+              }
+            },
+            "rateLimit": [
+              {
+                "window": 10,
+                "max": 3
+              }
+            ],
+            "$ERROR_CODES": {
+              "OTP_NOT_ENABLED": "OTP not enabled",
+              "OTP_HAS_EXPIRED": "OTP has expired",
+              "TOTP_NOT_ENABLED": "TOTP not enabled",
+              "TWO_FACTOR_NOT_ENABLED": "Two factor isn't enabled",
+              "BACKUP_CODES_NOT_ENABLED": "Backup codes aren't enabled",
+              "INVALID_BACKUP_CODE": "Invalid backup code",
+              "INVALID_CODE": "Invalid code",
+              "TOO_MANY_ATTEMPTS_REQUEST_NEW_CODE": "Too many attempts. Please request a new code.",
+              "INVALID_TWO_FACTOR_COOKIE": "Invalid two factor cookie"
+            }
+          }
+        },
+        {
+          "name": "magic-link",
+          "config": {
+            "id": "magic-link",
+            "endpoints": {},
+            "rateLimit": [
+              {
+                "window": 60,
+                "max": 5
+              }
+            ]
+          }
+        },
+        {
+          "name": "haveIBeenPwned",
+          "config": {
+            "id": "haveIBeenPwned",
+            "$ERROR_CODES": {
+              "PASSWORD_COMPROMISED": "The password you entered has been compromised. Please choose a different password."
+            }
+          }
+        },
+        {
+          "name": "passkey",
+          "config": {
+            "id": "passkey",
+            "endpoints": {},
+            "schema": {
+              "passkey": {
+                "fields": {
+                  "name": {
+                    "type": "string",
+                    "required": false
+                  },
+                  "publicKey": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "userId": {
+                    "type": "string",
+                    "references": {
+                      "model": "user",
+                      "field": "id"
+                    },
+                    "required": true,
+                    "index": true
+                  },
+                  "credentialID": {
+                    "type": "string",
+                    "required": true,
+                    "index": true
+                  },
+                  "counter": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "deviceType": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "backedUp": {
+                    "type": "boolean",
+                    "required": true
+                  },
+                  "transports": {
+                    "type": "string",
+                    "required": false
+                  },
+                  "createdAt": {
+                    "type": "date",
+                    "required": false
+                  },
+                  "aaguid": {
+                    "type": "string",
+                    "required": false
+                  }
+                }
+              }
+            },
+            "$ERROR_CODES": {
+              "CHALLENGE_NOT_FOUND": "Challenge not found",
+              "YOU_ARE_NOT_ALLOWED_TO_REGISTER_THIS_PASSKEY": "You are not allowed to register this passkey",
+              "FAILED_TO_VERIFY_REGISTRATION": "Failed to verify registration",
+              "PASSKEY_NOT_FOUND": "Passkey not found",
+              "AUTHENTICATION_FAILED": "Authentication failed",
+              "UNABLE_TO_CREATE_SESSION": "Unable to create session",
+              "FAILED_TO_UPDATE_PASSKEY": "Failed to update passkey"
+            }
+          }
+        },
+        {
+          "name": "captcha",
+          "config": {
+            "id": "captcha"
+          }
+        },
+        {
+          "name": "admin",
+          "config": {
+            "id": "admin",
+            "hooks": {
+              "after": [
+                {}
+              ]
+            },
+            "endpoints": {},
+            "$ERROR_CODES": {
+              "FAILED_TO_CREATE_USER": "Failed to create user",
+              "USER_ALREADY_EXISTS": "User already exists.",
+              "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL": "User already exists. Use another email.",
+              "YOU_CANNOT_BAN_YOURSELF": "You cannot ban yourself",
+              "YOU_ARE_NOT_ALLOWED_TO_CHANGE_USERS_ROLE": "You are not allowed to change users role",
+              "YOU_ARE_NOT_ALLOWED_TO_CREATE_USERS": "You are not allowed to create users",
+              "YOU_ARE_NOT_ALLOWED_TO_LIST_USERS": "You are not allowed to list users",
+              "YOU_ARE_NOT_ALLOWED_TO_LIST_USERS_SESSIONS": "You are not allowed to list users sessions",
+              "YOU_ARE_NOT_ALLOWED_TO_BAN_USERS": "You are not allowed to ban users",
+              "YOU_ARE_NOT_ALLOWED_TO_IMPERSONATE_USERS": "You are not allowed to impersonate users",
+              "YOU_ARE_NOT_ALLOWED_TO_REVOKE_USERS_SESSIONS": "You are not allowed to revoke users sessions",
+              "YOU_ARE_NOT_ALLOWED_TO_DELETE_USERS": "You are not allowed to delete users",
+              "YOU_ARE_NOT_ALLOWED_TO_SET_USERS_PASSWORD": "[REDACTED]",
+              "BANNED_USER": "You have been banned from this application",
+              "YOU_ARE_NOT_ALLOWED_TO_GET_USER": "You are not allowed to get user",
+              "NO_DATA_TO_UPDATE": "No data to update",
+              "YOU_ARE_NOT_ALLOWED_TO_UPDATE_USERS": "You are not allowed to update users",
+              "YOU_CANNOT_REMOVE_YOURSELF": "You cannot remove yourself",
+              "YOU_ARE_NOT_ALLOWED_TO_SET_NON_EXISTENT_VALUE": "You are not allowed to set a non-existent role value"
+            },
+            "schema": {
+              "user": {
+                "fields": {
+                  "role": {
+                    "type": "string",
+                    "required": false,
+                    "input": false
+                  },
+                  "banned": {
+                    "type": "boolean",
+                    "defaultValue": false,
+                    "required": false,
+                    "input": false
+                  },
+                  "banReason": {
+                    "type": "string",
+                    "required": false,
+                    "input": false
+                  },
+                  "banExpires": {
+                    "type": "date",
+                    "required": false,
+                    "input": false
+                  }
+                }
+              },
+              "session": {
+                "fields": {
+                  "impersonatedBy": {
+                    "type": "string",
+                    "required": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "trustedOrigins": [
+        "https://app.better-t-ins.test"
+      ],
+      "emailAndPassword": {
+        "enabled": true,
+        "requireEmailVerification": false,
+        "autoSignIn": true,
+        "revokeSessionsOnPasswordReset": true
+      },
+      "emailVerification": {
+        "sendOnSignUp": false,
+        "autoSignInAfterVerification": true,
+        "expiresIn": 3600
+      },
+      "user": {
+        "deleteUser": {
+          "enabled": true
+        }
+      },
+      "session": {
+        "cookieCache": {
+          "enabled": true,
+          "maxAge": 60
+        }
+      },
+      "advanced": {
+        "defaultCookieAttributes": {
+          "sameSite": "none",
+          "secure": true,
+          "httpOnly": true
+        }
+      }
+    }
+  }
+}

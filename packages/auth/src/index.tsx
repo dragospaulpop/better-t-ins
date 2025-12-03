@@ -1,9 +1,10 @@
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { passkey } from "@better-auth/passkey";
-import { db, eq } from "@better-t-ins/db";
+import { and, db, eq } from "@better-t-ins/db";
 // biome-ignore lint/performance/noNamespaceImport: this is a schema
 import * as schema from "@better-t-ins/db/schema/auth";
+import { allowedHosts } from "@better-t-ins/db/schema/settings";
 import { file, folder } from "@better-t-ins/db/schema/upload";
 import { sendEmail } from "@better-t-ins/mail";
 import DeleteAccountEmail from "@better-t-ins/mail/emails/delete-account-email";
@@ -12,11 +13,12 @@ import OTPEmail from "@better-t-ins/mail/emails/otp-email";
 import ResetPasswordEmail from "@better-t-ins/mail/emails/reset-password-email";
 import VerifyEmail from "@better-t-ins/mail/emails/verify-email";
 import render from "@better-t-ins/mail/render";
-import { type BetterAuthOptions, betterAuth } from "better-auth";
+import { APIError, type BetterAuthOptions, betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import {
   admin,
   captcha,
+  createAuthMiddleware,
   haveIBeenPwned,
   magicLink,
   twoFactor,
@@ -193,6 +195,49 @@ export const auth = betterAuth<BetterAuthOptions>({
       sameSite: "none",
       secure: true,
       httpOnly: true,
+    },
+  },
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== "/sign-up/email") {
+        return;
+      }
+
+      const [allowedHost] = await db
+        .select()
+        .from(allowedHosts)
+        .where(
+          and(
+            eq(allowedHosts.host, ctx.body?.email.split("@")[1]),
+            eq(allowedHosts.enabled, true)
+          )
+        )
+        .limit(1);
+
+      if (!allowedHost) {
+        throw new APIError("BAD_REQUEST", {
+          message: "Email must end with an allowed host",
+        });
+      }
+    }),
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          // promote user to admin if they are the first user to sign up
+          const [adminUser] = await db
+            .select()
+            .from(schema.user)
+            .where(eq(schema.user.role, "admin"));
+          if (!adminUser) {
+            await db
+              .update(schema.user)
+              .set({ role: "admin" })
+              .where(eq(schema.user.id, user.id));
+          }
+        },
+      },
     },
   },
 });

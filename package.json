@@ -47,12 +47,17 @@
     "email:dev": "turbo -F @better-t-ins/mail email:dev",
     "storage:start": "turbo -F @better-t-ins/storage storage:start",
     "storage:stop": "turbo -F @better-t-ins/storage storage:stop",
-    "storage:down": "turbo -F @better-t-ins/storage storage:down"
+    "storage:down": "turbo -F @better-t-ins/storage storage:down",
+    "auth:generate": "bun x @better-auth/cli@latest generate --config=auth-cli.ts --output=packages/db/src/schema/auth.ts"
   },
   "dependencies": {
     "@better-upload/server": "^3.0.3",
     "dotenv": "^17.2.2",
-    "zod": "^4.1.11"
+    "zod": "^4.1.11",
+    "better-auth": "catalog:",
+    "@better-auth/passkey": "catalog:",
+    "drizzle-orm": "catalog:",
+    "mysql2": "^3.14.0"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.6",

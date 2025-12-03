@@ -3,7 +3,7 @@ import {
   type AuthQueryOptions,
   createAuthHooks,
 } from "@daveyplate/better-auth-tanstack";
-
+import type { AnyUseQueryOptions } from "@tanstack/react-query";
 import { useContext } from "react";
 import { authClient } from "./auth-client";
 
@@ -207,6 +207,13 @@ function useDeleteUser(options?: Partial<AuthQueryOptions>) {
   });
 }
 
+function useListUsers(options?: Partial<AnyUseQueryOptions>) {
+  return useAuthQuery({
+    queryKey: ["list-users"],
+    queryFn: () => authClient.admin.listUsers({ query: {} }),
+    options,
+  });
+}
 export {
   useSession,
   usePrefetchSession,
@@ -243,4 +250,5 @@ export {
   useResetPassword,
   useChangePassword,
   useDeleteUser,
+  useListUsers,
 };

@@ -1,0 +1,1 @@
+admin can create predefined folder structure for users based on templates
