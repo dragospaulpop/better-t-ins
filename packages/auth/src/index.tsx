@@ -1,3 +1,5 @@
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { passkey } from "@better-auth/passkey";
 import { db, eq } from "@better-t-ins/db";
 // biome-ignore lint/performance/noNamespaceImport: this is a schema
@@ -19,8 +21,13 @@ import {
   magicLink,
   twoFactor,
 } from "better-auth/plugins";
-import "dotenv/config";
+import dotenv from "dotenv";
 import z from "zod";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+dotenv.config({
+  path: resolve(__dirname, "../../../apps/server/.env"),
+});
 
 const envSchema = z.object({
   RECAPTCHA_SECRET_KEY: z.string(),

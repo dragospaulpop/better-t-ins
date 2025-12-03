@@ -1,6 +1,13 @@
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import dotenv from "dotenv";
 import { drizzle } from "drizzle-orm/mysql2";
-
 import { z } from "zod";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+dotenv.config({
+  path: resolve(__dirname, "../../../apps/server/.env"),
+});
 
 const envSchema = z.object({
   DATABASE_URL: z.string(),
