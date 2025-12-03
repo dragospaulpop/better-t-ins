@@ -3,6 +3,7 @@ import { folderRouter } from "./folder";
 import { profileRouter } from "./profile";
 import { settingsRouter } from "./settings";
 import { todoRouter } from "./todo";
+import { usersRouter } from "./users";
 
 export const appRouter = router({
   healthCheck: publicProcedure.query(() => "OK"),
@@ -14,6 +15,7 @@ export const appRouter = router({
   folder: folderRouter,
   profile: profileRouter,
   settings: settingsRouter,
+  users: usersRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -16,9 +16,10 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Whoops from "@/components/whoops";
-import { ensureListUsersData } from "@/lib/auth-utils";
+import { useListUsers } from "@/lib/auth-hooks";
 import AddDomainDialog from "./-components/allowed-domains/add-domain-dialog";
 import AllowedDomainsTable from "./-components/allowed-domains-table";
+import AddUserDialog from "./-components/users/add-user-dialog";
 import type { User } from "./-components/users/columns";
 import UsersTable from "./-components/users-table";
 
@@ -44,11 +45,18 @@ export const Route = createFileRoute("/(app)/admin/settings/")({
 
     return <Whoops error={error} retry={retry} />;
   },
-  loader: async ({ context }) => {
+  loader: async ({ context: { queryClient, authClient, trpc } }) => {
     const [{ users }, { allowedHosts }] = await Promise.all([
-      ensureListUsersData(context),
-      context.queryClient.ensureQueryData(
-        context.trpc.settings.getAllowedDomains.queryOptions()
+      queryClient.ensureQueryData({
+        queryKey: ["list-users"],
+        queryFn: () =>
+          authClient.admin.listUsers({
+            query: {},
+            fetchOptions: { throw: true },
+          }),
+      }),
+      queryClient.ensureQueryData(
+        trpc.settings.getAllowedDomains.queryOptions()
       ),
     ]);
     return {
@@ -61,7 +69,9 @@ export const Route = createFileRoute("/(app)/admin/settings/")({
 
 function RouteComponent() {
   const { trpc } = Route.useRouteContext();
-  const { users } = Route.useLoaderData();
+  const { data: { users = [] } = {} } = useListUsers() as {
+    data: { users: User[] };
+  };
   const { data: serializedAllowedHosts } = useSuspenseQuery(
     trpc.settings.getAllowedDomains.queryOptions()
   );
@@ -90,6 +100,9 @@ function RouteComponent() {
         <TabsContent className="w-full min-w-0" value="profile">
           <Card className="w-full min-w-0 overflow-hidden">
             <CardHeader>
+              <CardAction>
+                <AddUserDialog />
+              </CardAction>
               <CardTitle>Users</CardTitle>
               <CardDescription>
                 Manage users and their permissions.

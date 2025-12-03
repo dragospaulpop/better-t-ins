@@ -226,7 +226,10 @@ function RouteComponent() {
                 Backup codes
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="bottom">
+            <TooltipContent
+              className="bg-muted text-muted-foreground"
+              side="bottom"
+            >
               Try backup codes that were generated when you enabled two-factor
               authentication
             </TooltipContent>
@@ -256,7 +259,10 @@ function RouteComponent() {
                 <LoadingSwap isLoading={isSendOtpPending}>OTP</LoadingSwap>
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="bottom">
+            <TooltipContent
+              className="bg-muted text-muted-foreground"
+              side="bottom"
+            >
               Email a one-time password (OTP) code to your email address
             </TooltipContent>
           </Tooltip>

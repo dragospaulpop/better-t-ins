@@ -211,7 +211,7 @@ function RouteComponent() {
                                 )}
                               </InputGroupButton>
                             </TooltipTrigger>
-                            <TooltipContent>
+                            <TooltipContent className="bg-muted text-muted-foreground">
                               Toggle password visibility
                             </TooltipContent>
                           </Tooltip>
@@ -271,7 +271,7 @@ function RouteComponent() {
                                 <RotateCcwKeyIcon />
                               </InputGroupButton>
                             </TooltipTrigger>
-                            <TooltipContent>
+                            <TooltipContent className="bg-muted text-muted-foreground">
                               Generate random password
                             </TooltipContent>
                           </Tooltip>
@@ -291,7 +291,7 @@ function RouteComponent() {
                                 )}
                               </InputGroupButton>
                             </TooltipTrigger>
-                            <TooltipContent>
+                            <TooltipContent className="bg-muted text-muted-foreground">
                               Toggle password visibility
                             </TooltipContent>
                           </Tooltip>
@@ -354,7 +354,7 @@ function RouteComponent() {
                                 )}
                               </InputGroupButton>
                             </TooltipTrigger>
-                            <TooltipContent>
+                            <TooltipContent className="bg-muted text-muted-foreground">
                               Toggle password visibility
                             </TooltipContent>
                           </Tooltip>

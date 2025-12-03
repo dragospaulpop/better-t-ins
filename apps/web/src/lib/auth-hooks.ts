@@ -210,10 +210,28 @@ function useDeleteUser(options?: Partial<AuthQueryOptions>) {
 function useListUsers(options?: Partial<AnyUseQueryOptions>) {
   return useAuthQuery({
     queryKey: ["list-users"],
-    queryFn: () => authClient.admin.listUsers({ query: {} }),
+    queryFn: ({ fetchOptions }) =>
+      authClient.admin.listUsers({ query: {}, fetchOptions }),
     options,
   });
 }
+
+function useCreateUser(options?: Partial<AuthQueryOptions>) {
+  return useAuthMutation({
+    queryKey: ["list-users"], // Will auto-invalidate list on success
+    mutationFn: authClient.admin.createUser,
+    options,
+  });
+}
+
+function useRemoveUser(options?: Partial<AuthQueryOptions>) {
+  return useAuthMutation({
+    queryKey: ["list-users"], // Will auto-invalidate list on success
+    mutationFn: authClient.admin.removeUser,
+    options,
+  });
+}
+
 export {
   useSession,
   usePrefetchSession,
@@ -251,4 +269,6 @@ export {
   useChangePassword,
   useDeleteUser,
   useListUsers,
+  useCreateUser,
+  useRemoveUser,
 };

@@ -259,7 +259,7 @@ export default function SignInForm({
                               {isPassWordVisible ? <EyeOffIcon /> : <EyeIcon />}
                             </InputGroupButton>
                           </TooltipTrigger>
-                          <TooltipContent>
+                          <TooltipContent className="bg-muted text-muted-foreground">
                             Toggle password visibility
                           </TooltipContent>
                         </Tooltip>

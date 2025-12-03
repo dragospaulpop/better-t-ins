@@ -14,7 +14,11 @@ import {
 } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
 import { LoadingSwap } from "@/components/ui/loading-swap";
-import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { getAuthErrorMessage } from "@/lib/auth-error";
 import { useEnable2FA, useSession } from "@/lib/auth-hooks";
 
@@ -116,6 +120,9 @@ export default function EnableTwoFactorForm() {
                             <EyeIcon />
                           </InputGroupButton>
                         </TooltipTrigger>
+                        <TooltipContent className="bg-muted text-muted-foreground">
+                          Toggle password visibility
+                        </TooltipContent>
                       </Tooltip>
                     </InputGroupAddon>
                   </InputGroup>

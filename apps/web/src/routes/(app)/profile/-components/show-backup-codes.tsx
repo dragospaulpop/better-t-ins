@@ -75,7 +75,9 @@ export default function ShowBackupCodes() {
                 <EyeIcon className="size-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>View backup codes</TooltipContent>
+            <TooltipContent className="bg-muted text-muted-foreground">
+              View backup codes
+            </TooltipContent>
           </Tooltip>
         ) : null}
         {data?.backupCodes && data?.backupCodes.length > 0 ? (

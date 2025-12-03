@@ -1,59 +1,54 @@
-import { useForm } from "@tanstack/react-form";
-import { useNavigate } from "@tanstack/react-router";
+import { revalidateLogic, useForm } from "@tanstack/react-form";
+import { useMutation } from "@tanstack/react-query";
+import { getRouteApi } from "@tanstack/react-router";
+import { TRPCClientError } from "@trpc/client";
 import {
   CopyIcon,
   EyeIcon,
   EyeOffIcon,
+  FolderPlusIcon,
   LockIcon,
-  MailIcon,
   RotateCcwKeyIcon,
-  UserIcon,
 } from "lucide-react";
-import { useCallback, useState } from "react";
-import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { useState } from "react";
 import { toast } from "sonner";
-import z from "zod";
+import { z } from "zod";
 import PasswordStrengthTooltip from "@/components/password-strength-tooltip";
-import { LoadingSwap } from "@/components/ui/loading-swap";
-import { Progress } from "@/components/ui/progress";
-import { getAuthErrorMessage } from "@/lib/auth-error";
+import { Button } from "@/components/ui/button";
 import {
-  useSendVerificationEmail,
-  useSession,
-  useSignUp,
-} from "@/lib/auth-hooks";
-import generatePassword, {
-  isStrongEnough,
-  passwordStrength,
-} from "@/lib/password-generator";
-import Loader from "../../../../components/loader";
-import { Button } from "../../../../components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "../../../../components/ui/card";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from "../../../../components/ui/field";
+} from "@/components/ui/field";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-} from "../../../../components/ui/input-group";
+} from "@/components/ui/input-group";
+import { LoadingSwap } from "@/components/ui/loading-swap";
+import { Progress } from "@/components/ui/progress";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "../../../../components/ui/tooltip";
-import RecaptchaNotice from "./recaptcha-notice";
+} from "@/components/ui/tooltip";
+import { useCreateUser } from "@/lib/auth-hooks";
+import generatePassword, {
+  isStrongEnough,
+  passwordStrength,
+} from "@/lib/password-generator";
 
 const MIN_PASSWORD_LENGTH_USER = 8;
 const MIN_PASSWORD_LENGTH = 16;
@@ -66,9 +61,9 @@ const PASSWORD_STRENGTH_TO_COLOR = {
   5: "bg-muted-foreground",
 };
 
-const formSchema = z
+const schema = z
   .object({
-    name: z.string().min(2, "Name must be at least 2 characters"),
+    name: z.string().min(1, "Name is required"),
     email: z.email("Invalid email address"),
     password: z
       .string()
@@ -91,20 +86,14 @@ const formSchema = z
     message: "Passwords do not match",
   });
 
-export default function SignUpForm({
-  onSwitchToSignIn,
-}: {
-  onSwitchToSignIn: () => void;
-}) {
-  const navigate = useNavigate({
-    from: "/",
-  });
-  const { isPending } = useSession();
+const routeApi = getRouteApi("/(app)/admin/settings/");
+
+export default function AddUserDialog() {
+  const [open, setOpen] = useState(false);
+  const { trpc } = routeApi.useRouteContext();
+
   const [isPassWordVisible, setIsPassWordVisible] = useState(false);
   const [passwordStrengthValue, setPasswordStrengthValue] = useState(0);
-  const { executeRecaptcha } = useGoogleReCaptcha();
-  const { mutateAsync: signUp, isPending: isSignUpPending } = useSignUp();
-  const { mutate: sendVerificationEmail } = useSendVerificationEmail();
 
   const generateRandomPassword = () => {
     const randomLength =
@@ -114,83 +103,72 @@ export default function SignUpForm({
     return generatePassword(randomLength, true);
   };
 
-  const verifyRecaptcha = useCallback(async () => {
-    if (!executeRecaptcha) {
-      toast.error("Failed to verify reCAPTCHA");
-      return null;
-    }
-    const token = await executeRecaptcha("signup");
-    if (!token) {
-      toast.error("Failed to verify reCAPTCHA");
-      return null;
-    }
-    return token;
-  }, [executeRecaptcha]);
+  const createMutation = useCreateUser();
+
+  const validateMutation = useMutation(
+    trpc.users.validateEmail.mutationOptions()
+  );
 
   const form = useForm({
     defaultValues: {
+      name: "",
       email: "",
       password: "",
-      name: "",
       confirmPassword: "",
     },
-    onSubmit: async ({ value }) => {
-      const token = await verifyRecaptcha();
-      if (!token) {
-        toast.error("Failed to verify reCAPTCHA");
-        return;
-      }
-      const { error } = await signUp({
-        email: value.email,
-        password: value.password,
-        name: value.name,
-        fetchOptions: {
-          headers: {
-            "x-captcha-response": token,
-          },
-        },
-      });
-
-      if (error) {
-        toast.error(error.message || error.statusText);
-        return;
-      }
-      sendVerificationEmail(
-        {
-          email: value.email,
-          callbackURL: `${window.location.origin}/dashboard`,
-        },
-        {
-          onSuccess: () => {
-            navigate({
-              to: "/login",
-            });
-            toast.success(
-              "Sign up successful. Check your email for a verification link."
-            );
-          },
-          onError: (emailError) => {
-            toast.error(getAuthErrorMessage(emailError));
-          },
-        }
-      );
-    },
+    validationLogic: revalidateLogic(),
     validators: {
-      onSubmit: formSchema,
+      onSubmit: schema,
+      onSubmitAsync: async ({ value }) => {
+        try {
+          await createMutation.mutateAsync({
+            ...value,
+          });
+          toast.success("User created successfully");
+          // auth-hook takes care of invalidating the list-users query
+          // await queryClient.invalidateQueries({
+          //   queryKey: ["list-users"],
+          // });
+          form.reset();
+          setPasswordStrengthValue(0);
+          setIsPassWordVisible(false);
+          setOpen(false);
+          return null;
+        } catch (e) {
+          const error = handleCreateUserError(e);
+          return {
+            fields: {
+              email: { message: error },
+            },
+          };
+        }
+      },
     },
   });
 
-  if (isPending) {
-    return <Loader />;
-  }
-
   return (
-    <Card className="w-full sm:max-w-md">
-      <CardHeader>
-        <CardTitle>Create Account</CardTitle>
-        <CardDescription>Create an account to get started.</CardDescription>
-      </CardHeader>
-      <CardContent>
+    <Dialog
+      onOpenChange={(v) => {
+        if (!v) {
+          form.reset();
+        }
+        setOpen(v);
+      }}
+      open={open}
+    >
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline">
+          <FolderPlusIcon className="h-4 w-4" />
+          Add user
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add user</DialogTitle>
+          <DialogDescription>
+            Add a new user to the application
+          </DialogDescription>
+        </DialogHeader>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -203,26 +181,22 @@ export default function SignUpForm({
               {(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid;
+
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Name</FieldLabel>
-
                     <InputGroup>
                       <InputGroupInput
                         aria-invalid={isInvalid}
-                        autoComplete="off"
                         autoFocus
                         id={field.name}
                         name={field.name}
                         onBlur={field.handleBlur}
                         onChange={(e) => field.handleChange(e.target.value)}
-                        placeholder="Your name"
+                        placeholder="Name"
                         type="text"
                         value={field.state.value}
                       />
-                      <InputGroupAddon>
-                        <UserIcon />
-                      </InputGroupAddon>
                     </InputGroup>
                     {isInvalid && (
                       <FieldError errors={field.state.meta.errors} />
@@ -232,29 +206,49 @@ export default function SignUpForm({
               }}
             </form.Field>
 
-            <form.Field name="email">
+            <form.Field
+              name="email"
+              validators={{
+                onDynamicAsyncDebounceMs: 500,
+                onDynamicAsync: async ({ value }) => {
+                  if (!value) {
+                    return { message: "Email can't be empty" };
+                  }
+
+                  try {
+                    const emailExists = await validateMutation.mutateAsync({
+                      email: value,
+                    });
+
+                    return emailExists
+                      ? { message: "Email already exists" }
+                      : undefined;
+                  } catch (e) {
+                    return {
+                      message: handleCreateUserError(e),
+                    };
+                  }
+                },
+              }}
+            >
               {(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid;
+
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-
                     <InputGroup>
                       <InputGroupInput
                         aria-invalid={isInvalid}
-                        autoComplete="off"
                         id={field.name}
                         name={field.name}
                         onBlur={field.handleBlur}
                         onChange={(e) => field.handleChange(e.target.value)}
-                        placeholder="Your email"
-                        type="email"
+                        placeholder="Email"
+                        type="text"
                         value={field.state.value}
                       />
-                      <InputGroupAddon>
-                        <MailIcon />
-                      </InputGroupAddon>
                     </InputGroup>
                     {isInvalid && (
                       <FieldError errors={field.state.meta.errors} />
@@ -284,7 +278,7 @@ export default function SignUpForm({
                             passwordStrength(e.target.value)
                           );
                         }}
-                        placeholder="Your password"
+                        placeholder="Password"
                         type={isPassWordVisible ? "text" : "password"}
                         value={field.state.value}
                       />
@@ -390,7 +384,7 @@ export default function SignUpForm({
                         name={field.name}
                         onBlur={field.handleBlur}
                         onChange={(e) => field.handleChange(e.target.value)}
-                        placeholder="Confirm your password"
+                        placeholder="Confirm password"
                         type={isPassWordVisible ? "text" : "password"}
                         value={field.state.value}
                       />
@@ -398,7 +392,7 @@ export default function SignUpForm({
                         <LockIcon />
                       </InputGroupAddon>
                       <InputGroupAddon align="inline-end">
-                        <Tooltip>
+                        <Tooltip open={true}>
                           <TooltipTrigger asChild>
                             <InputGroupButton
                               className="rounded-full"
@@ -426,36 +420,57 @@ export default function SignUpForm({
 
             <form.Subscribe>
               {(state) => (
-                <Field>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="outline">Cancel</Button>
+                  </DialogClose>
+
                   <Button
-                    className="w-full"
-                    disabled={
-                      !state.canSubmit || state.isSubmitting || isSignUpPending
-                    }
+                    disabled={!state.canSubmit || state.isSubmitting}
                     type="submit"
                   >
                     <LoadingSwap
-                      isLoading={state.isSubmitting || isSignUpPending}
+                      isLoading={state.isSubmitting || state.isFieldsValidating}
                     >
-                      Sign Up
+                      Add user
                     </LoadingSwap>
                   </Button>
-                </Field>
+                </DialogFooter>
               )}
             </form.Subscribe>
           </FieldGroup>
         </form>
-      </CardContent>
-
-      <CardFooter className="flex-col items-center justify-center">
-        <Field orientation="horizontal">
-          <FieldLabel htmlFor="sign-in">Already have an account?</FieldLabel>
-          <Button onClick={onSwitchToSignIn} variant="link">
-            Sign In
-          </Button>
-        </Field>
-        <RecaptchaNotice />
-      </CardFooter>
-    </Card>
+      </DialogContent>
+    </Dialog>
   );
+}
+
+function handleCreateUserError(e: unknown): string {
+  if (e instanceof TRPCClientError) {
+    if (e.data?.code === "UNAUTHORIZED") {
+      return "You are not authorized to create a user";
+    }
+    if (e.data?.code === "BAD_REQUEST") {
+      try {
+        const error = JSON.parse(e.message as string) as {
+          code: string;
+          message: string;
+          path: string[];
+        }[];
+
+        return (
+          error?.[0]?.message ??
+          "Failed to create user (no server error message)"
+        );
+      } catch (_) {
+        return "Failed to create user (unknown error)";
+      }
+    }
+
+    if (e.data?.code === "INTERNAL_SERVER_ERROR") {
+      return e.message;
+    }
+    return `Failed to create user (${e.data?.code} ${e.data?.message})`;
+  }
+  return `Failed to create user (unknown error: ${(e as Error)?.message})`;
 }

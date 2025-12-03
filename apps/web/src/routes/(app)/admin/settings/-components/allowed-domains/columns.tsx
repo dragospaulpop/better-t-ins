@@ -137,7 +137,9 @@ export const columns: ColumnDef<AllowedHost>[] = [
                 <AvatarFallback>{value?.charAt(0) ?? "?"}</AvatarFallback>
               </Avatar>
             </TooltipTrigger>
-            <TooltipContent>{value}</TooltipContent>
+            <TooltipContent className="bg-muted text-muted-foreground">
+              {value}
+            </TooltipContent>
           </Tooltip>
         </div>
       );
