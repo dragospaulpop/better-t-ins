@@ -62,8 +62,8 @@ export default function ListItems({
             return sortDirection === "asc" ? a.size - b.size : b.size - a.size;
           case "date":
             return sortDirection === "asc"
-              ? a.date.getTime() - b.date.getTime()
-              : b.date.getTime() - a.date.getTime();
+              ? a.createdAt.getTime() - b.createdAt.getTime()
+              : b.createdAt.getTime() - a.createdAt.getTime();
           default:
             return 0;
         }
@@ -114,7 +114,7 @@ export default function ListItems({
                   <CustomIcon
                     absoluteStrokeWidth={true}
                     className={cn("shrink-0", listItemIconSize)}
-                    extension={item.label as string}
+                    extension={item.mime as string}
                     strokeWidth={0.75}
                   />
                 )}
@@ -135,7 +135,7 @@ export default function ListItems({
                   {formatBytes(item.size, { decimalPlaces: 2 })}
                 </ItemDescription>
                 <ItemDescription className={cn("text-left", listItemLabel)}>
-                  {item.date.toLocaleDateString("en-US", {
+                  {item.createdAt.toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "short",
                     day: "numeric",
