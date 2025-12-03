@@ -13,6 +13,7 @@ import render from "@better-t-ins/mail/render";
 import { type BetterAuthOptions, betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import {
+  admin,
   captcha,
   haveIBeenPwned,
   magicLink,
@@ -106,6 +107,7 @@ export const auth = betterAuth<BetterAuthOptions>({
       secretKey: env.data.RECAPTCHA_SECRET_KEY,
       minScore: 0.1,
     }),
+    admin(),
   ],
   trustedOrigins: [env.data.CORS_ORIGIN],
 

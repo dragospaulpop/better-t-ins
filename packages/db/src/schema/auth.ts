@@ -16,6 +16,11 @@ export const user = mysqlTable("user", {
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
   twoFactorEnabled: boolean("two_factor_enabled"),
+
+  role: varchar("role", { length: 255 }).notNull().default("user"),
+  banned: boolean("banned").notNull().default(false),
+  banReason: text("ban_reason"),
+  banExpires: timestamp("ban_expires"),
 });
 
 export const twoFactor = mysqlTable("two_factor", {
@@ -40,6 +45,9 @@ export const session = mysqlTable("session", {
   userId: varchar("user_id", { length: 36 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
+  impersonatedBy: varchar("impersonated_by", { length: 36 }).references(
+    () => user.id
+  ),
 });
 
 export const account = mysqlTable("account", {
