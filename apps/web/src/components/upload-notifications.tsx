@@ -11,6 +11,7 @@ import {
   STATUSES,
   useUploadFeedback,
 } from "@/providers/upload-feedback-provider";
+import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import {
   Item,
@@ -40,7 +41,7 @@ const MESSAGES_TO_KEEP = 10;
 const PENDING_PROB = 0.25;
 const ERROR_PROB = 0.98;
 
-export default function UploadNotifications() {
+export default function UploadNotifications({ count }: { count?: number }) {
   const { messages, addMessage, clearMessages, editMessage } =
     useUploadFeedback();
 
@@ -162,8 +163,14 @@ export default function UploadNotifications() {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button size="icon" variant="ghost">
+        <Button className="relative" size="icon" variant="ghost">
           <Bell className="h-5 w-5" />
+          <Badge
+            className="-top-2 -right-2 absolute h-5 min-w-5 px-1 tabular-nums"
+            variant="secondary"
+          >
+            {count}
+          </Badge>
         </Button>
       </SheetTrigger>
       <SheetContent>

@@ -24,7 +24,7 @@ export default function Header() {
 
       <div className="flex items-center gap-2">
         <UploadFeedbackProvider>
-          <UploadNotifications />
+          <UploadNotifications count={10} />
         </UploadFeedbackProvider>
 
         <ModeToggle />
