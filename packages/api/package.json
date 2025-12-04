@@ -8,6 +8,10 @@
     "./*": {
       "types": "./dist/*.d.ts",
       "default": "./src/*.ts"
+    },
+    "./lib/*": {
+      "types": "./dist/lib/*.d.ts",
+      "default": "./src/lib/*.ts"
     }
   },
   "type": "module",
@@ -23,6 +27,7 @@
   "dependencies": {
     "@better-t-ins/auth": "workspace:*",
     "@better-t-ins/db": "workspace:*",
+    "@better-t-ins/storage": "workspace:*",
     "@trpc/client": "catalog:",
     "@trpc/server": "catalog:",
     "dotenv": "catalog:",

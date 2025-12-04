@@ -1,11 +1,11 @@
 // when using a separate backend server, make sure to update the `api` option on the client hooks.
 
+import { insertFiles } from "@better-t-ins/api/lib/files/insert-files";
 import { auth } from "@better-t-ins/auth";
 import { RejectUpload, type Router, route } from "@better-upload/server";
 import { minio } from "@better-upload/server/clients";
 import z from "zod";
 import { storage } from ".";
-import { insertFiles } from "./lib/insert-files";
 
 const configSchema = z.object({
   region: z.string(),
@@ -94,12 +94,14 @@ export const router: Router = {
         const folderId = metadata?.folderId as number | null;
 
         const fileRecords = files.map((uploadFile) => ({
-          name: uploadFile.name,
-          type: uploadFile.type || "application/octet-stream",
-          size: uploadFile.size,
+          fileRecord: {
+            name: uploadFile.name,
+            type: uploadFile.type || "application/octet-stream",
+            size: uploadFile.size,
+            folder_id: folderId,
+            owner_id: userId,
+          },
           s3_key: uploadFile.objectInfo.key,
-          folder_id: folderId,
-          owner_id: userId,
         }));
 
         if (fileRecords.length > 0) {

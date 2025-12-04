@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from "react";
 import Loader from "@/components/loader";
 import { Button } from "@/components/ui/button";
 import Whoops from "@/components/whoops";
+import { RefetchFolderProvider } from "@/providers/refetch-folder-provider";
 import { UploadProvider } from "@/providers/upload-provider";
 import { BreadcrumbNav } from "./-components/breadcrumb-nav";
 import CreateFolderDialog from "./-components/create-folder-dialog";
@@ -88,17 +89,17 @@ export const Route = createFileRoute("/(app)/files/{-$parentId}")({
 function RouteComponent() {
   const { parentId } = Route.useParams();
   const { trpc, queryClient } = Route.useRouteContext();
-  const { data: rawFolders = [] } = useSuspenseQuery(
+  const { data: rawFolders = [], refetch: refetchFolders } = useSuspenseQuery(
     trpc.folder.getAllByParentId.queryOptions({
       parent_id: parentId,
     })
   );
-  const { data: ancestors = [] } = useSuspenseQuery(
+  const { data: ancestors = [], refetch: refetchAncestors } = useSuspenseQuery(
     trpc.folder.getAncestors.queryOptions({
       id: parentId,
     })
   );
-  const { data: rawFiles = [] } = useSuspenseQuery(
+  const { data: rawFiles = [], refetch: refetchFiles } = useSuspenseQuery(
     trpc.file.getAllByFolderId.queryOptions({
       folder_id: parentId,
     })
@@ -132,34 +133,10 @@ function RouteComponent() {
   );
 
   const refresh = useCallback(async () => {
-    try {
-      // Use refetchQueries instead of invalidateQueries to wait for the result
-      // This actually waits for the fetch to complete (or fail)
-      await queryClient.refetchQueries({
-        queryKey: trpc.folder.getAllByParentId.queryKey({
-          parent_id: parentId,
-        }),
-      });
-      // Also refetch ancestors
-      await queryClient.refetchQueries({
-        queryKey: trpc.folder.getAncestors.queryKey({
-          id: parentId,
-        }),
-      });
-      // Also refetch files
-      await queryClient.refetchQueries({
-        queryKey: trpc.file.getAllByFolderId.queryKey({
-          folder_id: parentId,
-        }),
-      });
-    } catch {
-      // refetchQueries throws if the query fails
-      // The QueryCache.onError will handle showing the toast
-      // We catch here to prevent unhandled promise rejection
-    }
-    // Note: We don't need router.invalidate() here because useSuspenseQuery
-    // will automatically re-render when the query data changes
-  }, [queryClient, parentId, trpc]);
+    await refetchFolders();
+    await refetchAncestors();
+    await refetchFiles();
+  }, [refetchFolders, refetchAncestors, refetchFiles]);
 
   const handleSortBy = useCallback(
     (newField: "name" | "type" | "size" | "date") => {
@@ -237,15 +214,20 @@ function RouteComponent() {
         </div>
         {/* items - shrinks to content when few items, scrolls when many */}
         <div className="min-h-0 w-full flex-[0_1_auto] overflow-y-auto p-6">
-          <Folders
-            displayMode={displayMode}
-            files={files}
-            folders={folders}
-            foldersFirst={foldersFirst}
-            itemSize={itemSize}
-            sortDirection={sortDirection}
-            sortField={sortField}
-          />
+          <RefetchFolderProvider
+            refetchFiles={refetchFiles}
+            refetchFolders={refetchFolders}
+          >
+            <Folders
+              displayMode={displayMode}
+              files={files}
+              folders={folders}
+              foldersFirst={foldersFirst}
+              itemSize={itemSize}
+              sortDirection={sortDirection}
+              sortField={sortField}
+            />
+          </RefetchFolderProvider>
         </div>
         {/* uploader - min 140px, grows to fill remaining space */}
         <div className="flex min-h-48 w-full flex-1 flex-col items-center justify-center p-6">

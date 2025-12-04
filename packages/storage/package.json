@@ -9,6 +9,10 @@
     "./router": {
       "types": "./dist/router.d.ts",
       "default": "./src/router.ts"
+    },
+    "./lib/*": {
+      "types": "./dist/lib/*.d.ts",
+      "default": "./src/lib/*.ts"
     }
   },
   "scripts": {
@@ -29,6 +33,7 @@
     "zod": "catalog:",
     "@better-t-ins/auth": "workspace:*",
     "@better-t-ins/db": "workspace:*",
+    "@better-t-ins/api": "workspace:*",
     "@better-upload/server": "^3.0.3"
   }
 }

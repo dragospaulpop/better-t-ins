@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../index";
+import { deleteFile } from "../lib/files/delete-file";
+import { deleteHistoryItem } from "../lib/files/delete-history-item";
 import { getAllByFolderId } from "../lib/files/get-all-by-folder-id";
 import { getHistory } from "../lib/files/get-history";
 
@@ -20,4 +22,16 @@ export const fileRouter = router({
   getHistory: protectedProcedure
     .input(z.object({ file_id: z.coerce.number() }))
     .query(async ({ input }) => await getHistory(input.file_id)),
+
+  deleteHistoryItem: protectedProcedure
+    .input(z.object({ history_id: z.coerce.number() }))
+    .mutation(async ({ input }) => {
+      await deleteHistoryItem(input.history_id);
+    }),
+
+  deleteFile: protectedProcedure
+    .input(z.object({ file_id: z.coerce.number() }))
+    .mutation(async ({ input }) => {
+      await deleteFile(input.file_id);
+    }),
 });

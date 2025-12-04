@@ -57,7 +57,6 @@ export const file = mysqlTable("file", {
   name: varchar("name", { length: 255 }).notNull(),
   type: varchar("type", { length: 255 }).notNull(),
   size: bigint("size", { mode: "number" }),
-  s3_key: varchar("s3_key", { length: 512 }).notNull(),
   folder_id: int("folder_id").references(() => folder.id),
   owner_id: varchar("owner_id", { length: 36 }).references(() => user.id),
   createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
@@ -73,6 +72,7 @@ export type FileInsert = typeof file.$inferInsert;
 export const history = mysqlTable("history", {
   id: int("id").autoincrement().primaryKey(),
   file_id: int("file_id").references(() => file.id),
+  s3_key: varchar("s3_key", { length: 512 }).notNull(),
   size: int("size").notNull(),
   author_id: varchar("author_id", { length: 36 }).references(() => user.id),
   createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
@@ -81,3 +81,6 @@ export const history = mysqlTable("history", {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
 });
+
+export type History = typeof history.$inferSelect;
+export type HistoryInsert = typeof history.$inferInsert;

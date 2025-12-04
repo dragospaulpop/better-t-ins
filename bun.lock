@@ -122,6 +122,7 @@
       "dependencies": {
         "@better-t-ins/auth": "workspace:*",
         "@better-t-ins/db": "workspace:*",
+        "@better-t-ins/storage": "workspace:*",
         "@trpc/client": "catalog:",
         "@trpc/server": "catalog:",
         "dotenv": "catalog:",
@@ -198,6 +199,7 @@
     "packages/storage": {
       "name": "@better-t-ins/storage",
       "dependencies": {
+        "@better-t-ins/api": "workspace:*",
         "@better-t-ins/auth": "workspace:*",
         "@better-t-ins/db": "workspace:*",
         "@better-upload/server": "^3.0.3",

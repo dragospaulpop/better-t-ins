@@ -3,8 +3,13 @@ import type { FileInsert } from "@better-t-ins/db/schema/upload";
 import { file, history } from "@better-t-ins/db/schema/upload";
 import { and, eq, isNull } from "drizzle-orm";
 
-export async function insertFiles(files: FileInsert[]) {
-  for (const fileRecord of files) {
+type ObjWithFileRecordAndS3Key = {
+  fileRecord: FileInsert;
+  s3_key: string;
+};
+
+export async function insertFiles(records: ObjWithFileRecordAndS3Key[]) {
+  for (const { s3_key, fileRecord } of records) {
     const [existingFileRecord] = await db
       .select()
       .from(file)
@@ -16,18 +21,21 @@ export async function insertFiles(files: FileInsert[]) {
       )
       .limit(1);
 
-    const existingFileId = existingFileRecord
-      ? existingFileRecord.id
-      : undefined;
+    let existingFileId = existingFileRecord ? existingFileRecord.id : undefined;
 
     if (!existingFileId) {
-      await db.insert(file).values(fileRecord);
+      const newFileRecordId = await db
+        .insert(file)
+        .values(fileRecord)
+        .$returningId();
+      existingFileId = newFileRecordId?.[0]?.id;
     }
 
     await db.insert(history).values({
       file_id: existingFileId,
       size: fileRecord.size ?? 0,
       author_id: fileRecord.owner_id,
+      s3_key,
     });
   }
 }
