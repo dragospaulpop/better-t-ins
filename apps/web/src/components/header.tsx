@@ -1,7 +1,7 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { UploadFeedbackProvider } from "@/hooks/use-upload-feedback";
+import { UploadFeedbackProvider } from "@/providers/upload-feedback-provider";
 import { ModeToggle } from "./mode-toggle";
 import UploadNotifications from "./upload-notifications";
 import UserMenu from "./user-menu";

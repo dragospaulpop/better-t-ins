@@ -7,7 +7,10 @@ import {
   TriangleAlertIcon,
 } from "lucide-react";
 import { useCallback, useEffect, useRef } from "react";
-import { STATUSES, useUploadFeedback } from "@/hooks/use-upload-feedback";
+import {
+  STATUSES,
+  useUploadFeedback,
+} from "@/providers/upload-feedback-provider";
 import { Button } from "./ui/button";
 import {
   Item,
