@@ -1,4 +1,4 @@
-import type { Folder } from "@better-t-ins/db/schema/upload";
+import type { File, Folder } from "@better-t-ins/db/schema/upload";
 import {
   FileArchiveIcon,
   FileAudioIcon,
@@ -29,22 +29,6 @@ const fileIcons: Record<string, LucideIcon> = {
   "application/x-7z-compressed": FileArchiveIcon,
   "application/octet-stream": FileQuestionMarkIcon,
 };
-
-const fileTypes = [
-  "application/x-folder",
-  "application/pdf",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "text/plain",
-  "image/png",
-  "image/jpeg",
-  "video/mp4",
-  "audio/mpeg",
-  "application/zip",
-  "application/rar",
-  "application/x-7z-compressed",
-  "application/octet-stream",
-];
 
 export const mimeToReadable = (mime: string) => {
   switch (mime) {
@@ -79,18 +63,6 @@ export const mimeToReadable = (mime: string) => {
   }
 };
 
-const MAX_STRING_LENGTH = 50;
-const MIN_STRING_LENGTH = 4;
-const MAX_ITEMS = 50;
-
-const PROBABILITY_SPACE = 0.2;
-const LOWERCASE_LETTERS = "abcdefghijklmnopqrstuvwxyz";
-const ONE_YEAR_IN_MS = 31_536_000_000;
-const MAX_SIZE = 1_000_000_000;
-const MIN_SIZE = 100_000;
-const MAX_DATE = Date.now();
-const MIN_DATE = Date.now() - ONE_YEAR_IN_MS;
-
 export type Item = {
   id: string | number;
   parentId: string | number;
@@ -102,47 +74,6 @@ export type Item = {
   updatedAt: Date;
 };
 
-export const items: Item[] = new Array(MAX_ITEMS).fill(0).map((_, _index) => {
-  const type = "file";
-
-  const fileType = fileTypes[Math.floor(Math.random() * fileTypes.length)];
-
-  return {
-    id: crypto.randomUUID(),
-    parentId: crypto.randomUUID(),
-    name: (() => {
-      const initialString = Array.from(
-        {
-          length:
-            Math.floor(
-              Math.random() * (MAX_STRING_LENGTH - MIN_STRING_LENGTH + 1)
-            ) + MIN_STRING_LENGTH,
-        },
-        () =>
-          LOWERCASE_LETTERS[
-            Math.floor(Math.random() * LOWERCASE_LETTERS.length)
-          ]
-      ).join("");
-
-      let spacedString = "";
-      for (let i = 0; i < initialString.length; i++) {
-        spacedString += initialString[i];
-        // Randomly insert a space after a character, but not at the very end
-        if (i < initialString.length - 1 && Math.random() < PROBABILITY_SPACE) {
-          // 20% chance to insert a space
-          spacedString += " ";
-        }
-      }
-      return `${spacedString}.${fileType}`;
-    })(),
-    type,
-    mime: fileType,
-    size: Math.floor(Math.random() * (MAX_SIZE - MIN_SIZE) + MIN_SIZE),
-    createdAt: new Date(Math.random() * (MAX_DATE - MIN_DATE) + MIN_DATE),
-    updatedAt: new Date(Math.random() * (MAX_DATE - MIN_DATE) + MIN_DATE),
-  };
-});
-
 interface FoldersProps {
   displayMode: "grid" | "list";
   foldersFirst: boolean;
@@ -150,6 +81,7 @@ interface FoldersProps {
   sortDirection: "asc" | "desc";
   itemSize: Size;
   folders: Folder[];
+  files: File[];
 }
 
 export default function Folders({
@@ -159,6 +91,7 @@ export default function Folders({
   sortDirection,
   itemSize,
   folders,
+  files,
 }: FoldersProps) {
   const folderItems = folders.map(
     (folder) =>
@@ -173,13 +106,28 @@ export default function Folders({
       }) as Item
   );
 
+  const fileItems = files.map(
+    (file) =>
+      ({
+        id: file.id,
+        name: file.name,
+        type: "file",
+        mime: file.type,
+        size: file.size,
+        createdAt: file.createdAt,
+        updatedAt: file.updatedAt,
+      }) as Item
+  );
+
+  const items = [...fileItems, ...folderItems];
+
   return (
     <div className="w-full">
       {displayMode === "grid" ? (
         <GridItems
           foldersFirst={foldersFirst}
           itemSize={itemSize}
-          items={[...items, ...(folderItems ? folderItems : [])]}
+          items={items}
           sortDirection={sortDirection}
           sortField={sortField}
         />

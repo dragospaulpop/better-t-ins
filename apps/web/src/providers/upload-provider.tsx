@@ -34,6 +34,7 @@ const UploadContext = createContext<UploadContextValue | null>(null);
 interface UploadProviderProps {
   children: React.ReactNode;
   currentFolderId?: string | number | null;
+  onFileUploaded?: (folderId: string | null) => void;
 }
 
 // Normalize folder ID to string or null for consistent comparison
@@ -49,6 +50,7 @@ function normalizeFolderId(
 export function UploadProvider({
   children,
   currentFolderId: rawCurrentFolderId,
+  onFileUploaded,
 }: UploadProviderProps) {
   const currentFolderId = normalizeFolderId(rawCurrentFolderId);
 
@@ -62,6 +64,17 @@ export function UploadProvider({
   const uploadQueueRef = useRef<QueuedUpload[]>([]);
   uploadQueueRef.current = uploadQueue;
 
+  // Track the uploading folder ID in a ref for the effect (avoids stale closure)
+  const uploadingFolderIdRef = useRef<string | null>(null);
+  uploadingFolderIdRef.current = uploadingFolderId;
+
+  // Track callback in ref to avoid stale closures
+  const onFileUploadedRef = useRef(onFileUploaded);
+  onFileUploadedRef.current = onFileUploaded;
+
+  // Track previous uploaded files count to detect new completions
+  const prevUploadedCountRef = useRef(0);
+
   const queuedFolderIds = useMemo(() => {
     const ids = new Set<string>();
     for (const item of uploadQueue) {
@@ -72,16 +85,37 @@ export function UploadProvider({
     return ids;
   }, [uploadQueue]);
 
-  const { control, upload, isPending } = useUploadFiles({
+  const { control, upload, isPending, uploadedFiles } = useUploadFiles({
     route: "files",
     api: `${import.meta.env.VITE_SERVER_URL}/upload`,
     credentials: "include",
     onUploadSettle: () => {
+      // Reset the uploaded count when a batch settles
+      prevUploadedCountRef.current = 0;
       setUploadingFolderId(null);
       // Signal to process next item in effect
       setShouldProcessNext(true);
     },
   });
+
+  // Detect individual file completions and call callback
+  useEffect(() => {
+    const currentCount = uploadedFiles.length;
+    const prevCount = prevUploadedCountRef.current;
+
+    if (currentCount > prevCount) {
+      // New files have completed
+      const newFilesCount = currentCount - prevCount;
+      const folderId = uploadingFolderIdRef.current;
+
+      // Call callback for each new completed file
+      for (let i = 0; i < newFilesCount; i++) {
+        onFileUploadedRef.current?.(folderId);
+      }
+
+      prevUploadedCountRef.current = currentCount;
+    }
+  }, [uploadedFiles.length]);
 
   // Process queue in effect to avoid stale closure issues
   useEffect(() => {

@@ -69,7 +69,7 @@ export function UploadDropzone({
   return (
     <div
       className={cn(
-        "relative w-full rounded-lg border border-input border-dashed text-foreground transition-colors",
+        "relative h-full w-full rounded-lg border border-input border-dashed text-foreground transition-colors",
         {
           "border-primary/80": isDragActive,
         }
@@ -78,7 +78,7 @@ export function UploadDropzone({
       <label
         {...getRootProps()}
         className={cn(
-          "flex w-full min-w-72 cursor-pointer flex-col items-center justify-center rounded-lg bg-transparent px-2 py-6 transition-colors dark:bg-input/10",
+          "flex h-full w-full min-w-72 cursor-pointer flex-col items-center justify-center rounded-lg bg-transparent px-2 py-6 transition-colors dark:bg-input/10",
           {
             "hover:bg-accent dark:hover:bg-accent/40": true,
             "opacity-0": isDragActive,

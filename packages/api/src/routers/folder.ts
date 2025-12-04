@@ -3,6 +3,7 @@ import { folder } from "@better-t-ins/db/schema/upload";
 import { z } from "zod";
 import { protectedProcedure, router } from "../index";
 import { getAncestors } from "../lib/folders/get-ancestors";
+import { getFilesByFolderId } from "../lib/folders/get-files-by-folder-id";
 import { insertFolder } from "../lib/folders/insert-folder";
 
 const MAX_FOLDER_NAME_LENGTH = 100;
@@ -38,6 +39,19 @@ export const folderRouter = router({
           )
         )
         .orderBy(folder.name);
+    }),
+
+  getFilesByFolderId: protectedProcedure
+    .input(z.object({ folder_id: z.string().nullable().optional() }))
+    .query(async ({ input }) => {
+      const folderId =
+        Number.isNaN(input.folder_id) ||
+        input.folder_id === null ||
+        input.folder_id === undefined
+          ? null
+          : Number.parseInt(input.folder_id as string, 10);
+
+      return await getFilesByFolderId(folderId);
     }),
 
   validateFolderName: protectedProcedure

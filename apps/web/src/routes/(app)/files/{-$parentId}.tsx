@@ -37,7 +37,7 @@ export const Route = createFileRoute("/(app)/files/{-$parentId}")({
     return <Whoops error={error} retry={retry} />;
   },
   loader: async ({ context: { trpc, queryClient }, params: { parentId } }) => {
-    const [folders, ancestors] = await Promise.all([
+    const [folders, ancestors, files] = await Promise.all([
       queryClient.ensureQueryData(
         trpc.folder.getAllByParentId.queryOptions({
           parent_id: parentId,
@@ -48,9 +48,14 @@ export const Route = createFileRoute("/(app)/files/{-$parentId}")({
           id: parentId,
         })
       ),
+      queryClient.ensureQueryData(
+        trpc.folder.getFilesByFolderId.queryOptions({
+          folder_id: parentId,
+        })
+      ),
     ]);
 
-    return { folders, ancestors };
+    return { folders, ancestors, files };
   },
   beforeLoad: async ({ context: { trpc, queryClient }, params }) => {
     const { parentId } = params;
@@ -93,11 +98,22 @@ function RouteComponent() {
       id: parentId,
     })
   );
+  const { data: rawFiles = [] } = useSuspenseQuery(
+    trpc.folder.getFilesByFolderId.queryOptions({
+      folder_id: parentId,
+    })
+  );
 
   const folders = rawFolders?.map((folder) => ({
     ...folder,
     createdAt: new Date(folder.createdAt),
     updatedAt: new Date(folder.updatedAt),
+  }));
+
+  const files = rawFiles?.map((file) => ({
+    ...file,
+    createdAt: new Date(file.createdAt),
+    updatedAt: new Date(file.updatedAt),
   }));
 
   const [sortField, setSortField] = useState<"name" | "type" | "size" | "date">(
@@ -130,6 +146,12 @@ function RouteComponent() {
           id: parentId,
         }),
       });
+      // Also refetch files
+      await queryClient.refetchQueries({
+        queryKey: trpc.folder.getFilesByFolderId.queryKey({
+          folder_id: parentId,
+        }),
+      });
     } catch {
       // refetchQueries throws if the query fails
       // The QueryCache.onError will handle showing the toast
@@ -156,8 +178,30 @@ function RouteComponent() {
   const handleSortDirection = useCallback((newDirection: "asc" | "desc") => {
     setSortDirection(newDirection);
   }, []);
+
+  // Callback when a file finishes uploading - refetch if it's for the current folder
+  const handleFileUploaded = useCallback(
+    (folderId: string | null) => {
+      // Normalize parentId - undefined means root (null)
+      const currentFolderId = parentId ?? null;
+
+      // Only refetch if the uploaded file is in the currently displayed folder
+      if (folderId === currentFolderId) {
+        queryClient.invalidateQueries({
+          queryKey: trpc.folder.getFilesByFolderId.queryKey({
+            folder_id: parentId,
+          }),
+        });
+      }
+    },
+    [queryClient, parentId, trpc]
+  );
+
   return (
-    <UploadProvider currentFolderId={parentId}>
+    <UploadProvider
+      currentFolderId={parentId}
+      onFileUploaded={handleFileUploaded}
+    >
       {/* container */}
       <div className="relative flex h-full flex-col items-start justify-start gap-0 overflow-hidden">
         {/* toolbar */}
@@ -191,10 +235,11 @@ function RouteComponent() {
             />
           </div>
         </div>
-        {/* items */}
-        <div className="w-full flex-1 overflow-y-auto p-6">
+        {/* items - shrinks to content when few items, scrolls when many */}
+        <div className="min-h-0 w-full flex-[0_1_auto] overflow-y-auto p-6">
           <Folders
             displayMode={displayMode}
+            files={files}
             folders={folders}
             foldersFirst={foldersFirst}
             itemSize={itemSize}
@@ -202,8 +247,8 @@ function RouteComponent() {
             sortField={sortField}
           />
         </div>
-        {/* uploader */}
-        <div className="flex w-full flex-0 flex-col items-center justify-center p-6">
+        {/* uploader - min 140px, grows to fill remaining space */}
+        <div className="flex min-h-48 w-full flex-1 flex-col items-center justify-center p-6">
           <Uploader />
         </div>
       </div>
