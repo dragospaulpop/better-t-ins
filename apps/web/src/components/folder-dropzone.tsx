@@ -1,6 +1,12 @@
 import type { UploadHookControl } from "@better-upload/client";
 import { useNavigate } from "@tanstack/react-router";
-import { FolderIcon, MoreVerticalIcon, UploadIcon } from "lucide-react";
+import {
+  ClockIcon,
+  FolderIcon,
+  Loader2,
+  MoreVerticalIcon,
+  UploadIcon,
+} from "lucide-react";
 import { useId } from "react";
 import { useDropzone } from "react-dropzone";
 import { cn } from "@/lib/utils";
@@ -13,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
-type UploadDropzoneProps = {
+type FolderDropzoneProps = {
   control: UploadHookControl<true>;
   id?: string;
   accept?: string;
@@ -24,10 +30,12 @@ type UploadDropzoneProps = {
   item: Item;
   gridItemSize: string;
   gridItemLabel: string;
+  isUploading?: boolean;
+  isQueued?: boolean;
 };
 
 export function FolderDropzone({
-  control: { upload, isPending },
+  control: { upload },
   id: _id,
   accept,
   metadata,
@@ -35,13 +43,16 @@ export function FolderDropzone({
   item,
   gridItemSize,
   gridItemLabel,
-}: UploadDropzoneProps) {
+  isUploading = false,
+  isQueued = false,
+}: FolderDropzoneProps) {
   const id = useId();
   const navigate = useNavigate();
 
   const { getRootProps, getInputProps, isDragActive, inputRef } = useDropzone({
     onDrop: (files) => {
-      if (files.length > 0 && !isPending) {
+      // Allow drops anytime - queue system handles concurrent uploads
+      if (files.length > 0) {
         if (uploadOverride) {
           uploadOverride(files, { metadata });
         } else {
@@ -76,8 +87,7 @@ export function FolderDropzone({
         className={cn(
           "flex h-full w-full flex-col items-center justify-start rounded-lg bg-transparent p-2 transition-colors dark:bg-input/10",
           {
-            "cursor-not-allowed text-muted-foreground": isPending,
-            "hover:bg-accent dark:hover:bg-accent/40": !isPending,
+            "hover:bg-accent dark:hover:bg-accent/40": true,
             "justify-center": isDragActive,
           }
         )}
@@ -85,7 +95,6 @@ export function FolderDropzone({
         <input
           {...getInputProps()}
           accept={accept}
-          disabled={isPending}
           id={_id || id}
           multiple
           type="file"
@@ -96,14 +105,28 @@ export function FolderDropzone({
             strokeWidth={0.75}
           />
         )}
+
         {!isDragActive && (
-          <FolderIcon
-            className={cn(
-              "shrink-0 fill-tud-blue/75 dark:fill-tud-blue",
-              gridItemSize
+          <div className="relative my-2 grid items-center justify-center">
+            {isUploading && (
+              <Loader2 className="col-1 row-1 size-6 animate-spin self-center justify-self-center" />
             )}
-            strokeWidth={0}
-          />
+
+            <FolderIcon
+              className={cn(
+                "col-1 row-1 shrink-0 fill-tud-blue/75 dark:fill-tud-blue",
+                gridItemSize,
+                { "opacity-50": isUploading }
+              )}
+              strokeWidth={0}
+            />
+
+            {isQueued && !isUploading && (
+              <div className="-top-1 -right-1 absolute rounded-full bg-amber-500 p-0.5">
+                <ClockIcon className="size-3 text-white" />
+              </div>
+            )}
+          </div>
         )}
         {!isDragActive && (
           <span

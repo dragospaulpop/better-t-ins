@@ -1,3 +1,8 @@
+// Disable SSL verification for self-signed certificates in development
+if (process.env.NODE_ENV !== "production") {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+}
+
 import { createContext } from "@better-t-ins/api/context";
 import { appRouter } from "@better-t-ins/api/routers/index";
 import { auth } from "@better-t-ins/auth";

@@ -27,6 +27,8 @@
     "dotenv": "catalog:",
     "minio": "^8.0.3",
     "zod": "catalog:",
-    "@better-t-ins/auth": "workspace:*"
+    "@better-t-ins/auth": "workspace:*",
+    "@better-t-ins/db": "workspace:*",
+    "@better-upload/server": "^3.0.3"
   }
 }

@@ -3,6 +3,7 @@ import {
   FileArchiveIcon,
   FileAudioIcon,
   FileImageIcon,
+  FileQuestionMarkIcon,
   FileTextIcon,
   FileVideoIcon,
   FolderIcon,
@@ -26,6 +27,7 @@ const fileIcons: Record<string, LucideIcon> = {
   "application/zip": FileArchiveIcon,
   "application/rar": FileArchiveIcon,
   "application/x-7z-compressed": FileArchiveIcon,
+  "application/octet-stream": FileQuestionMarkIcon,
 };
 
 const fileTypes = [
@@ -41,6 +43,7 @@ const fileTypes = [
   "application/zip",
   "application/rar",
   "application/x-7z-compressed",
+  "application/octet-stream",
 ];
 
 export const mimeToReadable = (mime: string) => {
@@ -69,6 +72,8 @@ export const mimeToReadable = (mime: string) => {
       return "RAR Archive";
     case "application/x-7z-compressed":
       return "7Z Archive";
+    case "application/octet-stream":
+      return "Unknown File";
     default:
       return mime;
   }
@@ -204,7 +209,8 @@ export function CustomIcon({
   strokeWidth,
   absoluteStrokeWidth = false,
 }: CurstomIconProps) {
-  const IconComponent = fileIcons[extension.toLowerCase()] || FileTextIcon;
+  const IconComponent =
+    fileIcons[extension.toLowerCase()] || FileQuestionMarkIcon;
   return (
     // <div className="flex items-center justify-center rounded-md bg-tud-light-grey/15 dark:bg-tud-dark-grey/15">
     <IconComponent

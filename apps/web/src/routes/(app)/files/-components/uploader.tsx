@@ -1,12 +1,14 @@
-import { useUploadFiles } from "@better-upload/client";
 import { UploadDropzone } from "@/components/upload-dropzone";
+import { useUpload } from "@/providers/upload-provider";
 
 export function Uploader() {
-  const { control } = useUploadFiles({
-    route: "files",
-    api: `${import.meta.env.VITE_SERVER_URL}/upload`,
-    credentials: "include",
-  });
+  const {
+    control,
+    uploadToFolder,
+    isUploadingTo,
+    hasQueuedUploads,
+    currentFolderId,
+  } = useUpload();
 
   return (
     <UploadDropzone
@@ -14,6 +16,12 @@ export function Uploader() {
       description={{
         maxFiles: 100,
         maxFileSize: "50GB",
+      }}
+      isQueued={hasQueuedUploads(currentFolderId)}
+      isUploading={isUploadingTo(currentFolderId)}
+      uploadOverride={(files) => {
+        // Upload files to the current folder
+        uploadToFolder(files);
       }}
     />
   );

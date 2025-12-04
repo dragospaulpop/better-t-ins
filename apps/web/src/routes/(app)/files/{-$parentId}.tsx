@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from "react";
 import Loader from "@/components/loader";
 import { Button } from "@/components/ui/button";
 import Whoops from "@/components/whoops";
+import { UploadProvider } from "@/providers/upload-provider";
 import { BreadcrumbNav } from "./-components/breadcrumb-nav";
 import CreateFolderDialog from "./-components/create-folder-dialog";
 import DisplayOptions from "./-components/display-options";
@@ -156,54 +157,56 @@ function RouteComponent() {
     setSortDirection(newDirection);
   }, []);
   return (
-    // container
-    <div className="relative flex h-full flex-col items-start justify-start gap-0 overflow-hidden">
-      {/* toolbar */}
-      <div className="flex w-full flex-none flex-col gap-6 p-6">
-        <div className="flex w-full flex-wrap items-center justify-between gap-4 lg:flex-nowrap">
-          <BreadcrumbNav ancestors={ancestors} />
-          <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline">
-              <UploadIcon className="h-4 w-4" />
-              Upload files
-            </Button>
-            <CreateFolderDialog />
+    <UploadProvider currentFolderId={parentId}>
+      {/* container */}
+      <div className="relative flex h-full flex-col items-start justify-start gap-0 overflow-hidden">
+        {/* toolbar */}
+        <div className="flex w-full flex-none flex-col gap-6 p-6">
+          <div className="flex w-full flex-wrap items-center justify-between gap-4 lg:flex-nowrap">
+            <BreadcrumbNav ancestors={ancestors} />
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline">
+                <UploadIcon className="h-4 w-4" />
+                Upload files
+              </Button>
+              <CreateFolderDialog />
+            </div>
           </div>
-        </div>
-        <div className="flex w-full flex-wrap items-center justify-between gap-4 lg:flex-nowrap">
-          <div className="flex items-center gap-2">
-            <RefreshButton refresh={refresh} />
-            <SortOptions
-              foldersFirst={foldersFirst}
-              handleSortBy={handleSortBy}
-              handleSortDirection={handleSortDirection}
-              setFoldersFirst={setFoldersFirst}
-              sortDirection={sortDirection}
-              sortField={sortField}
+          <div className="flex w-full flex-wrap items-center justify-between gap-4 lg:flex-nowrap">
+            <div className="flex items-center gap-2">
+              <RefreshButton refresh={refresh} />
+              <SortOptions
+                foldersFirst={foldersFirst}
+                handleSortBy={handleSortBy}
+                handleSortDirection={handleSortDirection}
+                setFoldersFirst={setFoldersFirst}
+                sortDirection={sortDirection}
+                sortField={sortField}
+              />
+            </div>
+            <SizeOptions handleItemSize={handleItemSize} itemSize={itemSize} />
+            <DisplayOptions
+              displayMode={displayMode}
+              setDisplayMode={setDisplayMode}
             />
           </div>
-          <SizeOptions handleItemSize={handleItemSize} itemSize={itemSize} />
-          <DisplayOptions
+        </div>
+        {/* items */}
+        <div className="w-full flex-1 overflow-y-auto p-6">
+          <Folders
             displayMode={displayMode}
-            setDisplayMode={setDisplayMode}
+            folders={folders}
+            foldersFirst={foldersFirst}
+            itemSize={itemSize}
+            sortDirection={sortDirection}
+            sortField={sortField}
           />
         </div>
+        {/* uploader */}
+        <div className="flex w-full flex-0 flex-col items-center justify-center p-6">
+          <Uploader />
+        </div>
       </div>
-      {/* items */}
-      <div className="w-full flex-1 overflow-y-auto p-6">
-        <Folders
-          displayMode={displayMode}
-          folders={folders}
-          foldersFirst={foldersFirst}
-          itemSize={itemSize}
-          sortDirection={sortDirection}
-          sortField={sortField}
-        />
-      </div>
-      {/* uploader */}
-      <div className="flex w-full flex-0 flex-col items-center justify-center">
-        <Uploader />
-      </div>
-    </div>
+    </UploadProvider>
   );
 }

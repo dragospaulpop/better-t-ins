@@ -1,4 +1,5 @@
 import {
+  bigint,
   foreignKey,
   int,
   mysqlTable,
@@ -55,6 +56,8 @@ export const file = mysqlTable("file", {
   id: int("id").autoincrement().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   type: varchar("type", { length: 255 }).notNull(),
+  size: bigint("size", { mode: "number" }),
+  s3_key: varchar("s3_key", { length: 512 }).notNull(),
   folder_id: int("folder_id").references(() => folder.id),
   owner_id: varchar("owner_id", { length: 36 }).references(() => user.id),
   createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
@@ -63,6 +66,8 @@ export const file = mysqlTable("file", {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
 });
+
+export type File = typeof file.$inferSelect;
 
 export const history = mysqlTable("history", {
   id: int("id").autoincrement().primaryKey(),

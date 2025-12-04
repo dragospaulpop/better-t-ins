@@ -1,5 +1,5 @@
-import { useUploadFiles } from "@better-upload/client";
 import { FolderDropzone } from "@/components/folder-dropzone";
+import { useUpload } from "@/providers/upload-provider";
 import type { Item } from "./folders";
 
 interface FolderUploaderProps {
@@ -13,18 +13,21 @@ export function FolderUploader({
   gridItemSize,
   gridItemLabel,
 }: FolderUploaderProps) {
-  const { control } = useUploadFiles({
-    route: "files",
-    api: `${import.meta.env.VITE_SERVER_URL}/upload`,
-    credentials: "include",
-  });
+  const { control, uploadToFolder, isUploadingTo, hasQueuedUploads } =
+    useUpload();
 
   return (
     <FolderDropzone
       control={control}
       gridItemLabel={gridItemLabel}
       gridItemSize={gridItemSize}
+      isQueued={hasQueuedUploads(item.id)}
+      isUploading={isUploadingTo(item.id)}
       item={item}
+      uploadOverride={(files) => {
+        // Upload files to this specific folder (the folder being dragged onto)
+        uploadToFolder(files, item.id);
+      }}
     />
   );
 }

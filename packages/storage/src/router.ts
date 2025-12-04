@@ -1,6 +1,8 @@
 // when using a separate backend server, make sure to update the `api` option on the client hooks.
 
 import { auth } from "@better-t-ins/auth";
+import { db } from "@better-t-ins/db";
+import { file } from "@better-t-ins/db/schema/upload";
 import { RejectUpload, type Router, route } from "@better-upload/server";
 import { minio } from "@better-upload/server/clients";
 import z from "zod";
@@ -41,6 +43,11 @@ const MB_IN_GB = 1024;
 const MAX_GB = 50;
 const MAX_FILE_SIZE = B_IN_KB * KB_IN_MB * MB_IN_GB * MAX_GB;
 
+// Schema for validating client metadata
+const clientMetadataSchema = z.object({
+  folderId: z.string().nullable().optional(),
+});
+
 export const router: Router = {
   client: minio({
     region: config.data.region,
@@ -51,12 +58,60 @@ export const router: Router = {
   bucketName: config.data.bucketName,
   routes: {
     files: route({
-      onBeforeUpload: async ({ req }) => {
+      clientMetadataSchema,
+      onBeforeUpload: async ({ req, clientMetadata }) => {
         const session = await auth.api.getSession({ headers: req.headers });
         if (!session) {
           throw new RejectUpload("Unauthorized");
         }
         await storage.ensureBucket();
+
+        const userId = session.user.id;
+        const folderId = clientMetadata?.folderId
+          ? Number.parseInt(clientMetadata.folderId, 10)
+          : null;
+
+        return {
+          generateObjectInfo: ({ file: uploadFile }) => {
+            const uniqueId = crypto.randomUUID();
+            const key = `${userId}/${uniqueId}-${uploadFile.name}`;
+            return {
+              key,
+              metadata: {
+                "x-amz-meta-user-id": userId,
+                "x-amz-meta-original-name": uploadFile.name,
+              },
+            };
+          },
+          metadata: {
+            userId,
+            folderId,
+          },
+        };
+      },
+      onAfterSignedUrl: async ({ files, metadata }) => {
+        // Insert file records into the database
+        const userId = metadata?.userId as string;
+        const folderId = metadata?.folderId as number | null;
+
+        const fileRecords = files.map((uploadFile) => ({
+          name: uploadFile.name,
+          type: uploadFile.type || "application/octet-stream",
+          size: uploadFile.size,
+          s3_key: uploadFile.objectInfo.key,
+          folder_id: folderId,
+          owner_id: userId,
+        }));
+
+        if (fileRecords.length > 0) {
+          await db.insert(file).values(fileRecords);
+        }
+
+        return {
+          metadata: {
+            filesCreated: fileRecords.length,
+          },
+        };
       },
       multipleFiles: true,
       multipart: true,
