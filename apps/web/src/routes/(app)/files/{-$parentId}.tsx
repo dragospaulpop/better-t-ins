@@ -49,7 +49,7 @@ export const Route = createFileRoute("/(app)/files/{-$parentId}")({
         })
       ),
       queryClient.ensureQueryData(
-        trpc.folder.getFilesByFolderId.queryOptions({
+        trpc.file.getAllByFolderId.queryOptions({
           folder_id: parentId,
         })
       ),
@@ -99,7 +99,7 @@ function RouteComponent() {
     })
   );
   const { data: rawFiles = [] } = useSuspenseQuery(
-    trpc.folder.getFilesByFolderId.queryOptions({
+    trpc.file.getAllByFolderId.queryOptions({
       folder_id: parentId,
     })
   );
@@ -148,7 +148,7 @@ function RouteComponent() {
       });
       // Also refetch files
       await queryClient.refetchQueries({
-        queryKey: trpc.folder.getFilesByFolderId.queryKey({
+        queryKey: trpc.file.getAllByFolderId.queryKey({
           folder_id: parentId,
         }),
       });
@@ -188,7 +188,7 @@ function RouteComponent() {
       // Only refetch if the uploaded file is in the currently displayed folder
       if (folderId === currentFolderId) {
         queryClient.invalidateQueries({
-          queryKey: trpc.folder.getFilesByFolderId.queryKey({
+          queryKey: trpc.file.getAllByFolderId.queryKey({
             folder_id: parentId,
           }),
         });

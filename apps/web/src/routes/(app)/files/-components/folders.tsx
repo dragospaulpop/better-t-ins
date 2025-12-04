@@ -72,6 +72,7 @@ export type Item = {
   size: number;
   createdAt: Date;
   updatedAt: Date;
+  history_count?: number;
 };
 
 interface FoldersProps {
@@ -81,7 +82,7 @@ interface FoldersProps {
   sortDirection: "asc" | "desc";
   itemSize: Size;
   folders: Folder[];
-  files: File[];
+  files: (File & { history_count?: number })[];
 }
 
 export default function Folders({
@@ -116,6 +117,7 @@ export default function Folders({
         size: file.size,
         createdAt: file.createdAt,
         updatedAt: file.updatedAt,
+        history_count: file.history_count,
       }) as Item
   );
 

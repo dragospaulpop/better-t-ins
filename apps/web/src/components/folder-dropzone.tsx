@@ -122,7 +122,7 @@ export function FolderDropzone({
             />
 
             {isQueued && !isUploading && (
-              <div className="-top-1 -right-1 absolute rounded-full bg-amber-500 p-0.5">
+              <div className="-top-1 -left-1 absolute rounded-full bg-amber-500 p-0.5">
                 <ClockIcon className="size-3 text-white" />
               </div>
             )}
@@ -140,7 +140,7 @@ export function FolderDropzone({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              className="opacity-0 transition-opacity group-hover:opacity-100"
+              className="rounded-full p-1 opacity-0 transition-opacity group-hover:opacity-100"
               size="icon-sm"
               variant="ghost"
             >

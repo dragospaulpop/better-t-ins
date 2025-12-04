@@ -1,4 +1,5 @@
 import { protectedProcedure, publicProcedure, router } from "../index";
+import { fileRouter } from "./file";
 import { folderRouter } from "./folder";
 import { profileRouter } from "./profile";
 import { settingsRouter } from "./settings";
@@ -13,6 +14,7 @@ export const appRouter = router({
   })),
   todo: todoRouter,
   folder: folderRouter,
+  file: fileRouter,
   profile: profileRouter,
   settings: settingsRouter,
   users: usersRouter,

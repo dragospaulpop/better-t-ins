@@ -1,15 +1,9 @@
-import { MoreVerticalIcon } from "lucide-react";
+import { FileStackIcon } from "lucide-react";
 import { useMemo } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { FolderUploader } from "./folder-uploader";
 import { CustomIcon, type Item } from "./folders";
+import { ItemMenu } from "./item-menu";
 import { type Size, sizeClassMap } from "./size-options";
 
 interface GridItemsProps {
@@ -145,26 +139,11 @@ function FileItem({
       <span className={cn("line-clamp-2 break-all text-center", gridItemLabel)}>
         {item.name}
       </span>
-      <div className="absolute top-1 right-1">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              className="opacity-0 transition-opacity group-hover:opacity-100"
-              size="icon-sm"
-              variant="ghost"
-            >
-              <MoreVerticalIcon className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem>Open</DropdownMenuItem>
-            <DropdownMenuItem>Open in new tab</DropdownMenuItem>
-            <DropdownMenuItem>Download</DropdownMenuItem>
-            <DropdownMenuItem>Rename</DropdownMenuItem>
-            <DropdownMenuItem>Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+      {item?.history_count && item.history_count > 1 && (
+        <FileStackIcon className="absolute top-1 left-1 size-3 text-tud-green/75" />
+      )}
+
+      <ItemMenu item={item} />
     </div>
   );
 }

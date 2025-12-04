@@ -68,6 +68,7 @@ export const file = mysqlTable("file", {
 });
 
 export type File = typeof file.$inferSelect;
+export type FileInsert = typeof file.$inferInsert;
 
 export const history = mysqlTable("history", {
   id: int("id").autoincrement().primaryKey(),
