@@ -1,7 +1,6 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { UploadFeedbackProvider } from "@/providers/upload-feedback-provider";
 import { ModeToggle } from "./mode-toggle";
 import UploadNotifications from "./upload-notifications";
 import UserMenu from "./user-menu";
@@ -23,9 +22,7 @@ export default function Header() {
       </div>
 
       <div className="flex items-center gap-2">
-        <UploadFeedbackProvider>
-          <UploadNotifications count={10} />
-        </UploadFeedbackProvider>
+        <UploadNotifications />
 
         <ModeToggle />
 

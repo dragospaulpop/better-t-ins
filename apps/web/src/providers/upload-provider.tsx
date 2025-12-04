@@ -1,5 +1,6 @@
 import type { UploadHookControl } from "@better-upload/client";
 import { useUploadFiles } from "@better-upload/client";
+import { formatBytes } from "@better-upload/client/helpers";
 import {
   createContext,
   useCallback,
@@ -9,6 +10,10 @@ import {
   useRef,
   useState,
 } from "react";
+import {
+  STATUSES,
+  useUploadFeedback,
+} from "@/providers/upload-feedback-provider";
 
 interface QueuedUpload {
   folderId: string | null;
@@ -37,6 +42,8 @@ interface UploadProviderProps {
   onFileUploaded?: (folderId: string | null) => void;
 }
 
+const PERCENT_MULTIPLIER = 100;
+
 // Normalize folder ID to string or null for consistent comparison
 function normalizeFolderId(
   folderId: string | number | null | undefined
@@ -53,6 +60,7 @@ export function UploadProvider({
   onFileUploaded,
 }: UploadProviderProps) {
   const currentFolderId = normalizeFolderId(rawCurrentFolderId);
+  const { addMessage, editMessage } = useUploadFeedback();
 
   const [uploadingFolderId, setUploadingFolderId] = useState<string | null>(
     null
@@ -75,6 +83,15 @@ export function UploadProvider({
   // Track previous uploaded files count to detect new completions
   const prevUploadedCountRef = useRef(0);
 
+  // Track feedback functions in refs to avoid stale closures
+  const addMessageRef = useRef(addMessage);
+  addMessageRef.current = addMessage;
+  const editMessageRef = useRef(editMessage);
+  editMessageRef.current = editMessage;
+
+  // Track file IDs for feedback messages (file name -> message ID)
+  const fileMessageIdsRef = useRef<Map<string, string>>(new Map());
+
   const queuedFolderIds = useMemo(() => {
     const ids = new Set<string>();
     for (const item of uploadQueue) {
@@ -85,11 +102,89 @@ export function UploadProvider({
     return ids;
   }, [uploadQueue]);
 
+  // Helper to create a unique key for a file
+  const getFileKey = useCallback(
+    (file: { name: string; size: number }) => `${file.name}-${file.size}`,
+    []
+  );
+
   const { control, upload, isPending, uploadedFiles } = useUploadFiles({
     route: "files",
     api: `${import.meta.env.VITE_SERVER_URL}/upload`,
     credentials: "include",
+    onUploadBegin: ({ files }) => {
+      // Add pending messages for each file
+      for (const file of files) {
+        const messageId = crypto.randomUUID();
+        const fileKey = getFileKey(file);
+        fileMessageIdsRef.current.set(fileKey, messageId);
+
+        addMessageRef.current({
+          id: messageId,
+          message: file.name,
+          description: formatBytes(file.size, { decimalPlaces: 2 }),
+          progress: 0,
+          status: STATUSES.pending,
+        });
+      }
+    },
+    onUploadProgress: ({ file }) => {
+      const fileKey = getFileKey(file);
+      const messageId = fileMessageIdsRef.current.get(fileKey);
+      if (!messageId) {
+        return;
+      }
+
+      const progressPercent = Math.round(file.progress * PERCENT_MULTIPLIER);
+
+      editMessageRef.current(messageId, {
+        id: messageId,
+        message: file.name,
+        description: formatBytes(file.size, { decimalPlaces: 2 }),
+        progress: progressPercent,
+        status:
+          file.status === "complete" ? STATUSES.success : STATUSES.pending,
+      });
+    },
+    onUploadComplete: ({ files }) => {
+      // Mark completed files as success
+      for (const file of files) {
+        const fileKey = getFileKey(file);
+        const messageId = fileMessageIdsRef.current.get(fileKey);
+        if (!messageId) {
+          continue;
+        }
+
+        editMessageRef.current(messageId, {
+          id: messageId,
+          message: file.name,
+          description: formatBytes(file.size, { decimalPlaces: 2 }),
+          progress: 100,
+          status: STATUSES.success,
+        });
+      }
+    },
+    onUploadFail: ({ failedFiles }) => {
+      // Mark failed files as error
+      for (const file of failedFiles) {
+        const fileKey = getFileKey(file);
+        const messageId = fileMessageIdsRef.current.get(fileKey);
+        if (!messageId) {
+          continue;
+        }
+
+        editMessageRef.current(messageId, {
+          id: messageId,
+          message: file.name,
+          description: file.error?.message || "Upload failed",
+          progress: undefined,
+          status: STATUSES.error,
+        });
+      }
+    },
     onUploadSettle: () => {
+      // Clear the file message IDs map for this batch
+      fileMessageIdsRef.current.clear();
       // Reset the uploaded count when a batch settles
       prevUploadedCountRef.current = 0;
       setUploadingFolderId(null);

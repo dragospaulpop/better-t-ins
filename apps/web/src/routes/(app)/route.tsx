@@ -3,6 +3,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import Header from "@/components/header";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { ensureSessionData } from "@/lib/auth-utils";
+import { UploadFeedbackProvider } from "@/providers/upload-feedback-provider";
 
 export const Route = createFileRoute("/(app)")({
   component: RouteComponent,
@@ -24,16 +25,18 @@ export const Route = createFileRoute("/(app)")({
 
 function RouteComponent() {
   return (
-    <SidebarProvider>
-      <div className="flex h-screen w-full overflow-hidden bg-background">
-        <AppSidebar />
-        <div className="flex flex-1 flex-col overflow-hidden">
-          <Header />
-          <main className="flex-1 overflow-hidden p-0">
-            <Outlet />
-          </main>
+    <UploadFeedbackProvider>
+      <SidebarProvider>
+        <div className="flex h-screen w-full overflow-hidden bg-background">
+          <AppSidebar />
+          <div className="flex flex-1 flex-col overflow-hidden">
+            <Header />
+            <main className="flex-1 overflow-hidden p-0">
+              <Outlet />
+            </main>
+          </div>
         </div>
-      </div>
-    </SidebarProvider>
+      </SidebarProvider>
+    </UploadFeedbackProvider>
   );
 }
