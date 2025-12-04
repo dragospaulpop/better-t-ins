@@ -78,7 +78,7 @@ export const router: Router = {
               key,
               metadata: {
                 "x-amz-meta-user-id": userId,
-                "x-amz-meta-original-name": uploadFile.name,
+                "x-amz-meta-original-name": encodeURIComponent(uploadFile.name),
               },
             };
           },
