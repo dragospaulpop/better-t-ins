@@ -1,14 +1,15 @@
 import { UploadDropzone } from "@/components/upload-dropzone";
 import { useUpload } from "@/providers/upload-provider";
 
-export function Uploader() {
-  const {
-    control,
-    uploadToFolder,
-    isUploadingTo,
-    hasQueuedUploads,
-    currentFolderId,
-  } = useUpload();
+interface UploaderProps {
+  targetFolderId?: string | null;
+}
+
+export function Uploader({ targetFolderId }: UploaderProps) {
+  const { control, uploadToFolder, isUploadingTo, hasQueuedUploads } =
+    useUpload();
+
+  const folderId = targetFolderId ?? null;
 
   return (
     <UploadDropzone
@@ -17,11 +18,10 @@ export function Uploader() {
         maxFiles: 100,
         maxFileSize: "50GB",
       }}
-      isQueued={hasQueuedUploads(currentFolderId)}
-      isUploading={isUploadingTo(currentFolderId)}
+      isQueued={hasQueuedUploads(folderId)}
+      isUploading={isUploadingTo(folderId)}
       uploadOverride={(files) => {
-        // Upload files to the current folder
-        uploadToFolder(files);
+        uploadToFolder(files, folderId);
       }}
     />
   );

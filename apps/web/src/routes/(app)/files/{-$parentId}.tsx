@@ -231,7 +231,7 @@ function RouteComponent() {
         </div>
         {/* uploader - min 140px, grows to fill remaining space */}
         <div className="flex min-h-48 w-full flex-1 flex-col items-center justify-center p-6">
-          <Uploader />
+          <Uploader targetFolderId={parentId ?? null} />
         </div>
       </div>
     </UploadProvider>

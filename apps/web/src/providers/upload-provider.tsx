@@ -72,16 +72,12 @@ export function UploadProvider({
   const uploadQueueRef = useRef<QueuedUpload[]>([]);
   uploadQueueRef.current = uploadQueue;
 
-  // Track the uploading folder ID in a ref for the effect (avoids stale closure)
+  // Track the uploading folder ID in a ref for callbacks (set directly, not synced from state)
   const uploadingFolderIdRef = useRef<string | null>(null);
-  uploadingFolderIdRef.current = uploadingFolderId;
 
   // Track callback in ref to avoid stale closures
   const onFileUploadedRef = useRef(onFileUploaded);
   onFileUploadedRef.current = onFileUploaded;
-
-  // Track previous uploaded files count to detect new completions
-  const prevUploadedCountRef = useRef(0);
 
   // Track feedback functions in refs to avoid stale closures
   const addMessageRef = useRef(addMessage);
@@ -108,7 +104,7 @@ export function UploadProvider({
     []
   );
 
-  const { control, upload, isPending, uploadedFiles } = useUploadFiles({
+  const { control, upload, isPending } = useUploadFiles({
     route: "files",
     api: `${import.meta.env.VITE_SERVER_URL}/upload`,
     credentials: "include",
@@ -147,21 +143,22 @@ export function UploadProvider({
       });
     },
     onUploadComplete: ({ files }) => {
-      // Mark completed files as success
+      // Mark completed files as success and call callback
+      const folderId = uploadingFolderIdRef.current;
       for (const file of files) {
         const fileKey = getFileKey(file);
         const messageId = fileMessageIdsRef.current.get(fileKey);
-        if (!messageId) {
-          continue;
+        if (messageId) {
+          editMessageRef.current(messageId, {
+            id: messageId,
+            message: file.name,
+            description: formatBytes(file.size, { decimalPlaces: 2 }),
+            progress: 100,
+            status: STATUSES.success,
+          });
         }
-
-        editMessageRef.current(messageId, {
-          id: messageId,
-          message: file.name,
-          description: formatBytes(file.size, { decimalPlaces: 2 }),
-          progress: 100,
-          status: STATUSES.success,
-        });
+        // Call the callback for each completed file (before onUploadSettle resets the ref)
+        onFileUploadedRef.current?.(folderId);
       }
     },
     onUploadFail: ({ failedFiles }) => {
@@ -185,32 +182,12 @@ export function UploadProvider({
     onUploadSettle: () => {
       // Clear the file message IDs map for this batch
       fileMessageIdsRef.current.clear();
-      // Reset the uploaded count when a batch settles
-      prevUploadedCountRef.current = 0;
       setUploadingFolderId(null);
+      uploadingFolderIdRef.current = null;
       // Signal to process next item in effect
       setShouldProcessNext(true);
     },
   });
-
-  // Detect individual file completions and call callback
-  useEffect(() => {
-    const currentCount = uploadedFiles.length;
-    const prevCount = prevUploadedCountRef.current;
-
-    if (currentCount > prevCount) {
-      // New files have completed
-      const newFilesCount = currentCount - prevCount;
-      const folderId = uploadingFolderIdRef.current;
-
-      // Call callback for each new completed file
-      for (let i = 0; i < newFilesCount; i++) {
-        onFileUploadedRef.current?.(folderId);
-      }
-
-      prevUploadedCountRef.current = currentCount;
-    }
-  }, [uploadedFiles.length]);
 
   // Process queue in effect to avoid stale closure issues
   useEffect(() => {
@@ -227,6 +204,7 @@ export function UploadProvider({
     const [nextUpload, ...remainingQueue] = uploadQueueRef.current;
     setUploadQueue(remainingQueue);
     setUploadingFolderId(nextUpload.folderId);
+    uploadingFolderIdRef.current = nextUpload.folderId;
 
     upload(nextUpload.files, {
       metadata: {
@@ -251,6 +229,8 @@ export function UploadProvider({
 
       // Start upload immediately
       setUploadingFolderId(targetFolderId);
+      uploadingFolderIdRef.current = targetFolderId;
+
       upload(fileArray, {
         metadata: {
           folderId: targetFolderId,
