@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from "react";
 import Loader from "@/components/loader";
 import { Button } from "@/components/ui/button";
 import Whoops from "@/components/whoops";
+import { PacerUploadProvider } from "@/providers/pacer-upload-provider";
 import { RefetchFolderProvider } from "@/providers/refetch-folder-provider";
 import { UploadProvider } from "@/providers/upload-provider";
 import { BreadcrumbNav } from "./-components/breadcrumb-nav";
@@ -17,6 +18,7 @@ import Folders from "./-components/folders";
 import RefreshButton from "./-components/refresh-button";
 import SizeOptions from "./-components/size-options";
 import SortOptions from "./-components/sort-options";
+import { TestPacer } from "./-components/test-pacer";
 import { Uploader } from "./-components/uploader";
 
 export const Route = createFileRoute("/(app)/files/{-$parentId}")({
@@ -220,6 +222,10 @@ function RouteComponent() {
               sortField={sortField}
             />
           </RefetchFolderProvider>
+
+          <PacerUploadProvider currentFolderId={parentId}>
+            <TestPacer />
+          </PacerUploadProvider>
         </div>
         {/* uploader - min 140px, grows to fill remaining space */}
         <div className="flex min-h-48 w-full flex-1 flex-col items-center justify-center p-6">
