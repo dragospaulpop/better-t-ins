@@ -37,27 +37,6 @@ export const Route = createFileRoute("/(app)/files/{-$parentId}")({
 
     return <Whoops error={error} retry={retry} />;
   },
-  loader: async ({ context: { trpc, queryClient }, params: { parentId } }) => {
-    const [folders, ancestors, files] = await Promise.all([
-      queryClient.ensureQueryData(
-        trpc.folder.getAllByParentId.queryOptions({
-          parent_id: parentId,
-        })
-      ),
-      queryClient.ensureQueryData(
-        trpc.folder.getAncestors.queryOptions({
-          id: parentId,
-        })
-      ),
-      queryClient.ensureQueryData(
-        trpc.file.getAllByFolderId.queryOptions({
-          folder_id: parentId,
-        })
-      ),
-    ]);
-
-    return { folders, ancestors, files };
-  },
   beforeLoad: async ({ context: { trpc, queryClient }, params }) => {
     const { parentId } = params;
     try {
@@ -84,11 +63,28 @@ export const Route = createFileRoute("/(app)/files/{-$parentId}")({
       });
     }
   },
+  loader: ({ context: { trpc, queryClient }, params: { parentId } }) => {
+    queryClient.ensureQueryData(
+      trpc.folder.getAllByParentId.queryOptions({
+        parent_id: parentId,
+      })
+    );
+    queryClient.ensureQueryData(
+      trpc.folder.getAncestors.queryOptions({
+        id: parentId,
+      })
+    );
+    queryClient.ensureQueryData(
+      trpc.file.getAllByFolderId.queryOptions({
+        folder_id: parentId,
+      })
+    );
+  },
 });
 
 function RouteComponent() {
   const { parentId } = Route.useParams();
-  const { trpc, queryClient } = Route.useRouteContext();
+  const { trpc } = Route.useRouteContext();
   const { data: rawFolders = [], refetch: refetchFolders } = useSuspenseQuery(
     trpc.folder.getAllByParentId.queryOptions({
       parent_id: parentId,
@@ -164,14 +160,10 @@ function RouteComponent() {
 
       // Only refetch if the uploaded file is in the currently displayed folder
       if (folderId === currentFolderId) {
-        queryClient.invalidateQueries({
-          queryKey: trpc.file.getAllByFolderId.queryKey({
-            folder_id: parentId,
-          }),
-        });
+        refetchFiles();
       }
     },
-    [queryClient, parentId, trpc]
+    [parentId, refetchFiles]
   );
 
   return (

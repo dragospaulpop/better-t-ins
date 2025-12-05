@@ -33,7 +33,6 @@
     "zod": "catalog:",
     "@better-t-ins/auth": "workspace:*",
     "@better-t-ins/db": "workspace:*",
-    "@better-t-ins/api": "workspace:*",
     "@better-upload/server": "^3.0.3"
   }
 }

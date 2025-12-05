@@ -1,11 +1,11 @@
 // when using a separate backend server, make sure to update the `api` option on the client hooks.
 
-import { insertFiles } from "@better-t-ins/api/lib/files/insert-files";
 import { auth } from "@better-t-ins/auth";
 import { RejectUpload, type Router, route } from "@better-upload/server";
 import { minio } from "@better-upload/server/clients";
 import z from "zod";
 import { storage } from ".";
+import { insertFiles } from "./lib/insert-files";
 
 const configSchema = z.object({
   region: z.string(),

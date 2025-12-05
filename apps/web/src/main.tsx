@@ -25,6 +25,7 @@ if (!env.success) {
 const router = createRouter({
   routeTree,
   defaultPreload: "intent",
+  defaultPreloadStaleTime: 0,
   defaultPendingComponent: () => <Loader />,
   context: { trpc, queryClient, authClient },
 });
