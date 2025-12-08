@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import Whoops from "@/components/whoops";
 import { PacerUploadProvider } from "@/providers/pacer-upload-provider";
 import { RefetchFolderProvider } from "@/providers/refetch-folder-provider";
-import { UploadProvider } from "@/providers/upload-provider";
 import { BreadcrumbNav } from "./-components/breadcrumb-nav";
 import CreateFolderDialog from "./-components/create-folder-dialog";
 import DisplayOptions from "./-components/display-options";
@@ -18,7 +17,6 @@ import Folders from "./-components/folders";
 import RefreshButton from "./-components/refresh-button";
 import SizeOptions from "./-components/size-options";
 import SortOptions from "./-components/sort-options";
-import { TestPacer } from "./-components/test-pacer";
 import UploadStatus from "./-components/upload-status";
 import { Uploader } from "./-components/uploader";
 
@@ -155,24 +153,10 @@ function RouteComponent() {
     setSortDirection(newDirection);
   }, []);
 
-  // Callback when a file finishes uploading - refetch if it's for the current folder
-  const handleFileUploaded = useCallback(
-    (folderId: string | null) => {
-      // Normalize parentId - undefined means root (null)
-      const currentFolderId = parentId ?? null;
-
-      // Only refetch if the uploaded file is in the currently displayed folder
-      if (folderId === currentFolderId) {
-        refetchFiles();
-      }
-    },
-    [parentId, refetchFiles]
-  );
-
   return (
-    <UploadProvider
-      currentFolderId={parentId}
-      onFileUploaded={handleFileUploaded}
+    <PacerUploadProvider
+      currentFolderId={parentId ?? null}
+      refreshCurrentFolder={refetchFiles}
     >
       {/* container */}
       <div className="relative flex h-full flex-col items-start justify-start gap-0 overflow-hidden">
@@ -224,16 +208,12 @@ function RouteComponent() {
               sortField={sortField}
             />
           </RefetchFolderProvider>
-
-          <PacerUploadProvider currentFolderId={parentId}>
-            <TestPacer />
-          </PacerUploadProvider>
         </div>
         {/* uploader - min 140px, grows to fill remaining space */}
         <div className="flex min-h-48 w-full flex-1 flex-col items-center justify-center p-6">
           <Uploader targetFolderId={parentId ?? null} />
         </div>
       </div>
-    </UploadProvider>
+    </PacerUploadProvider>
   );
 }

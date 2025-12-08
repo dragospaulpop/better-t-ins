@@ -1,13 +1,12 @@
 import { UploadDropzone } from "@/components/upload-dropzone";
-import { useUpload } from "@/providers/upload-provider";
+import { usePacerUpload } from "@/providers/pacer-upload-provider";
 
 interface UploaderProps {
   targetFolderId?: string | null;
 }
 
 export function Uploader({ targetFolderId }: UploaderProps) {
-  const { control, uploadToFolder, isUploadingTo, hasQueuedUploads } =
-    useUpload();
+  const { control, addToUploadQueue } = usePacerUpload();
 
   const folderId = targetFolderId ?? null;
 
@@ -18,10 +17,11 @@ export function Uploader({ targetFolderId }: UploaderProps) {
         maxFiles: 100,
         maxFileSize: "50GB",
       }}
-      isQueued={hasQueuedUploads(folderId)}
-      isUploading={isUploadingTo(folderId)}
+      folderId={folderId}
+      // isQueued={hasQueuedUploads(folderId)}
+      // isUploading={isUploadingTo(folderId)}
       uploadOverride={(files) => {
-        uploadToFolder(files, folderId);
+        addToUploadQueue({ files, folderId });
       }}
     />
   );

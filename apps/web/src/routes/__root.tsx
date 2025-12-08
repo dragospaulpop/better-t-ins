@@ -11,9 +11,11 @@ import "../index.css";
 
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { FormDevtoolsPanel } from "@tanstack/react-form-devtools";
+import { pacerDevtoolsPlugin } from "@tanstack/react-pacer-devtools";
 
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import NotFound from "@/components/not-found";
 import RouterError from "@/components/router-error";
@@ -101,6 +103,7 @@ function RootComponent() {
             name: "TanStack Form",
             render: <FormDevtoolsPanel />,
           },
+          pacerDevtoolsPlugin(),
         ]}
       />
     </>

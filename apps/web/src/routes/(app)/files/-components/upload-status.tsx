@@ -7,7 +7,6 @@ export default function UploadStatus() {
   const { averageProgress, isUploading } = useStore(store, (state) => ({
     averageProgress: state.averageProgress,
     isUploading: state.isUploading,
-    hasQueuedUploads: state.hasQueuedUploads,
   }));
 
   return (

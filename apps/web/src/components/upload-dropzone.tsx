@@ -3,6 +3,7 @@ import { ClockIcon, Loader2, Upload } from "lucide-react";
 import { useId } from "react";
 import { useDropzone } from "react-dropzone";
 import { cn } from "@/lib/utils";
+import type { EnhancedFile } from "@/providers/pacer-upload-provider";
 
 function DropzoneLabel({
   isUploading,
@@ -33,10 +34,12 @@ type UploadDropzoneProps = {
       }
     | string;
   uploadOverride?: (
-    ...args: Parameters<UploadHookControl<true>["upload"]>
+    files: EnhancedFile[],
+    options?: Parameters<UploadHookControl<true>["upload"]>[1]
   ) => void;
   isUploading?: boolean;
   isQueued?: boolean;
+  folderId?: string | number | null;
 };
 
 export function UploadDropzone({
@@ -48,6 +51,7 @@ export function UploadDropzone({
   uploadOverride,
   isUploading = false,
   isQueued = false,
+  folderId,
 }: UploadDropzoneProps) {
   const id = useId();
 
@@ -56,7 +60,14 @@ export function UploadDropzone({
       // Allow drops anytime - queue system handles concurrent uploads
       if (files.length > 0) {
         if (uploadOverride) {
-          uploadOverride(files, { metadata });
+          uploadOverride(
+            files.map((file) => ({
+              id: crypto.randomUUID(),
+              file,
+              folderId: folderId ?? null,
+            })),
+            { metadata }
+          );
         } else {
           upload(files, { metadata });
         }

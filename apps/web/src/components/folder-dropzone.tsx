@@ -10,6 +10,7 @@ import {
 import { useId } from "react";
 import { useDropzone } from "react-dropzone";
 import { cn } from "@/lib/utils";
+import type { EnhancedFile } from "@/providers/pacer-upload-provider";
 import type { Item } from "@/routes/(app)/files/-components/folders";
 import { Button } from "./ui/button";
 import {
@@ -25,7 +26,8 @@ type FolderDropzoneProps = {
   accept?: string;
   metadata?: Record<string, unknown>;
   uploadOverride?: (
-    ...args: Parameters<UploadHookControl<true>["upload"]>
+    files: EnhancedFile[],
+    options?: Parameters<UploadHookControl<true>["upload"]>[1]
   ) => void;
   item: Item;
   gridItemSize: string;
@@ -54,7 +56,14 @@ export function FolderDropzone({
       // Allow drops anytime - queue system handles concurrent uploads
       if (files.length > 0) {
         if (uploadOverride) {
-          uploadOverride(files, { metadata });
+          uploadOverride(
+            files.map((file) => ({
+              id: crypto.randomUUID(),
+              file,
+              folderId: item.id,
+            })),
+            { metadata }
+          );
         } else {
           upload(files, { metadata });
         }
@@ -100,10 +109,15 @@ export function FolderDropzone({
           type="file"
         />
         {isDragActive && (
-          <UploadIcon
-            className={cn("pointer-events-none shrink-0", gridItemSize)}
-            strokeWidth={0.75}
-          />
+          <div className="relative my-2 grid items-center justify-center">
+            <UploadIcon
+              className={cn(
+                "pointer-events-none col-1 row-1 shrink-0",
+                gridItemSize
+              )}
+              strokeWidth={0.75}
+            />
+          </div>
         )}
 
         {!isDragActive && (
@@ -128,13 +142,12 @@ export function FolderDropzone({
             )}
           </div>
         )}
-        {!isDragActive && (
-          <span
-            className={cn("line-clamp-2 break-all text-center", gridItemLabel)}
-          >
-            {item.name}
-          </span>
-        )}
+
+        <span
+          className={cn("line-clamp-2 break-all text-center", gridItemLabel)}
+        >
+          {item.name}
+        </span>
       </div>
       <div className="absolute top-1 right-1">
         <DropdownMenu>

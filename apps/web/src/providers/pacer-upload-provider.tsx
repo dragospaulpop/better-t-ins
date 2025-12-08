@@ -2,12 +2,13 @@ import {
   type ReactAsyncQueuer,
   useAsyncQueuer,
 } from "@tanstack/react-pacer/async-queuer";
-import { createContext, useCallback, useContext, useMemo } from "react";
+import { createContext, useCallback, useContext, useMemo, useRef } from "react";
 
 interface PacerUploadContextValue {
   currentFolderId?: string | number | null;
-  asyncQueuer: ReactAsyncQueuer<Item>;
-  addItem: (item: Item) => void;
+  asyncQueuer: ReactAsyncQueuer<UploadQueueItem>;
+  control: UploadHookControl<true>;
+  addToUploadQueue: (item: UploadQueueItem) => void;
 }
 
 const PacerUploadContext = createContext<PacerUploadContextValue | null>(null);
@@ -15,60 +16,110 @@ const PacerUploadContext = createContext<PacerUploadContextValue | null>(null);
 interface PacerUploadProviderProps {
   children: React.ReactNode;
   currentFolderId?: string | number | null;
+  refreshCurrentFolder: () => void;
 }
 
+import { type UploadHookControl, useUploadFiles } from "@better-upload/client";
 import {
-  addItem as addItemToStore,
+  addItemsToStore,
+  setUploading,
+  updateItemError,
   updateItemProgress,
   updateItemStatus,
 } from "@/stores/upload-store";
+// import { addItem as addItemToStore } from "@/stores/upload-store";
 
-const UPDATE_DELAY = 1000;
-const UPLOAD_PROGRESS_INCREMENT = 10;
-const MAX_PROGRESS = 100;
-
-type Item = {
+export interface EnhancedFile {
   id: string;
-  name: string;
-  size: number;
-  mime: string;
-};
-async function processItem(item: Item) {
-  let progress = 0;
-  await new Promise((resolve) => {
-    const interval = setInterval(() => {
-      progress += UPLOAD_PROGRESS_INCREMENT;
-      if (progress >= MAX_PROGRESS) {
-        updateItemStatus(item.id, "completed");
-        clearInterval(interval);
-        resolve(true);
-      }
-      updateItemProgress(item.id, progress);
-    }, UPDATE_DELAY);
-  });
-  // biome-ignore lint/suspicious/noConsole: testing
-  console.log("processing item", item);
-
-  return item.name;
+  file: File;
+  folderId: string | number | null;
 }
+
+type UploadQueueItem = {
+  files: EnhancedFile[];
+  folderId: string | number | null;
+};
 
 export function PacerUploadProvider({
   children,
   currentFolderId,
+  refreshCurrentFolder,
 }: PacerUploadProviderProps) {
+  const fileTrackingMap = useRef(new WeakMap<File, EnhancedFile>());
+
+  const { control, uploadAsync } = useUploadFiles({
+    route: "files",
+    api: `${import.meta.env.VITE_SERVER_URL}/upload`,
+    credentials: "include",
+    onUploadBegin: ({ files }) => {
+      for (const file of files) {
+        const enhancedFile = fileTrackingMap.current.get(file.raw);
+        if (enhancedFile) {
+          updateItemStatus(enhancedFile.id, "uploading");
+        }
+      }
+    },
+    onUploadProgress: ({ file }) => {
+      const enhancedFile = fileTrackingMap.current.get(file.raw);
+      if (enhancedFile) {
+        updateItemProgress(enhancedFile.id, file.progress);
+      }
+    },
+    onUploadComplete: ({ files }) => {
+      for (const file of files) {
+        const enhancedFile = fileTrackingMap.current.get(file.raw);
+        if (enhancedFile) {
+          updateItemStatus(enhancedFile.id, "completed");
+        }
+
+        if (enhancedFile?.folderId === currentFolderId) {
+          refreshCurrentFolder();
+        }
+      }
+    },
+    onUploadFail: ({ failedFiles }) => {
+      for (const file of failedFiles) {
+        const enhancedFile = fileTrackingMap.current.get(file.raw);
+        if (enhancedFile) {
+          updateItemStatus(enhancedFile.id, "failed");
+          updateItemError(
+            enhancedFile.id,
+            file.error?.message ?? "Upload failed"
+          );
+        }
+      }
+    },
+    onUploadSettle: ({ files }) => {
+      for (const file of files) {
+        const enhancedFile = fileTrackingMap.current.get(file.raw);
+        if (enhancedFile) {
+          updateItemStatus(enhancedFile.id, "completed");
+        }
+      }
+    },
+  });
+
   const asyncQueuer = useAsyncQueuer(
-    processItem,
+    async (item: UploadQueueItem) => {
+      for (const enhancedFile of item.files) {
+        fileTrackingMap.current.set(enhancedFile.file, enhancedFile);
+      }
+
+      await uploadAsync(
+        item.files.map((f) => f.file),
+        {
+          metadata: {
+            folderId: item.folderId,
+          },
+        }
+      );
+    },
     {
       maxSize: undefined,
       concurrency: 1,
       started: true,
-      onError: (error, item) => {
-        // biome-ignore lint/suspicious/noConsole: testing
-        console.log("error processing item", error, item);
-      },
-      onSuccess(result, item) {
-        // biome-ignore lint/suspicious/noConsole: testing
-        console.log("success processing item", result, item);
+      onSettled: () => {
+        setUploading(false);
       },
     },
     (state) => ({
@@ -81,9 +132,20 @@ export function PacerUploadProvider({
     })
   );
 
-  const addItem = useCallback(
-    (item: Item) => {
-      addItemToStore(item);
+  const addToUploadQueue = useCallback(
+    (item: UploadQueueItem) => {
+      addItemsToStore(
+        item.files.map((f) => ({
+          id: f.id,
+          name: f.file.name,
+          size: f.file.size,
+          mime: f.file.type,
+          progress: 0,
+          status: "pending",
+          error: undefined,
+          createdAt: new Date(),
+        }))
+      );
       asyncQueuer.addItem(item);
     },
     [asyncQueuer]
@@ -93,9 +155,10 @@ export function PacerUploadProvider({
     () => ({
       currentFolderId,
       asyncQueuer,
-      addItem,
+      addToUploadQueue,
+      control,
     }),
-    [currentFolderId, asyncQueuer, addItem]
+    [currentFolderId, asyncQueuer, addToUploadQueue, control]
   );
 
   return (
