@@ -22,7 +22,9 @@ interface PacerUploadProviderProps {
 import { type UploadHookControl, useUploadFiles } from "@better-upload/client";
 import {
   addItemsToStore,
+  removeFolderFromQueuedFolderIds,
   setUploading,
+  setUploadingFolderId,
   updateItemError,
   updateItemProgress,
   updateItemStatus,
@@ -32,12 +34,12 @@ import {
 export interface EnhancedFile {
   id: string;
   file: File;
-  folderId: string | number | null;
+  folderId: number | null;
 }
 
 type UploadQueueItem = {
   files: EnhancedFile[];
-  folderId: string | number | null;
+  folderId: number | null;
 };
 
 export function PacerUploadProvider({
@@ -105,11 +107,14 @@ export function PacerUploadProvider({
         fileTrackingMap.current.set(enhancedFile.file, enhancedFile);
       }
 
+      setUploadingFolderId(item.folderId);
+      removeFolderFromQueuedFolderIds(item.folderId);
+
       await uploadAsync(
         item.files.map((f) => f.file),
         {
           metadata: {
-            folderId: item.folderId,
+            folderId: item.folderId ? String(item.folderId) : null,
           },
         }
       );
@@ -120,6 +125,7 @@ export function PacerUploadProvider({
       started: true,
       onSettled: () => {
         setUploading(false);
+        setUploadingFolderId(null);
       },
     },
     (state) => ({
@@ -144,7 +150,8 @@ export function PacerUploadProvider({
           status: "pending",
           error: undefined,
           createdAt: new Date(),
-        }))
+        })),
+        item.folderId
       );
       asyncQueuer.addItem(item);
     },

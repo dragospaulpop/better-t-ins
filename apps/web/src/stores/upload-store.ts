@@ -15,10 +15,9 @@ export type UploadItem = {
 
 export type UploadStore = {
   uploadQueue: UploadItem[];
-  queuedFolderIds: Set<string>;
-  uploadingFolderId: string | null;
+  queuedFolderIds: Set<number | null>;
+  uploadingFolderId: number | null;
   isUploading: boolean;
-  currentFolderId: string | null;
   averageProgress: number;
 };
 
@@ -27,15 +26,18 @@ export const store = new Store<UploadStore>({
   queuedFolderIds: new Set(),
   uploadingFolderId: null,
   isUploading: false,
-  currentFolderId: null,
   averageProgress: 0,
 });
 
-export const addItemsToStore = (items: UploadItem[]) => {
+export const addItemsToStore = (
+  items: UploadItem[],
+  folderId: number | null
+) => {
   store.setState((state) => ({
     ...state,
     isUploading: true,
     uploadQueue: [...state.uploadQueue, ...items],
+    queuedFolderIds: new Set([...state.queuedFolderIds, folderId]),
   }));
 };
 
@@ -102,5 +104,21 @@ export const setUploading = (isUploading: boolean) => {
   store.setState((state) => ({
     ...state,
     isUploading,
+  }));
+};
+
+export const setUploadingFolderId = (folderId: number | null | undefined) => {
+  store.setState((state) => ({
+    ...state,
+    uploadingFolderId: folderId ?? null,
+  }));
+};
+
+export const removeFolderFromQueuedFolderIds = (folderId: number | null) => {
+  store.setState((state) => ({
+    ...state,
+    queuedFolderIds: new Set(
+      [...state.queuedFolderIds].filter((id) => id !== folderId)
+    ),
   }));
 };

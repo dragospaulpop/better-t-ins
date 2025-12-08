@@ -64,7 +64,7 @@ export const mimeToReadable = (mime: string) => {
 };
 
 export type Item = {
-  id: string | number;
+  id: number;
   parentId: string | number;
   name: string;
   type: "folder" | "file";
