@@ -22,13 +22,14 @@ const MIME_TYPES = [
 ];
 
 export function TestPacer() {
-  const { asyncQueuer } = usePacerUpload();
+  const { addItem } = usePacerUpload();
 
   return (
     <div>
       <Button
         onClick={() =>
-          asyncQueuer.addItem({
+          addItem({
+            id: crypto.randomUUID(),
             name: crypto.randomUUID(),
             size: Math.random() * MAX_SIZE,
             mime: MIME_TYPES[Math.floor(Math.random() * MIME_TYPES.length)],

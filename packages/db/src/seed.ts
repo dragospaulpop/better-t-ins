@@ -1,17 +1,17 @@
 import { eq } from "drizzle-orm";
 import { db } from ".";
-import { allowedHosts } from "./schema/settings";
+import { allowedHost } from "./schema/settings";
 
 async function seedAllowedHosts() {
   const [tudconsultHost] = await db
     .select()
-    .from(allowedHosts)
-    .where(eq(allowedHosts.host, "tudconsult.ro"));
+    .from(allowedHost)
+    .where(eq(allowedHost.host, "tudconsult.ro"));
   if (tudconsultHost) {
     // biome-ignore lint/suspicious/noConsole: grrr...
     console.log("Tudconsult host already exists");
   } else {
-    await db.insert(allowedHosts).values({
+    await db.insert(allowedHost).values({
       host: "tudconsult.ro",
       description: "Tudconsult",
       enabled: true,

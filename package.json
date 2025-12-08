@@ -40,6 +40,7 @@
     "db:watch": "turbo -F @better-t-ins/db db:watch",
     "db:stop": "turbo -F @better-t-ins/db db:stop",
     "db:down": "turbo -F @better-t-ins/db db:down",
+    "db:seed": "turbo -F @better-t-ins/db db:seed",
     "mail:start": "turbo -F @better-t-ins/mail mail:start",
     "mail:watch": "turbo -F @better-t-ins/mail mail:watch",
     "mail:stop": "turbo -F @better-t-ins/mail mail:stop",

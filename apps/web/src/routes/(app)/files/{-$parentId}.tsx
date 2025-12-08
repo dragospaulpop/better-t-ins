@@ -19,6 +19,7 @@ import RefreshButton from "./-components/refresh-button";
 import SizeOptions from "./-components/size-options";
 import SortOptions from "./-components/sort-options";
 import { TestPacer } from "./-components/test-pacer";
+import UploadStatus from "./-components/upload-status";
 import { Uploader } from "./-components/uploader";
 
 export const Route = createFileRoute("/(app)/files/{-$parentId}")({
@@ -175,6 +176,7 @@ function RouteComponent() {
     >
       {/* container */}
       <div className="relative flex h-full flex-col items-start justify-start gap-0 overflow-hidden">
+        <UploadStatus />
         {/* toolbar */}
         <div className="flex w-full flex-none flex-col gap-6 p-6">
           <div className="flex w-full flex-wrap items-center justify-between gap-4 lg:flex-nowrap">
