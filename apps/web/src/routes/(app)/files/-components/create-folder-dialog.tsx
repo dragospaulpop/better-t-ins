@@ -192,7 +192,7 @@ export default function CreateFolderDialog() {
   );
 }
 
-function handleCreateFolderError(e: unknown): string {
+export function handleCreateFolderError(e: unknown): string {
   if (e instanceof TRPCClientError) {
     if (e.data?.code === "UNAUTHORIZED") {
       return "You are not authorized to create a folder";

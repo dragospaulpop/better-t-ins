@@ -8,8 +8,9 @@ import { deleteFolder } from "../lib/folders/delete-folder";
 import { getAncestors } from "../lib/folders/get-ancestors";
 import { getDescendants } from "../lib/folders/get-descendants";
 import { insertFolder } from "../lib/folders/insert-folder";
+import renameFolder from "../lib/folders/rename-folder";
 
-const MAX_FOLDER_NAME_LENGTH = 100;
+const MAX_FOLDER_NAME_LENGTH = 255;
 // const SLEEP_MS = 2000;
 // const BOO_HOO_PROBABILITY = 0.5;
 
@@ -177,6 +178,33 @@ export const folderRouter = router({
       );
 
       await Promise.all(folderIds.map((id) => deleteFolder(db, id)));
+    }),
+
+  renameFolder: protectedProcedure
+    .input(
+      z.object({
+        id: z.coerce.number(),
+        name: z.string().min(1).max(MAX_FOLDER_NAME_LENGTH),
+        parent_id: z.string().nullable().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const id = input.id;
+      const name = input.name;
+      const parentId = input.parent_id;
+
+      const exists = await folderAlreadyExists(
+        name,
+        parentId ? Number.parseInt(parentId, 10) : null,
+        userId
+      );
+
+      if (exists) {
+        throw new Error("Folder name already exists");
+      }
+
+      await renameFolder(db, id, name);
     }),
 });
 

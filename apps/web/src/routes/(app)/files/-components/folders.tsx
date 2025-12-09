@@ -65,11 +65,11 @@ export const mimeToReadable = (mime: string) => {
 
 export type Item = {
   id: number;
-  parentId: string | number;
+  parentId: string | number | null;
   name: string;
   type: "folder" | "file";
   mime: string;
-  size: number;
+  size?: number;
   createdAt: Date;
   updatedAt: Date;
   history_count?: number;
@@ -99,9 +99,9 @@ export default function Folders({
       ({
         id: folder.id,
         name: folder.name,
+        parentId: folder.parent_id ?? null,
         type: "folder",
         mime: "application/x-folder",
-        size: 15,
         createdAt: folder.createdAt,
         updatedAt: folder.updatedAt,
       }) as Item

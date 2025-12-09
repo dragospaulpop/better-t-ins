@@ -1,6 +1,7 @@
 import type { UploadHookControl } from "@better-upload/client";
+import { revalidateLogic, useForm } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   ClockIcon,
   FolderIcon,
@@ -11,11 +12,13 @@ import {
 import { useId, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
+import z from "zod";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import type { EnhancedFile } from "@/providers/pacer-upload-provider";
 import { useRefetchFolder } from "@/providers/refetch-folder-provider";
 import { useSelectedItems } from "@/providers/selected-items-provider";
+import { handleCreateFolderError } from "@/routes/(app)/files/-components/create-folder-dialog";
 import type { Item } from "@/routes/(app)/files/-components/folders";
 import {
   AlertDialog,
@@ -29,11 +32,24 @@ import {
 } from "./ui/alert-dialog";
 import { Button } from "./ui/button";
 import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
+import { InputGroup, InputGroupInput } from "./ui/input-group";
+import { LoadingSwap } from "./ui/loading-swap";
+
+const MAX_FOLDER_NAME_LENGTH = 255;
 
 type FolderDropzoneProps = {
   control: UploadHookControl<true>;
@@ -87,6 +103,28 @@ export function FolderDropzone({
     })
   );
 
+  const [openDialog, setOpenDialog] = useState<"edit" | null>(null);
+
+  const validateMutation = useMutation(
+    trpc.folder.validateFolderName.mutationOptions()
+  );
+
+  const { mutateAsync: renameFolder } = useMutation(
+    trpc.folder.renameFolder.mutationOptions({
+      onSuccess: () => {
+        toast.success("Folder renamed successfully");
+        refetchFolders();
+        form.reset();
+        setOpenDialog(null);
+      },
+      onError: (error) => {
+        toast.error("Failed to rename folder", {
+          description: error.message,
+        });
+      },
+    })
+  );
+
   const { getRootProps, getInputProps, isDragActive, inputRef } = useDropzone({
     onDrop: (files) => {
       // Allow drops anytime - queue system handles concurrent uploads
@@ -107,6 +145,29 @@ export function FolderDropzone({
       inputRef.current.value = "";
     },
     noClick: true,
+  });
+
+  const form = useForm({
+    defaultValues: {
+      name: item.name,
+    },
+    validationLogic: revalidateLogic(),
+    validators: {
+      onSubmit: z.object({
+        name: z.string().min(1).max(MAX_FOLDER_NAME_LENGTH),
+      }),
+      onSubmitAsync: async ({ value }) => {
+        try {
+          await renameFolder({ id: item.id, name: value.name });
+        } catch (e) {
+          return {
+            fields: {
+              name: { message: handleCreateFolderError(e) },
+            },
+          };
+        }
+      },
+    },
   });
 
   return (
@@ -208,10 +269,23 @@ export function FolderDropzone({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem>Open</DropdownMenuItem>
-              <DropdownMenuItem>Open in new tab</DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  params={{ parentId: String(item.id) }}
+                  to="/files/{-$parentId}"
+                >
+                  Open
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => window.open(`/files/${item.id}`, "_blank")}
+              >
+                Open in new tab
+              </DropdownMenuItem>
               <DropdownMenuItem>Download</DropdownMenuItem>
-              <DropdownMenuItem>Rename</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setOpenDialog("edit")}>
+                Rename
+              </DropdownMenuItem>
               <DropdownMenuItem
                 className="text-destructive focus:bg-destructive/20"
                 onSelect={() => setDeleteOpen(true)}
@@ -238,6 +312,101 @@ export function FolderDropzone({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog
+        onOpenChange={(open) => !open && setOpenDialog(null)}
+        open={openDialog === "edit"}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rename folder</DialogTitle>
+          </DialogHeader>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              form.handleSubmit();
+            }}
+          >
+            <FieldGroup>
+              <form.Field
+                name="name"
+                validators={{
+                  onDynamicAsyncDebounceMs: 500,
+                  onDynamicAsync: async ({ value }) => {
+                    if (!value) {
+                      return { message: "Name can't be empty" };
+                    }
+
+                    try {
+                      const folderExists = await validateMutation.mutateAsync({
+                        name: value,
+                        parent_id: item.parentId ? String(item.parentId) : null,
+                      });
+
+                      return folderExists
+                        ? { message: "Folder name already exists" }
+                        : undefined;
+                    } catch (e) {
+                      return {
+                        message: handleCreateFolderError(e),
+                      };
+                    }
+                  },
+                }}
+              >
+                {(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+
+                  return (
+                    <Field data-invalid={isInvalid}>
+                      <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+                      <InputGroup>
+                        <InputGroupInput
+                          aria-invalid={isInvalid}
+                          autoFocus
+                          id={field.name}
+                          name={field.name}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          placeholder="Folder name"
+                          type="text"
+                          value={field.state.value}
+                        />
+                      </InputGroup>
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
+                  );
+                }}
+              </form.Field>
+              <form.Subscribe>
+                {(state) => (
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button variant="outline">Cancel</Button>
+                    </DialogClose>
+                    <Button
+                      disabled={!state.canSubmit || state.isSubmitting}
+                      type="submit"
+                    >
+                      <LoadingSwap
+                        isLoading={
+                          state.isSubmitting || state.isFieldsValidating
+                        }
+                      >
+                        Save
+                      </LoadingSwap>
+                    </Button>
+                  </DialogFooter>
+                )}
+              </form.Subscribe>
+            </FieldGroup>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

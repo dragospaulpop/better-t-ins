@@ -3,10 +3,8 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { createFileRoute, redirect, useRouter } from "@tanstack/react-router";
-import { UploadIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Loader from "@/components/loader";
-import { Button } from "@/components/ui/button";
 import Whoops from "@/components/whoops";
 import { PacerUploadProvider } from "@/providers/pacer-upload-provider";
 import { RefetchFolderProvider } from "@/providers/refetch-folder-provider";
@@ -207,10 +205,10 @@ function RouteComponent() {
               <div className="flex w-full flex-wrap items-center justify-between gap-4 lg:flex-nowrap">
                 <BreadcrumbNav ancestors={ancestors} />
                 <div className="flex items-center gap-2">
-                  <Button size="sm" variant="outline">
+                  {/* <Button size="sm" variant="outline">
                     <UploadIcon className="h-4 w-4" />
                     Upload files
-                  </Button>
+                  </Button> */}
                   <CreateFolderDialog />
                 </div>
               </div>

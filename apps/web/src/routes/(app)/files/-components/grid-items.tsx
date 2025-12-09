@@ -52,7 +52,9 @@ export default function GridItems({
               ? a.mime.localeCompare(b.mime)
               : b.mime.localeCompare(a.mime);
           case "size":
-            return sortDirection === "asc" ? a.size - b.size : b.size - a.size;
+            return sortDirection === "asc"
+              ? (a.size ?? 0) - (b.size ?? 0)
+              : (b.size ?? 0) - (a.size ?? 0);
           case "date":
             return sortDirection === "asc"
               ? a.createdAt.getTime() - b.createdAt.getTime()
