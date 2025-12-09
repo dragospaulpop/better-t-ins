@@ -2,7 +2,11 @@ import { and, db, eq, isNull } from "@better-t-ins/db";
 import { folder } from "@better-t-ins/db/schema/upload";
 import { z } from "zod";
 import { protectedProcedure, router } from "../index";
+import { deleteFile } from "../lib/files/delete-file";
+import { getAllByFolderId } from "../lib/files/get-all-by-folder-id";
+import { deleteFolder } from "../lib/folders/delete-folder";
 import { getAncestors } from "../lib/folders/get-ancestors";
+import { getDescendants } from "../lib/folders/get-descendants";
 import { insertFolder } from "../lib/folders/insert-folder";
 
 const MAX_FOLDER_NAME_LENGTH = 100;
@@ -119,6 +123,60 @@ export const folderRouter = router({
       }
 
       return await getAncestors(db, Number.parseInt(id, 10));
+    }),
+
+  deleteFolder: protectedProcedure
+    .input(z.object({ id: z.coerce.number() }))
+    .mutation(async ({ input }) => {
+      const id = input.id;
+
+      if (!id) {
+        return;
+      }
+
+      const descendants = await getDescendants(db, id);
+
+      const files = await Promise.all(
+        descendants
+          .flatMap((descendant) => descendant.id)
+          .map((descendantId) => getAllByFolderId(descendantId))
+      );
+
+      await Promise.all(
+        files
+          .flatMap((fileArray) => fileArray.map((file) => file.id))
+          .map((fileId) => deleteFile(fileId))
+      );
+
+      await deleteFolder(db, id);
+    }),
+
+  deleteFolders: protectedProcedure
+    .input(z.object({ folder_ids: z.array(z.coerce.number()) }))
+    .mutation(async ({ input }) => {
+      const folderIds = input.folder_ids;
+
+      if (!folderIds) {
+        return;
+      }
+
+      const descendants = await Promise.all(
+        folderIds.map((folderId) => getDescendants(db, folderId))
+      );
+
+      const files = await Promise.all(
+        descendants
+          .flatMap((descendant) => descendant.map((d) => d.id))
+          .flatMap((id) => getAllByFolderId(id))
+      );
+
+      await Promise.all(
+        files
+          .flatMap((fileArray) => fileArray.map((file) => file.id))
+          .map((id) => deleteFile(id))
+      );
+
+      await Promise.all(folderIds.map((id) => deleteFolder(db, id)));
     }),
 });
 

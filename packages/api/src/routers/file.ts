@@ -34,4 +34,14 @@ export const fileRouter = router({
     .mutation(async ({ input }) => {
       await deleteFile(input.file_id);
     }),
+
+  deleteFiles: protectedProcedure
+    .input(z.object({ file_ids: z.array(z.coerce.number()) }))
+    .mutation(async ({ input }) => {
+      await Promise.all(
+        input.file_ids.map(async (fileId) => {
+          await deleteFile(fileId);
+        })
+      );
+    }),
 });

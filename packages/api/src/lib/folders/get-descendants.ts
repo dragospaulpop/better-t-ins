@@ -2,7 +2,7 @@ import type { MySql2Database } from "@better-t-ins/db";
 import { eq } from "@better-t-ins/db";
 import { folder, folderClosure } from "@better-t-ins/db/schema/upload";
 
-export async function getAncestors(db: MySql2Database, id: number) {
+export async function getDescendants(db: MySql2Database, id: number) {
   return await db
     .select({
       id: folder.id,

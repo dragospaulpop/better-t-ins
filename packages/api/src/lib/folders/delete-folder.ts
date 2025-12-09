@@ -1,29 +1,34 @@
-import type { MySql2Database } from "@better-t-ins/db";
-import { sql } from "@better-t-ins/db";
+import { desc, eq, inArray, type MySql2Database, or } from "@better-t-ins/db";
+import { folder, folderClosure } from "@better-t-ins/db/schema/upload";
 
 export async function deleteFolder(db: MySql2Database, folderId: number) {
   await db.transaction(async (tx) => {
-    // Delete closure links (ancestors and descendants)
-    await tx.execute(
-      sql`
-        DELETE FROM folder_closure
-        WHERE descendant IN (
-          SELECT descendant FROM (SELECT descendant FROM folder_closure WHERE ancestor = ${folderId}) AS d
-        )
-        OR ancestor IN (
-          SELECT descendant FROM (SELECT descendant FROM folder_closure WHERE ancestor = ${folderId}) AS d2
-        );
-      `
-    );
+    // Collect all descendant folder IDs WITH depth (deepest first)
+    const descendants = await tx
+      .select({
+        descendant: folderClosure.descendant,
+        depth: folderClosure.depth,
+      })
+      .from(folderClosure)
+      .where(eq(folderClosure.ancestor, folderId))
+      .orderBy(desc(folderClosure.depth)); // Children first!
 
-    // Delete the actual folders
-    await tx.execute(
-      sql`
-        DELETE FROM folder
-        WHERE id IN (
-          SELECT descendant FROM (SELECT descendant FROM folder_closure WHERE ancestor = ${folderId}) AS f
-        );
-      `
-    );
+    const descendantIds = descendants.map((d) => d.descendant);
+
+    // Delete closure links first
+    await tx
+      .delete(folderClosure)
+      .where(
+        or(
+          inArray(folderClosure.descendant, descendantIds),
+          inArray(folderClosure.ancestor, descendantIds)
+        )
+      );
+
+    // Delete folders one by one, deepest (children) first
+
+    for (const { descendant } of descendants) {
+      await tx.delete(folder).where(eq(folder.id, descendant));
+    }
   });
 }

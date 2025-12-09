@@ -1,8 +1,10 @@
 import { FileStackIcon } from "lucide-react";
 import { useMemo } from "react";
+import { defaultStyles, FileIcon } from "react-file-icon";
 import { cn } from "@/lib/utils";
+import { useSelectedItems } from "@/providers/selected-items-provider";
 import { FolderUploader } from "./folder-uploader";
-import { CustomIcon, type Item } from "./folders";
+import type { Item } from "./folders";
 import { ItemMenu } from "./item-menu";
 import { type Size, sizeClassMap } from "./size-options";
 
@@ -126,17 +128,55 @@ function FileItem({
   gridItemSize: string;
   gridItemLabel: string;
 }) {
+  const { selectedFiles, toggleSelectedFile } = useSelectedItems();
+
+  const extension = useMemo(
+    () => item.name.split(".").pop()?.toLowerCase(),
+    [item.name]
+  );
+
+  const style = useMemo(
+    () =>
+      defaultStyles[extension as keyof typeof defaultStyles] ||
+      defaultStyles.bin,
+    [extension]
+  );
+
   return (
-    <div className="group relative flex flex-col items-center justify-between gap-2 rounded-lg border border-transparent bg-card p-2 transition-all hover:border-tud-blue/50 hover:bg-tud-blue/25 hover:shadow-md hover:shadow-tud-green/25">
+    // biome-ignore lint/a11y/useSemanticElements: gimme a break
+    <div
+      className={cn(
+        "group relative flex flex-col items-center justify-start gap-0 rounded-lg border border-transparent p-2 transition-all hover:bg-tud-blue/25 hover:shadow-md hover:shadow-tud-green/25",
+        {
+          "border-tud-blue/80 bg-tud-blue/25": selectedFiles.includes(item.id),
+        }
+      )}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleSelectedFile(item.id);
+      }}
+      onKeyUp={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          toggleSelectedFile(item.id);
+        }
+      }}
+      role="button"
+      tabIndex={0}
+    >
       <div className="relative">
-        <CustomIcon
-          absoluteStrokeWidth={true}
-          className={cn("shrink-0", gridItemSize)}
-          extension={item.mime as string}
-          strokeWidth={0.75}
-        />
+        <div
+          className={cn(
+            gridItemSize,
+            "my-2 grid shrink-0 place-items-center p-2 [&>svg]:size-full"
+          )}
+        >
+          <FileIcon extension={extension} {...style} labelUppercase={false} />
+        </div>
       </div>
-      <span className={cn("line-clamp-2 break-all text-center", gridItemLabel)}>
+      <span
+        className={cn("line-clamp-none break-all text-center", gridItemLabel)}
+      >
         {item.name}
       </span>
       {item?.history_count && item.history_count > 1 && (

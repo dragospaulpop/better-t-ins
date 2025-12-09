@@ -4,16 +4,18 @@ import {
 } from "@tanstack/react-query";
 import { createFileRoute, redirect, useRouter } from "@tanstack/react-router";
 import { UploadIcon } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Loader from "@/components/loader";
 import { Button } from "@/components/ui/button";
 import Whoops from "@/components/whoops";
 import { PacerUploadProvider } from "@/providers/pacer-upload-provider";
 import { RefetchFolderProvider } from "@/providers/refetch-folder-provider";
+import { SelectedItemsProvider } from "@/providers/selected-items-provider";
 import { BreadcrumbNav } from "./-components/breadcrumb-nav";
 import CreateFolderDialog from "./-components/create-folder-dialog";
+import DeleteSelectedButton from "./-components/delete-selected-button";
 import DisplayOptions from "./-components/display-options";
-import Folders from "./-components/folders";
+import FolderContents from "./-components/folder-contents";
 import RefreshButton from "./-components/refresh-button";
 import SizeOptions from "./-components/size-options";
 import SortOptions from "./-components/sort-options";
@@ -85,18 +87,19 @@ export const Route = createFileRoute("/(app)/files/{-$parentId}")({
 
 function RouteComponent() {
   const { parentId } = Route.useParams();
-  const { trpc } = Route.useRouteContext();
-  const { data: rawFolders = [], refetch: refetchFolders } = useSuspenseQuery(
+  const { trpc, queryClient } = Route.useRouteContext();
+
+  const { data: rawFolders = [] } = useSuspenseQuery(
     trpc.folder.getAllByParentId.queryOptions({
       parent_id: parentId,
     })
   );
-  const { data: ancestors = [], refetch: refetchAncestors } = useSuspenseQuery(
+  const { data: ancestors = [] } = useSuspenseQuery(
     trpc.folder.getAncestors.queryOptions({
       id: parentId,
     })
   );
-  const { data: rawFiles = [], refetch: refetchFiles } = useSuspenseQuery(
+  const { data: rawFiles = [] } = useSuspenseQuery(
     trpc.file.getAllByFolderId.queryOptions({
       folder_id: parentId,
     })
@@ -130,10 +133,38 @@ function RouteComponent() {
   );
 
   const refresh = useCallback(async () => {
-    await refetchFolders();
-    await refetchAncestors();
-    await refetchFiles();
-  }, [refetchFolders, refetchAncestors, refetchFiles]);
+    await queryClient.invalidateQueries(
+      trpc.folder.getAllByParentId.queryOptions({
+        parent_id: parentId,
+      })
+    );
+    await queryClient.invalidateQueries(
+      trpc.folder.getAncestors.queryOptions({
+        id: parentId,
+      })
+    );
+    await queryClient.invalidateQueries(
+      trpc.file.getAllByFolderId.queryOptions({
+        folder_id: parentId,
+      })
+    );
+  }, [parentId, queryClient, trpc]);
+
+  const refetchFiles = useCallback(() => {
+    queryClient.invalidateQueries(
+      trpc.file.getAllByFolderId.queryOptions({
+        folder_id: parentId,
+      })
+    );
+  }, [parentId, queryClient, trpc]);
+
+  const refetchFolders = useCallback(() => {
+    queryClient.invalidateQueries(
+      trpc.folder.getAllByParentId.queryOptions({
+        parent_id: parentId,
+      })
+    );
+  }, [parentId, queryClient, trpc]);
 
   const handleSortBy = useCallback(
     (newField: "name" | "type" | "size" | "date") => {
@@ -153,52 +184,62 @@ function RouteComponent() {
     setSortDirection(newDirection);
   }, []);
 
+  const currentFolderId = useMemo(
+    () => (parentId ? Number.parseInt(parentId, 10) : null),
+    [parentId]
+  );
+
   return (
     <PacerUploadProvider
-      currentFolderId={parentId ?? null}
+      currentFolderId={currentFolderId}
       refreshCurrentFolder={refetchFiles}
     >
-      {/* container */}
-      <div className="relative flex h-full flex-col items-start justify-start gap-0 overflow-hidden">
-        <UploadStatus />
-        {/* toolbar */}
-        <div className="flex w-full flex-none flex-col gap-6 p-6">
-          <div className="flex w-full flex-wrap items-center justify-between gap-4 lg:flex-nowrap">
-            <BreadcrumbNav ancestors={ancestors} />
-            <div className="flex items-center gap-2">
-              <Button size="sm" variant="outline">
-                <UploadIcon className="h-4 w-4" />
-                Upload files
-              </Button>
-              <CreateFolderDialog />
+      <SelectedItemsProvider currentFolderId={currentFolderId}>
+        <RefetchFolderProvider
+          refetchFiles={refetchFiles}
+          refetchFolders={refetchFolders}
+        >
+          {/* container */}
+          <div className="relative flex h-full flex-col items-start justify-start gap-0 overflow-hidden">
+            <UploadStatus />
+            {/* toolbar */}
+            <div className="flex w-full flex-none flex-col gap-6 p-6">
+              <div className="flex w-full flex-wrap items-center justify-between gap-4 lg:flex-nowrap">
+                <BreadcrumbNav ancestors={ancestors} />
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="outline">
+                    <UploadIcon className="h-4 w-4" />
+                    Upload files
+                  </Button>
+                  <CreateFolderDialog />
+                </div>
+              </div>
+              <div className="flex w-full flex-wrap items-center justify-between gap-4 lg:flex-nowrap">
+                <div className="flex items-center gap-2">
+                  <RefreshButton refresh={refresh} />
+                  <SortOptions
+                    foldersFirst={foldersFirst}
+                    handleSortBy={handleSortBy}
+                    handleSortDirection={handleSortDirection}
+                    setFoldersFirst={setFoldersFirst}
+                    sortDirection={sortDirection}
+                    sortField={sortField}
+                  />
+                </div>
+                <DeleteSelectedButton />
+                <SizeOptions
+                  handleItemSize={handleItemSize}
+                  itemSize={itemSize}
+                />
+                <DisplayOptions
+                  displayMode={displayMode}
+                  setDisplayMode={setDisplayMode}
+                />
+              </div>
             </div>
-          </div>
-          <div className="flex w-full flex-wrap items-center justify-between gap-4 lg:flex-nowrap">
-            <div className="flex items-center gap-2">
-              <RefreshButton refresh={refresh} />
-              <SortOptions
-                foldersFirst={foldersFirst}
-                handleSortBy={handleSortBy}
-                handleSortDirection={handleSortDirection}
-                setFoldersFirst={setFoldersFirst}
-                sortDirection={sortDirection}
-                sortField={sortField}
-              />
-            </div>
-            <SizeOptions handleItemSize={handleItemSize} itemSize={itemSize} />
-            <DisplayOptions
-              displayMode={displayMode}
-              setDisplayMode={setDisplayMode}
-            />
-          </div>
-        </div>
-        {/* items - shrinks to content when few items, scrolls when many */}
-        <div className="min-h-0 w-full flex-[0_1_auto] overflow-y-auto p-6">
-          <RefetchFolderProvider
-            refetchFiles={refetchFiles}
-            refetchFolders={refetchFolders}
-          >
-            <Folders
+            {/* items - shrinks to content when few items, scrolls when many */}
+
+            <FolderContents
               displayMode={displayMode}
               files={files}
               folders={folders}
@@ -207,13 +248,14 @@ function RouteComponent() {
               sortDirection={sortDirection}
               sortField={sortField}
             />
-          </RefetchFolderProvider>
-        </div>
-        {/* uploader - min 140px, grows to fill remaining space */}
-        <div className="flex min-h-48 w-full flex-1 flex-col items-center justify-center p-6">
-          <Uploader targetFolderId={parentId ?? null} />
-        </div>
-      </div>
+
+            {/* uploader - min 140px, grows to fill remaining space */}
+            <div className="flex min-h-48 w-full flex-1 flex-col items-center justify-center p-6">
+              <Uploader targetFolderId={currentFolderId} />
+            </div>
+          </div>
+        </RefetchFolderProvider>
+      </SelectedItemsProvider>
     </PacerUploadProvider>
   );
 }

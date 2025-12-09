@@ -1,8 +1,18 @@
+import { type UploadHookControl, useUploadFiles } from "@better-upload/client";
 import {
   type ReactAsyncQueuer,
   useAsyncQueuer,
 } from "@tanstack/react-pacer/async-queuer";
 import { createContext, useCallback, useContext, useMemo, useRef } from "react";
+import {
+  addItemsToStore,
+  removeFolderFromQueuedFolderIds,
+  setUploading,
+  setUploadingFolderId,
+  updateItemError,
+  updateItemProgress,
+  updateItemStatus,
+} from "@/stores/upload-store";
 
 interface PacerUploadContextValue {
   currentFolderId?: string | number | null;
@@ -15,20 +25,10 @@ const PacerUploadContext = createContext<PacerUploadContextValue | null>(null);
 
 interface PacerUploadProviderProps {
   children: React.ReactNode;
-  currentFolderId?: string | number | null;
+  currentFolderId: number | null;
   refreshCurrentFolder: () => void;
 }
 
-import { type UploadHookControl, useUploadFiles } from "@better-upload/client";
-import {
-  addItemsToStore,
-  removeFolderFromQueuedFolderIds,
-  setUploading,
-  setUploadingFolderId,
-  updateItemError,
-  updateItemProgress,
-  updateItemStatus,
-} from "@/stores/upload-store";
 // import { addItem as addItemToStore } from "@/stores/upload-store";
 
 export interface EnhancedFile {
@@ -41,6 +41,8 @@ type UploadQueueItem = {
   files: EnhancedFile[];
   folderId: number | null;
 };
+
+const COMPLETED_PROGRESS = 100;
 
 export function PacerUploadProvider({
   children,
@@ -65,6 +67,12 @@ export function PacerUploadProvider({
       const enhancedFile = fileTrackingMap.current.get(file.raw);
       if (enhancedFile) {
         updateItemProgress(enhancedFile.id, file.progress);
+        if (
+          enhancedFile.folderId === currentFolderId &&
+          file.progress >= COMPLETED_PROGRESS
+        ) {
+          refreshCurrentFolder();
+        }
       }
     },
     onUploadComplete: ({ files }) => {
@@ -72,6 +80,7 @@ export function PacerUploadProvider({
         const enhancedFile = fileTrackingMap.current.get(file.raw);
         if (enhancedFile) {
           updateItemStatus(enhancedFile.id, "completed");
+          updateItemProgress(enhancedFile.id, 0);
         }
 
         if (enhancedFile?.folderId === currentFolderId) {

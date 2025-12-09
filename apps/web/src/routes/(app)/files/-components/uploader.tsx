@@ -2,7 +2,7 @@ import { UploadDropzone } from "@/components/upload-dropzone";
 import { usePacerUpload } from "@/providers/pacer-upload-provider";
 
 interface UploaderProps {
-  targetFolderId?: string | null;
+  targetFolderId?: number | null;
 }
 
 export function Uploader({ targetFolderId }: UploaderProps) {
