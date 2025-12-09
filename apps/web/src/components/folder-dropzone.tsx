@@ -2,6 +2,7 @@ import type { UploadHookControl } from "@better-upload/client";
 import { revalidateLogic, useForm } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
+import { TRPCClientError } from "@trpc/client";
 import {
   ClockIcon,
   FolderIcon,
@@ -18,7 +19,6 @@ import { cn } from "@/lib/utils";
 import type { EnhancedFile } from "@/providers/pacer-upload-provider";
 import { useRefetchFolder } from "@/providers/refetch-folder-provider";
 import { useSelectedItems } from "@/providers/selected-items-provider";
-import { handleCreateFolderError } from "@/routes/(app)/files/-components/create-folder-dialog";
 import type { Item } from "@/routes/(app)/files/-components/folders";
 import {
   AlertDialog,
@@ -162,7 +162,7 @@ export function FolderDropzone({
         } catch (e) {
           return {
             fields: {
-              name: { message: handleCreateFolderError(e) },
+              name: { message: handleRenameFolderError(e) },
             },
           };
         }
@@ -349,7 +349,7 @@ export function FolderDropzone({
                         : undefined;
                     } catch (e) {
                       return {
-                        message: handleCreateFolderError(e),
+                        message: handleRenameFolderError(e),
                       };
                     }
                   },
@@ -409,4 +409,34 @@ export function FolderDropzone({
       </Dialog>
     </>
   );
+}
+
+function handleRenameFolderError(e: unknown): string {
+  if (e instanceof TRPCClientError) {
+    if (e.data?.code === "UNAUTHORIZED") {
+      return "You are not authorized to rename a folder";
+    }
+    if (e.data?.code === "BAD_REQUEST") {
+      try {
+        const error = JSON.parse(e.message as string) as {
+          code: string;
+          message: string;
+          path: string[];
+        }[];
+
+        return (
+          error?.[0]?.message ??
+          "Failed to rename folder (no server error message)"
+        );
+      } catch (_) {
+        return "Failed to rename folder (unknown error)";
+      }
+    }
+
+    if (e.data?.code === "INTERNAL_SERVER_ERROR") {
+      return e.message;
+    }
+    return `Failed to rename folder (${e.data?.code} ${e.data?.message})`;
+  }
+  return `Failed to rename folder (unknown error: ${(e as Error)?.message})`;
 }

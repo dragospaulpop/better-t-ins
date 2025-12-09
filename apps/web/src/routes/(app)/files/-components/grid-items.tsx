@@ -145,46 +145,50 @@ function FileItem({
   );
 
   return (
-    // biome-ignore lint/a11y/useSemanticElements: gimme a break
-    <div
-      className={cn(
-        "group relative flex flex-col items-center justify-start gap-0 rounded-lg border border-transparent p-2 transition-all hover:bg-tud-blue/25 hover:shadow-md hover:shadow-tud-green/25",
-        {
-          "border-tud-blue/80 bg-tud-blue/25": selectedFiles.includes(item.id),
-        }
-      )}
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        toggleSelectedFile(item.id);
-      }}
-      onKeyUp={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
+    <div className="group relative">
+      {/* biome-ignore lint/a11y/useSemanticElements: gimme a break */}
+      <div
+        className={cn(
+          "group z-10 flex flex-col items-center justify-start gap-0 rounded-lg border border-transparent p-2 transition-all hover:bg-tud-blue/25 hover:shadow-md hover:shadow-tud-green/25",
+          {
+            "border-tud-blue/80 bg-tud-blue/25": selectedFiles.includes(
+              item.id
+            ),
+          }
+        )}
+        data-type="file"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
           toggleSelectedFile(item.id);
-        }
-      }}
-      role="button"
-      tabIndex={0}
-    >
-      <div className="relative">
-        <div
-          className={cn(
-            gridItemSize,
-            "my-2 grid shrink-0 place-items-center p-2 [&>svg]:size-full"
-          )}
-        >
-          <FileIcon extension={extension} {...style} labelUppercase={false} />
-        </div>
-      </div>
-      <span
-        className={cn("line-clamp-none break-all text-center", gridItemLabel)}
+        }}
+        onKeyUp={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            toggleSelectedFile(item.id);
+          }
+        }}
+        role="button"
+        tabIndex={0}
       >
-        {item.name}
-      </span>
-      {item?.history_count && item.history_count > 1 && (
-        <FileStackIcon className="absolute top-1 left-1 size-3 text-tud-green/75" />
-      )}
-
+        <div className="relative">
+          <div
+            className={cn(
+              gridItemSize,
+              "my-2 grid shrink-0 place-items-center p-2 [&>svg]:size-full"
+            )}
+          >
+            <FileIcon extension={extension} {...style} labelUppercase={false} />
+          </div>
+        </div>
+        <span
+          className={cn("line-clamp-none break-all text-center", gridItemLabel)}
+        >
+          {item.name}
+        </span>
+        {item?.history_count && item.history_count > 1 && (
+          <FileStackIcon className="absolute top-1 left-1 size-3 text-tud-green/75" />
+        )}
+      </div>
       <ItemMenu item={item} />
     </div>
   );

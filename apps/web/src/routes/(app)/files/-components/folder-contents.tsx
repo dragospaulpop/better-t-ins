@@ -26,6 +26,7 @@ export default function FolderContents({
     // biome-ignore lint/a11y/useSemanticElements: gimme a break
     <div
       className="min-h-0 w-full flex-[0_1_auto] overflow-y-auto p-6"
+      id="folder-contents"
       onClick={() => {
         clearSelectedItems();
       }}

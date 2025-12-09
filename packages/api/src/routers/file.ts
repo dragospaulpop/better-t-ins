@@ -2,8 +2,12 @@ import { z } from "zod";
 import { protectedProcedure, router } from "../index";
 import { deleteFile } from "../lib/files/delete-file";
 import { deleteHistoryItem } from "../lib/files/delete-history-item";
+import fileAlreadyExists from "../lib/files/file-already-exists";
 import { getAllByFolderId } from "../lib/files/get-all-by-folder-id";
 import { getHistory } from "../lib/files/get-history";
+import renameFile from "../lib/files/rename-file";
+
+const MAX_FILE_NAME_LENGTH = 255;
 
 export const fileRouter = router({
   getAllByFolderId: protectedProcedure
@@ -43,5 +47,52 @@ export const fileRouter = router({
           await deleteFile(fileId);
         })
       );
+    }),
+
+  renameFile: protectedProcedure
+    .input(
+      z.object({
+        file_id: z.coerce.number(),
+        name: z.string().min(1).max(MAX_FILE_NAME_LENGTH),
+        folder_id: z.string().nullable().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const fileId = input.file_id;
+      const name = input.name;
+
+      const exists = await fileAlreadyExists(
+        name,
+        input.folder_id ? Number.parseInt(input.folder_id, 10) : null,
+        fileId
+      );
+      if (exists) {
+        throw new Error("File name already exists");
+      }
+
+      await renameFile(fileId, name);
+    }),
+
+  validateFileName: protectedProcedure
+    .input(
+      z.object({
+        file_id: z.coerce.number(),
+        name: z.string().min(1).max(MAX_FILE_NAME_LENGTH),
+        folder_id: z.string().nullable().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const name = input.name;
+      const fileId = input.file_id;
+      const folderId =
+        input.folder_id === undefined ||
+        input.folder_id === null ||
+        Number.isNaN(input.folder_id)
+          ? null
+          : Number.parseInt(input.folder_id, 10);
+
+      const exists = await fileAlreadyExists(name, folderId, fileId);
+
+      return exists;
     }),
 });
