@@ -169,16 +169,20 @@ SSH into `phpint` (10.194.250.33).
 
     **File:** `/etc/nginx/sites-available/tudbox-app`
     ```nginx
+    # /etc/nginx/sites-available/tudbox-app
     server {
         server_name app.yourdomain.com;
+        root /var/www/tudbox-web/dist;
+        index index.html;
 
         location / {
-            # Proxy to the static file server running on nodeint
-            proxy_pass http://10.194.250.35:3001;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
+            try_files $uri $uri/ /index.html;  # SPA fallback
+        }
+
+        # Static asset caching
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
         }
     }
     ```
