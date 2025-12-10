@@ -9,14 +9,13 @@ import arcjet, {
   shield,
   slidingWindow,
 } from "@arcjet/bun";
-import { findIp } from "@arcjet/ip";
 import type { Context } from "hono";
 import { cloneRawRequest } from "hono/request";
 
 // The arcjet instance is created outside of the handler
 const aj = arcjet({
   key: process.env.ARCJET_KEY || "", // Get your site key from https://app.arcjet.com
-  characteristics: ["userId", "ip"],
+  characteristics: ["userId"],
   rules: [
     // Protect against common attacks with Arcjet Shield. Other rules are
     // added dynamically using `withRule`.
@@ -57,13 +56,15 @@ const signupOptions = {
 export default async function protect(c: Context): Promise<ArcjetDecision> {
   const session = c.get("session");
 
-  const ip =
-    c.req.header("X-Forwarded-For")?.split(",")?.[0]?.trim() ||
-    c.req.header("X-Real-IP") ||
-    findIp(c.req.raw) ||
-    "127.0.0.1";
+  // fortinet does not proxy the real ip
 
-  const userId = session?.userId ?? ip;
+  // const ip =
+  //   c.req.header("X-Forwarded-For")?.split(",")?.[0]?.trim() ||
+  //   c.req.header("X-Real-IP") ||
+  //   findIp(c.req.raw) ||
+  //   "127.0.0.1";
+
+  const userId = session?.userId ?? "anon";
 
   // If this is a signup then use the special protectSignup rule
   // See https://docs.arcjet.com/signup-protection/quick-start
@@ -78,14 +79,14 @@ export default async function protect(c: Context): Promise<ArcjetDecision> {
     if (typeof body.email === "string") {
       return aj
         .withRule(protectSignup(signupOptions))
-        .protect(c.req.raw, { email: body.email, userId, ip });
+        .protect(c.req.raw, { email: body.email, userId });
     }
     // Otherwise use rate limit and detect bot
     return aj
       .withRule(detectBot(botOptions))
       .withRule(slidingWindow(rateLimitOptions))
-      .protect(c.req.raw, { userId, ip });
+      .protect(c.req.raw, { userId });
   }
   // For all other auth requests
-  return aj.withRule(detectBot(botOptions)).protect(c.req.raw, { userId, ip });
+  return aj.withRule(detectBot(botOptions)).protect(c.req.raw, { userId });
 }
