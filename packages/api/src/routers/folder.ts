@@ -8,7 +8,10 @@ import { deleteFolder } from "../lib/folders/delete-folder";
 import buildTree, { type FolderNode } from "../lib/folders/folder-tree";
 import { getAncestors } from "../lib/folders/get-ancestors";
 import { getDescendants } from "../lib/folders/get-descendants";
-import { getFolderTreeFlat } from "../lib/folders/get-folder-tree-flat";
+import {
+  getFilesInRootFolder,
+  getFolderTreeFlat,
+} from "../lib/folders/get-folder-tree-flat";
 import { insertFolder } from "../lib/folders/insert-folder";
 import renameFolder from "../lib/folders/rename-folder";
 
@@ -275,7 +278,15 @@ export const folderRouter = router({
       .where(and(eq(folder.owner_id, userId), isNull(folder.parent_id)))
       .orderBy(folder.name);
 
-    const tree: FolderNode[] = [];
+    const filesInRoot = await getFilesInRootFolder(db, userId);
+
+    const treeRootObject = {
+      id: null,
+      name: "Root",
+      depth: 0,
+      files: filesInRoot,
+      children: [] as FolderNode[],
+    } satisfies FolderNode;
 
     for (const folderInRoot of foldersInRoot) {
       const { folders, files } = await getFolderTreeFlat(
@@ -285,11 +296,11 @@ export const folderRouter = router({
       );
       const treeNode = buildTree(folders, files);
       if (treeNode) {
-        tree.push(treeNode);
+        treeRootObject.children.push(treeNode);
       }
     }
 
-    return tree;
+    return treeRootObject;
   }),
 });
 

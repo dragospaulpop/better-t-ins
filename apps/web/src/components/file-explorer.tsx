@@ -75,15 +75,7 @@ function FolderNodeItem({ node }: { node: FolderNode }) {
             ))}
             {node.files.map((file) => (
               <SidebarMenuItem key={file.fileId}>
-                <SidebarMenuButton
-                  className="data-[active=true]:bg-transparent"
-                  onClick={() =>
-                    navigate({
-                      to: "/files/{-$parentId}",
-                      params: { parentId: String(node.id) },
-                    })
-                  }
-                >
+                <SidebarMenuButton className="cursor-default data-[active=true]:bg-transparent">
                   <ChevronRightIcon className="size-4 shrink-0 opacity-0" />
                   <FileIcon className="size-4 shrink-0" />
                   <span className="whitespace-nowrap">{file.fileName}</span>
@@ -97,7 +89,7 @@ function FolderNodeItem({ node }: { node: FolderNode }) {
   );
 }
 
-export default function FileExplorer({ items }: { items: FolderNode[] }) {
+export default function FileExplorer({ rootNode }: { rootNode: FolderNode }) {
   const { parentId } = useParams({ strict: false });
   const isRootActive = !parentId;
 
@@ -117,14 +109,23 @@ export default function FileExplorer({ items }: { items: FolderNode[] }) {
                 ) : (
                   <FolderIcon className="size-4" />
                 )}
-                <span>Root</span>
+                <span>{rootNode.name}</span>
               </CustomNavButton>
             </SidebarMenuButton>
           </CollapsibleTrigger>
           <CollapsibleContent>
             <SidebarMenuSub>
-              {items.map((item) => (
+              {rootNode.children.map((item) => (
                 <FolderNodeItem key={item.id} node={item} />
+              ))}
+              {rootNode.files.map((file) => (
+                <SidebarMenuItem key={file.fileId}>
+                  <SidebarMenuButton className="cursor-default data-[active=true]:bg-transparent">
+                    <ChevronRightIcon className="size-4 shrink-0 opacity-0" />
+                    <FileIcon className="size-4 shrink-0" />
+                    <span className="whitespace-nowrap">{file.fileName}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               ))}
             </SidebarMenuSub>
           </CollapsibleContent>

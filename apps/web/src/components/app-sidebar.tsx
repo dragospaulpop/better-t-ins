@@ -127,7 +127,18 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent className="overflow-x-auto">
             <div className="min-w-max">
-              <FileExplorer items={rootFolderTree ?? ([] as FolderNode[])} />
+              <FileExplorer
+                rootNode={
+                  rootFolderTree ??
+                  ({
+                    id: null,
+                    name: "Root",
+                    depth: 0,
+                    files: [],
+                    children: [],
+                  } satisfies FolderNode)
+                }
+              />
             </div>
           </SidebarGroupContent>
         </SidebarGroup>

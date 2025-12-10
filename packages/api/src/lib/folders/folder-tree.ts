@@ -5,7 +5,7 @@ export interface FileInfo {
 }
 
 export interface FolderNode {
-  id: number;
+  id: number | null;
   name: string;
   depth: number;
   files: FileInfo[];

@@ -1,6 +1,6 @@
 // packages/api/src/lib/folders/get-folder-tree-flat.ts
 import type { MySql2Database } from "@tud-box/db";
-import { and, eq, sql } from "@tud-box/db";
+import { and, eq, isNull, sql } from "@tud-box/db";
 import {
   file,
   folder,
@@ -56,4 +56,25 @@ export async function getFolderTreeFlat(
     );
 
   return { folders, files };
+}
+
+export async function getFilesInRootFolder(db: MySql2Database, userId: string) {
+  const files = await db
+    .select({
+      fileId: file.id,
+      fileName: file.name,
+      fileType: file.type,
+      fileSize: file.size,
+      folderId: file.folder_id,
+      s3Key: sql<string>`(
+        SELECT ${history.s3_key} FROM ${history}
+        WHERE ${history.file_id} = ${sql.raw("`file`.`id`")}
+        ORDER BY ${history.createdAt} DESC
+        LIMIT 1
+      )`.as("s3_key"),
+    })
+    .from(file)
+    .where(and(eq(file.owner_id, userId), isNull(file.folder_id)));
+
+  return files;
 }
