@@ -11,6 +11,7 @@ build
 # Environment variables
 .env
 .env*.local
+.env.production
 
 # IDEs and editors
 .vscode/*
@@ -57,3 +58,4 @@ temp
 # END Ruler Generated Files
 
 .certs
+packages/mail/.env.production

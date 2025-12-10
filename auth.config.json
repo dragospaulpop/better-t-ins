@@ -275,7 +275,10 @@
           }
         }
       ],
-      "trustedOrigins": ["https://app.tud-box.test"],
+      "trustedOrigins": [
+        "https://app.tud-box.test",
+        "https://tud-box.verdedata.ro"
+      ],
       "emailAndPassword": {
         "enabled": true,
         "requireEmailVerification": false,
