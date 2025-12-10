@@ -42,11 +42,11 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
   head: () => ({
     meta: [
       {
-        title: "better-t-ins",
+        title: "TUDBox",
       },
       {
         name: "description",
-        content: "better-t-ins is a web application",
+        content: "TUDBox is a file storage application from TUD",
       },
     ],
     links: [

@@ -15,9 +15,9 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       manifest: {
-        name: "better-t-ins",
-        short_name: "better-t-ins",
-        description: "better-t-ins - PWA Application",
+        name: "TUDBox",
+        short_name: "tud-box",
+        description: "A file storage application from TUD",
         theme_color: "#0c0c0c",
       },
       pwaAssets: { disabled: false, config: true },
@@ -27,7 +27,7 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 3001,
-    allowedHosts: ["app.better-t-ins.test", "localhost"],
+    allowedHosts: ["app.better-t-ins.test", "localhost", "tudbox.verdedata.ro"],
     // https: {
     //   key: "./.certs/app.better-t-ins.test+6-key.pem",
     //   cert: "./.certs/app.better-t-ins.test+6.pem",
