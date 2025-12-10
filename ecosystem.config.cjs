@@ -6,6 +6,6 @@ module.exports = {
   env: {
     PATH: `${process.env.HOME}/.bun/bin:${process.env.PATH}`, // Add "~/.bun/bin/bun" to PATH
     NODE_ENV: "production",
-    PORT: 3001,
+    PORT: 3100,
   },
 };

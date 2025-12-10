@@ -5,8 +5,8 @@ services:
     image: minio/minio
     container_name: tud-box-minio
     ports:
-      - "${MINIO_PORT}:9000"
-      - "${MINIO_CONSOLE_PORT}:9001"
+      - "${MINIO_HOST}:${MINIO_PORT}:9000"
+      - "${MINIO_HOST}:${MINIO_CONSOLE_PORT}:9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
