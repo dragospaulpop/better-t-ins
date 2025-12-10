@@ -134,7 +134,15 @@ export function FileItemMenu({ item }: { item: Item }) {
   });
 
   return (
-    <div className="absolute top-1 right-1 z-20 opacity-0 transition-opacity group-hover:opacity-100">
+    // biome-ignore lint/a11y/useSemanticElements: leave me alone
+    // biome-ignore lint/a11y/useKeyWithClickEvents: leave me alone
+    <div
+      className="absolute top-1 right-1 z-20 opacity-0 transition-opacity group-hover:opacity-100"
+      onClick={(e) => e.stopPropagation()}
+      onDoubleClick={(e) => e.preventDefault()}
+      role="button"
+      tabIndex={0}
+    >
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button className="rounded-full p-1" size="icon-sm" variant="ghost">
@@ -202,7 +210,7 @@ export function FileItemMenu({ item }: { item: Item }) {
         onOpenChange={(open) => !open && setOpenDialog(null)}
         open={openDialog === "edit"}
       >
-        <DialogContent>
+        <DialogContent onClick={(e) => e.stopPropagation()}>
           <DialogHeader>
             <DialogTitle>Rename file</DialogTitle>
           </DialogHeader>

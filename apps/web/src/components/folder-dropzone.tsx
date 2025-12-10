@@ -278,7 +278,16 @@ export function FolderDropzone({
             {item.name}
           </span>
         </div>
-        <div className="absolute top-1 right-1">
+
+        {/** biome-ignore lint/a11y/useKeyWithClickEvents: leave me alone */}
+        {/** biome-ignore lint/a11y/useSemanticElements: leave me alone */}
+        <div
+          className="absolute top-1 right-1"
+          onClick={(e) => e.stopPropagation()}
+          onDoubleClick={(e) => e.preventDefault()}
+          role="button"
+          tabIndex={0}
+        >
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -340,7 +349,7 @@ export function FolderDropzone({
         onOpenChange={(open) => !open && setOpenDialog(null)}
         open={openDialog === "edit"}
       >
-        <DialogContent>
+        <DialogContent onClick={(e) => e.stopPropagation()}>
           <DialogHeader>
             <DialogTitle>Rename folder</DialogTitle>
           </DialogHeader>
