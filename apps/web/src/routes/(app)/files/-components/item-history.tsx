@@ -86,6 +86,19 @@ export default function ItemHistory({
     }
   }, [history, onOpenChange, item.id, refetchFiles]);
 
+  const { mutateAsync: downloadSpecificFileHistoryItem } = useMutation(
+    trpc.file.downloadSpecificFileHistoryItem.mutationOptions({
+      onSuccess: (data) => {
+        window.open(data, "_blank", "noopener");
+      },
+      onError: (error) => {
+        toast.error("Failed to download specific file history item", {
+          description: error.message,
+        });
+      },
+    })
+  );
+
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent>
@@ -141,6 +154,11 @@ export default function ItemHistory({
                   <ItemActions>
                     <Button
                       className="rounded-full"
+                      onClick={() =>
+                        downloadSpecificFileHistoryItem({
+                          history_id: historyItem.id,
+                        })
+                      }
                       size="icon"
                       variant="ghost"
                     >

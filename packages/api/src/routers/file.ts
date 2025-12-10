@@ -1,13 +1,20 @@
+import { storage } from "@better-t-ins/storage";
 import { z } from "zod";
 import { protectedProcedure, router } from "../index";
 import { deleteFile } from "../lib/files/delete-file";
 import { deleteHistoryItem } from "../lib/files/delete-history-item";
 import fileAlreadyExists from "../lib/files/file-already-exists";
 import { getAllByFolderId } from "../lib/files/get-all-by-folder-id";
+import { getFileHistoryKey } from "../lib/files/get-file-history-key";
 import { getHistory } from "../lib/files/get-history";
+import { getLatestFileHistoryKey } from "../lib/files/get-latest-file-history-key";
 import renameFile from "../lib/files/rename-file";
 
 const MAX_FILE_NAME_LENGTH = 255;
+
+const FIVE_MINUTES = 5;
+const SECONDS = 60;
+const FIVE_MINUTES_IN_SECONDS = FIVE_MINUTES * SECONDS;
 
 export const fileRouter = router({
   getAllByFolderId: protectedProcedure
@@ -94,5 +101,33 @@ export const fileRouter = router({
       const exists = await fileAlreadyExists(name, folderId, fileId);
 
       return exists;
+    }),
+
+  downloadLatestFileHistory: protectedProcedure
+    .input(z.object({ file_id: z.coerce.number() }))
+    .mutation(async ({ input }) => {
+      const key = await getLatestFileHistoryKey(input.file_id);
+
+      // get presigned url from s3
+      const url = await storage.client.presignedGetObject(
+        storage.bucketName,
+        key,
+        FIVE_MINUTES_IN_SECONDS
+      );
+      return url;
+    }),
+
+  downloadSpecificFileHistoryItem: protectedProcedure
+    .input(z.object({ history_id: z.coerce.number() }))
+    .mutation(async ({ input }) => {
+      const key = await getFileHistoryKey(input.history_id);
+
+      // get presigned url from s3
+      const url = await storage.client.presignedGetObject(
+        storage.bucketName,
+        key,
+        FIVE_MINUTES_IN_SECONDS
+      );
+      return url;
     }),
 });

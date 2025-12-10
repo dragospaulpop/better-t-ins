@@ -93,6 +93,19 @@ export function ItemMenu({ item }: { item: Item }) {
     })
   );
 
+  const { mutateAsync: downloadLatestFileHistory } = useMutation(
+    trpc.file.downloadLatestFileHistory.mutationOptions({
+      onSuccess: (data) => {
+        window.open(data, "_blank", "noopener");
+      },
+      onError: (error) => {
+        toast.error("Failed to download latest file history", {
+          description: error.message,
+        });
+      },
+    })
+  );
+
   const form = useForm({
     defaultValues: {
       name: item.name,
@@ -138,7 +151,9 @@ export function ItemMenu({ item }: { item: Item }) {
             <HistoryIcon className="mr-2 size-4" />
             View History
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => downloadLatestFileHistory({ file_id: item.id })}
+          >
             <DownloadIcon className="mr-2 size-4" />
             Download latest
           </DropdownMenuItem>
