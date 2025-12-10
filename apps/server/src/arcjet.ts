@@ -63,6 +63,9 @@ export default async function protect(c: Context): Promise<ArcjetDecision> {
     findIp(c.req.raw) ||
     "127.0.0.1";
 
+  console.log(ip);
+  console.log(c.req.header());
+
   const userId = session?.userId ?? ip;
 
   // If this is a signup then use the special protectSignup rule
