@@ -52,10 +52,8 @@ export const Route = createFileRoute("/(auth)/verify-email")({
 });
 
 function RouteComponent() {
-  const [intervalId, setIntervalId] = useState<NodeJS.Timeout | undefined>(
-    undefined
-  );
-  const [timeLeft, setTimeLeft] = useState<number>(0);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [isCountingDown, setIsCountingDown] = useState(false);
   const { data: session } = useSession();
   const { mutate: sendVerificationEmail } = useSendVerificationEmail();
   const { mutate: signOut } = useSignOut();
@@ -74,6 +72,7 @@ function RouteComponent() {
       {
         onSuccess: () => {
           setTimeLeft(EMAIL_VERIFICATION_RESEND_INTERVAL);
+          setIsCountingDown(true);
           toast.success("Verification email sent");
         },
         onError: (error) => {
@@ -84,20 +83,22 @@ function RouteComponent() {
   };
 
   useEffect(() => {
+    if (!isCountingDown) {
+      return;
+    }
+
     const interval = setInterval(() => {
-      setTimeLeft((time) => time - 1);
+      setTimeLeft((time) => {
+        if (time <= 1) {
+          setIsCountingDown(false);
+          return 0;
+        }
+        return time - 1;
+      });
     }, SECOND);
 
-    setIntervalId(interval);
-
     return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    if (timeLeft <= 0) {
-      clearInterval(intervalId);
-    }
-  }, [timeLeft, intervalId]);
+  }, [isCountingDown]);
   return (
     <div className="grid h-full min-h-0 place-items-center p-2">
       <div className="flex w-full max-w-md flex-col gap-6">
@@ -108,9 +109,8 @@ function RouteComponent() {
             <CardAction>
               <Button
                 onClick={() => {
-                  clearInterval(intervalId);
-                  setIntervalId(undefined);
                   setTimeLeft(0);
+                  setIsCountingDown(false);
                   signOut(
                     {},
                     {
