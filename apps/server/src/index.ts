@@ -3,25 +3,30 @@ if (process.env.NODE_ENV !== "production") {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 }
 
+import { trpcServer } from "@hono/trpc-server";
 import { createContext } from "@tud-box/api/context";
 import { appRouter } from "@tud-box/api/routers/index";
 import { auth } from "@tud-box/auth";
-import { trpcServer } from "@hono/trpc-server";
 import "dotenv/config";
 import { Readable } from "node:stream";
+import { handleRequest } from "@better-upload/server";
 import buildPaths from "@tud-box/api/lib/folders/build-paths";
 import { getFolderTreeFlat } from "@tud-box/api/lib/folders/get-folder-tree-flat";
 import { and, db, eq } from "@tud-box/db";
 import { folder } from "@tud-box/db/schema/upload";
 import { storage } from "@tud-box/storage";
 import { router as uploadRouter } from "@tud-box/storage/router";
-import { handleRequest } from "@better-upload/server";
 import archiver from "archiver";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import z from "zod";
 import protect from "./arcjet";
+
+const customLogger = (message: string, ...rest: string[]) => {
+  // biome-ignore lint/suspicious/noConsole: we want to log to the console
+  console.log(message, ...rest);
+};
 
 const RATE_LIMIT_EXCEEDED_STATUS = 429;
 const EMAIL_INVALID_STATUS = 400;
@@ -49,7 +54,7 @@ const app = new Hono<{
   };
 }>();
 
-app.use(logger());
+app.use(logger(customLogger));
 app.use(
   "/*",
   cors({
@@ -149,22 +154,61 @@ app.get("/download/folder/:id", async (c) => {
 
   const archive = archiver("zip", { zlib: { level: 9 } });
 
-  // Append each file's content from storage
-  for (const file of files) {
-    const folderPath = file.folderId ? (paths.get(file.folderId) ?? "") : "";
+  // Critical: Handle archive errors
+  archive.on("error", (err) => {
+    customLogger("Archive error:", err.message);
+    archive.abort();
+  });
 
-    const fileStream = await storage.client.getObject(
-      storage.bucketName,
-      file.s3Key
-    );
-    archive.append(fileStream, { name: `${folderPath}/${file.fileName}` });
-  }
+  // Append files sequentially to avoid overwhelming connections
+  const appendFiles = async () => {
+    for (const file of files) {
+      const folderPath = file.folderId ? (paths.get(file.folderId) ?? "") : "";
 
-  // Don't await - let it finalize while streaming
-  archive.finalize();
+      try {
+        const fileStream = await storage.client.getObject(
+          storage.bucketName,
+          file.s3Key
+        );
 
-  // Convert Node.js Readable to Web ReadableStream
-  const webStream = Readable.toWeb(archive) as ReadableStream;
+        // Wrap in a promise to properly handle stream errors
+        await new Promise<void>((resolve, reject) => {
+          fileStream.on("error", reject);
+          archive.append(fileStream, {
+            name: `${folderPath}/${file.fileName}`,
+          });
+          // archiver emits 'entry' when the entry has been processed
+          archive.once("entry", () => resolve());
+        });
+      } catch (err) {
+        customLogger(
+          `Error fetching file ${file.s3Key}:`,
+          (err as Error).message
+        );
+        // Continue with other files or abort - your choice
+        // To abort: throw err;
+      }
+    }
+  };
+
+  // Use a PassThrough stream for better control
+  const { PassThrough } = await import("node:stream");
+  const passThrough = new PassThrough();
+
+  // Pipe archive to passthrough
+  archive.pipe(passThrough);
+
+  // Start appending files and finalize when done
+  appendFiles()
+    .then(() => archive.finalize())
+    .catch((err) => {
+      customLogger("Failed to create archive:", (err as Error).message);
+      archive.abort();
+      passThrough.destroy(err);
+    });
+
+  // Convert to web stream
+  const webStream = Readable.toWeb(passThrough) as ReadableStream;
 
   return new Response(webStream, {
     headers: {
