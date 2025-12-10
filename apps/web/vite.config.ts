@@ -27,7 +27,7 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 3001,
-    allowedHosts: ["app.better-t-ins.test", "localhost", "tudbox.verdedata.ro"],
+    allowedHosts: ["app.better-t-ins.test", "localhost"],
     // https: {
     //   key: "./.certs/app.better-t-ins.test+6-key.pem",
     //   cert: "./.certs/app.better-t-ins.test+6.pem",
