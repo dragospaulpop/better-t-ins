@@ -1,8 +1,8 @@
 // when using a separate backend server, make sure to update the `api` option on the client hooks.
 
-import { auth } from "@tud-box/auth";
 import { RejectUpload, type Router, route } from "@better-upload/server";
 import { minio } from "@better-upload/server/clients";
+import { auth } from "@tud-box/auth";
 import z from "zod";
 import { storage } from ".";
 import { insertFiles } from "./lib/insert-files";
@@ -73,7 +73,12 @@ export const router: Router = {
         return {
           generateObjectInfo: ({ file: uploadFile }) => {
             const uniqueId = crypto.randomUUID();
-            const key = `${userId}/${uniqueId}-${uploadFile.name}`;
+            const sanitizedName = uploadFile.name.replace(
+              /[^\p{L}\p{N}._-]/gu,
+              "_"
+            );
+            const key = `${userId}/${uniqueId}-${sanitizedName}`;
+
             return {
               key,
               metadata: {
