@@ -3,6 +3,7 @@ import { createContext, useContext } from "react";
 interface RefetchFolderContextValue {
   refetchFolders: () => void;
   refetchFiles: () => void;
+  refetchTree: () => void;
 }
 
 const RefetchFolderContext = createContext<RefetchFolderContextValue | null>(
@@ -13,15 +14,19 @@ type RefetchFolderProviderProps = {
   children: React.ReactNode;
   refetchFolders: () => void;
   refetchFiles: () => void;
+  refetchTree: () => void;
 };
 
 export function RefetchFolderProvider({
   children,
   refetchFolders,
   refetchFiles,
+  refetchTree,
 }: RefetchFolderProviderProps) {
   return (
-    <RefetchFolderContext.Provider value={{ refetchFolders, refetchFiles }}>
+    <RefetchFolderContext.Provider
+      value={{ refetchFolders, refetchFiles, refetchTree }}
+    >
       {children}
     </RefetchFolderContext.Provider>
   );

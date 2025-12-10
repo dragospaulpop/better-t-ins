@@ -50,7 +50,7 @@ export default function ItemHistory({
   onOpenChange: (open: boolean) => void;
   item: ItemType;
 }) {
-  const { refetchFiles } = useRefetchFolder();
+  const { refetchFiles, refetchTree } = useRefetchFolder();
   const {
     data: history,
     isLoading,
@@ -83,8 +83,9 @@ export default function ItemHistory({
         queryKey: trpc.file.getHistory.queryKey({ file_id: Number(item.id) }),
       });
       refetchFiles();
+      refetchTree();
     }
-  }, [history, onOpenChange, item.id, refetchFiles]);
+  }, [history, onOpenChange, item.id, refetchFiles, refetchTree]);
 
   const { mutateAsync: downloadSpecificFileHistoryItem } = useMutation(
     trpc.file.downloadSpecificFileHistoryItem.mutationOptions({

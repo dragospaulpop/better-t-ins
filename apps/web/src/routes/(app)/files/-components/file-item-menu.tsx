@@ -54,7 +54,7 @@ import ItemHistory from "./item-history";
 const MAX_FILE_NAME_LENGTH = 255;
 
 export function FileItemMenu({ item }: { item: Item }) {
-  const { refetchFiles } = useRefetchFolder();
+  const { refetchFiles, refetchTree } = useRefetchFolder();
   const [historyOpen, setHistoryOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const { mutate: deleteFile } = useMutation(
@@ -62,6 +62,7 @@ export function FileItemMenu({ item }: { item: Item }) {
       onSuccess: () => {
         toast.success("File deleted successfully");
         refetchFiles();
+        refetchTree();
       },
       onError: (error) => {
         toast.error("Failed to delete file", {
@@ -83,6 +84,7 @@ export function FileItemMenu({ item }: { item: Item }) {
         toast.success("File renamed successfully");
         refetchFiles();
         form.reset();
+        refetchTree();
         setOpenDialog(null);
       },
       onError: (error) => {

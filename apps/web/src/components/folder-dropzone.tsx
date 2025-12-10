@@ -83,7 +83,7 @@ export function FolderDropzone({
   const navigate = useNavigate();
   const { toggleSelectedFolder, selectedFolders, clearSelectedFolders } =
     useSelectedItems();
-  const { refetchFiles, refetchFolders } = useRefetchFolder();
+  const { refetchFiles, refetchFolders, refetchTree } = useRefetchFolder();
 
   const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -94,6 +94,7 @@ export function FolderDropzone({
         clearSelectedFolders();
         refetchFiles();
         refetchFolders();
+        refetchTree();
       },
       onError: (error) => {
         toast.error("Failed to delete folder", {
@@ -114,6 +115,7 @@ export function FolderDropzone({
       onSuccess: () => {
         toast.success("Folder renamed successfully");
         refetchFolders();
+        refetchTree();
         form.reset();
         setOpenDialog(null);
       },

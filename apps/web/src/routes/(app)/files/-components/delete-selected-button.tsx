@@ -14,7 +14,7 @@ export default function DeleteSelectedButton() {
     clearSelectedFiles,
     clearSelectedFolders,
   } = useSelectedItems();
-  const { refetchFiles, refetchFolders } = useRefetchFolder();
+  const { refetchFiles, refetchFolders, refetchTree } = useRefetchFolder();
   const { mutateAsync: deleteSelectedFiles, isPending: isDeletingFiles } =
     useMutation(
       trpc.file.deleteFiles.mutationOptions({
@@ -22,6 +22,7 @@ export default function DeleteSelectedButton() {
           toast.success("Files deleted successfully");
           refetchFiles();
           clearSelectedFiles();
+          refetchTree();
         },
         onError: (error) => {
           toast.error("Failed to delete files", {
@@ -38,6 +39,7 @@ export default function DeleteSelectedButton() {
           toast.success("Folders deleted successfully");
           refetchFiles();
           refetchFolders();
+          refetchTree();
           clearSelectedFolders();
         },
         onError: (error) => {

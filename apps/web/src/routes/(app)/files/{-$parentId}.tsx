@@ -164,6 +164,10 @@ function RouteComponent() {
     );
   }, [parentId, queryClient, trpc]);
 
+  const refetchTree = useCallback(() => {
+    queryClient.invalidateQueries(trpc.folder.getRootFolderTree.queryOptions());
+  }, [queryClient, trpc]);
+
   const handleSortBy = useCallback(
     (newField: "name" | "type" | "size" | "date") => {
       const currentField = sortField;
@@ -199,6 +203,7 @@ function RouteComponent() {
         <RefetchFolderProvider
           refetchFiles={refetchFiles}
           refetchFolders={refetchFolders}
+          refetchTree={refetchTree}
         >
           {/* container */}
           <div className="relative flex h-full flex-col items-start justify-start gap-0 overflow-hidden">

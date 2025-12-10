@@ -149,7 +149,7 @@ function FileItem({
       {/* biome-ignore lint/a11y/useSemanticElements: gimme a break */}
       <div
         className={cn(
-          "group z-10 flex flex-col items-center justify-start gap-0 rounded-lg border border-transparent p-2 transition-all hover:bg-tud-blue/25 hover:shadow-md hover:shadow-tud-green/25",
+          "group z-10 flex h-full flex-col items-center justify-start gap-0 rounded-lg border border-transparent p-2 transition-all hover:bg-tud-blue/25 hover:shadow-md hover:shadow-tud-green/25",
           {
             "border-tud-blue/80 bg-tud-blue/25": selectedFiles.includes(
               item.id
