@@ -1,9 +1,10 @@
 import { and, db, eq, isNull } from "@tud-box/db";
 import { folder } from "@tud-box/db/schema/upload";
 import { z } from "zod";
-import { protectedProcedure, router } from "../index";
+import { adminProcedure, protectedProcedure, router } from "../index";
 import { deleteFile } from "../lib/files/delete-file";
 import { getAllByFolderId } from "../lib/files/get-all-by-folder-id";
+import assignFolderTemplateToUsers from "../lib/folders/assign-folder-template-to-users";
 import { deleteFolder } from "../lib/folders/delete-folder";
 import buildTree, { type FolderNode } from "../lib/folders/folder-tree";
 import { getAncestors } from "../lib/folders/get-ancestors";
@@ -282,7 +283,7 @@ export const folderRouter = router({
 
     const treeRootObject = {
       id: null,
-      name: "Root",
+      name: "Home",
       depth: 0,
       files: filesInRoot,
       children: [] as FolderNode[],
@@ -302,6 +303,20 @@ export const folderRouter = router({
 
     return treeRootObject;
   }),
+
+  assignFolderTemplateToUsers: adminProcedure
+    .input(
+      z.object({
+        folderId: z.coerce.number(),
+        userIds: z.array(z.string()),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const folderId = input.folderId;
+      const userIds = input.userIds;
+
+      await assignFolderTemplateToUsers(folderId, userIds);
+    }),
 });
 
 function createFolderParentCondition(parentId: number | null) {

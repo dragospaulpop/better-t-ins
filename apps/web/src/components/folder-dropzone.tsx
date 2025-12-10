@@ -10,16 +10,18 @@ import {
   MoreVerticalIcon,
   UploadIcon,
 } from "lucide-react";
-import { useId, useState } from "react";
+import { Fragment, useId, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import z from "zod";
+import { useListUsers, useSession } from "@/lib/auth-hooks";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import type { EnhancedFile } from "@/providers/pacer-upload-provider";
 import { useRefetchFolder } from "@/providers/refetch-folder-provider";
 import { useSelectedItems } from "@/providers/selected-items-provider";
-import type { Item } from "@/routes/(app)/files/-components/folders";
+import type { User } from "@/routes/(app)/admin/settings/-components/users/columns";
+import type { Item as FolderItem } from "@/routes/(app)/files/-components/folders";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,11 +32,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
+import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Button } from "./ui/button";
+import { Checkbox } from "./ui/checkbox";
 import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -43,10 +48,22 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
 import { InputGroup, InputGroupInput } from "./ui/input-group";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemMedia,
+  ItemSeparator,
+  ItemTitle,
+} from "./ui/item";
+import { Label } from "./ui/label";
 import { LoadingSwap } from "./ui/loading-swap";
 
 const MAX_FOLDER_NAME_LENGTH = 255;
@@ -60,7 +77,7 @@ type FolderDropzoneProps = {
     files: EnhancedFile[],
     options?: Parameters<UploadHookControl<true>["upload"]>[1]
   ) => void;
-  item: Item;
+  item: FolderItem;
   gridItemSize: string;
   gridItemLabel: string;
   isUploading?: boolean;
@@ -80,12 +97,21 @@ export function FolderDropzone({
   isQueued = false,
 }: FolderDropzoneProps) {
   const id = useId();
+  const { user } = useSession();
   const navigate = useNavigate();
   const { toggleSelectedFolder, selectedFolders, clearSelectedFolders } =
     useSelectedItems();
   const { refetchFiles, refetchFolders, refetchTree } = useRefetchFolder();
 
+  const [openDialog, setOpenDialog] = useState<"edit" | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [assignOpen, setAssignOpen] = useState(false);
+
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+
+  const { data: { users = [] } = {} } = useListUsers() as {
+    data: { users: User[] };
+  };
 
   const { mutateAsync: deleteFolder } = useMutation(
     trpc.folder.deleteFolder.mutationOptions({
@@ -103,8 +129,18 @@ export function FolderDropzone({
       },
     })
   );
-
-  const [openDialog, setOpenDialog] = useState<"edit" | null>(null);
+  const { mutateAsync: assignFolderTemplateToUsers } = useMutation(
+    trpc.folder.assignFolderTemplateToUsers.mutationOptions({
+      onSuccess: () => {
+        toast.success("Folder assigned successfully to users");
+      },
+      onError: (error) => {
+        toast.error("Failed to assign folder to users", {
+          description: error.message,
+        });
+      },
+    })
+  );
 
   const validateMutation = useMutation(
     trpc.folder.validateFolderName.mutationOptions()
@@ -192,6 +228,14 @@ export function FolderDropzone({
       },
     },
   });
+
+  const assignFolderToUsers = async (folderId: number) => {
+    await assignFolderTemplateToUsers({ folderId, userIds: selectedUserIds });
+    setAssignOpen(false);
+    setSelectedUserIds([]);
+    refetchFolders();
+    refetchTree();
+  };
 
   return (
     <>
@@ -326,6 +370,14 @@ export function FolderDropzone({
               >
                 Delete
               </DropdownMenuItem>
+              {user?.role === "admin" && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => setAssignOpen(true)}>
+                    Assign as template to users
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -439,6 +491,82 @@ export function FolderDropzone({
               </form.Subscribe>
             </FieldGroup>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        onOpenChange={(open) => !open && setAssignOpen(false)}
+        open={assignOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Assign as template to users</DialogTitle>
+          </DialogHeader>
+          <DialogDescription>
+            If the folder name already exists in the a user's home it will get a
+            random prefix. Assigning it to your own user will just create a copy
+            of the folder in your home. Note that only the folder structure will
+            be copied.
+          </DialogDescription>
+          <ItemGroup className="max-h-[300px] overflow-y-auto">
+            {users.map((userItem, index) => (
+              <Fragment key={userItem.id}>
+                <Item asChild size="sm">
+                  <Label htmlFor={userItem.id}>
+                    <ItemMedia>
+                      <Avatar>
+                        <AvatarFallback>
+                          {userItem.name?.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </ItemMedia>
+                    <ItemContent className="gap-1">
+                      <ItemTitle>{userItem.name}</ItemTitle>
+                      <ItemDescription>{userItem.email}</ItemDescription>
+                    </ItemContent>
+                    <ItemActions>
+                      <Checkbox
+                        checked={selectedUserIds.includes(userItem.id)}
+                        id={userItem.id}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedUserIds([
+                              ...selectedUserIds,
+                              userItem.id,
+                            ]);
+                          } else {
+                            setSelectedUserIds(
+                              selectedUserIds.filter(
+                                (selectedId) => selectedId !== userItem.id
+                              )
+                            );
+                          }
+                        }}
+                      />
+                    </ItemActions>
+                  </Label>
+                </Item>
+                {index !== users.length - 1 && <ItemSeparator />}
+              </Fragment>
+            ))}
+          </ItemGroup>
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                setAssignOpen(false);
+                setSelectedUserIds([]);
+              }}
+              variant="outline"
+            >
+              Cancel
+            </Button>
+            <Button
+              disabled={selectedUserIds.length === 0}
+              onClick={() => assignFolderToUsers(item.id)}
+            >
+              Assign
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>

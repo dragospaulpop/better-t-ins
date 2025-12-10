@@ -28,7 +28,7 @@ function FolderNodeItem({ node }: { node: FolderNode }) {
     return (
       <SidebarMenuItem>
         <SidebarMenuButton
-          className="data-[active=true]:bg-transparent"
+          className=""
           isActive={isActive}
           onClick={() =>
             navigate({
@@ -43,7 +43,7 @@ function FolderNodeItem({ node }: { node: FolderNode }) {
           ) : (
             <FolderIcon className="size-4 shrink-0" />
           )}
-          <span className="whitespace-nowrap">{node.name}</span>
+          <span className="whitespace-nowrap">{node.name} leaf</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
     );

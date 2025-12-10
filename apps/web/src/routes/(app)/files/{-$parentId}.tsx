@@ -146,6 +146,9 @@ function RouteComponent() {
         folder_id: parentId,
       })
     );
+    await queryClient.invalidateQueries(
+      trpc.folder.getRootFolderTree.queryOptions()
+    );
   }, [parentId, queryClient, trpc]);
 
   const refetchFiles = useCallback(() => {
