@@ -29,7 +29,11 @@ type SerializedAllowedHost = Omit<AllowedHost, "createdAt" | "updatedAt"> & {
 };
 
 export const Route = createFileRoute("/(app)/admin/settings/")({
-  pendingComponent: () => <Loader />,
+  pendingComponent: () => (
+    <div className="flex h-full items-center justify-center pt-8">
+      <Loader />
+    </div>
+  ),
   errorComponent: ({ error }) => {
     const router = useRouter();
     const queryErrorResetBoundary = useQueryErrorResetBoundary();

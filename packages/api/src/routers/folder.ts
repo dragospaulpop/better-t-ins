@@ -131,7 +131,8 @@ export const folderRouter = router({
 
   deleteFolder: protectedProcedure
     .input(z.object({ id: z.coerce.number() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
       const id = input.id;
 
       if (!id) {
@@ -143,7 +144,7 @@ export const folderRouter = router({
       const files = await Promise.all(
         descendants
           .flatMap((descendant) => descendant.id)
-          .map((descendantId) => getAllByFolderId(descendantId))
+          .map((descendantId) => getAllByFolderId(descendantId, userId))
       );
 
       await Promise.all(
@@ -157,7 +158,8 @@ export const folderRouter = router({
 
   deleteFolders: protectedProcedure
     .input(z.object({ folder_ids: z.array(z.coerce.number()) }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
       const folderIds = input.folder_ids;
 
       if (!folderIds) {
@@ -171,7 +173,7 @@ export const folderRouter = router({
       const files = await Promise.all(
         descendants
           .flatMap((descendant) => descendant.map((d) => d.id))
-          .flatMap((id) => getAllByFolderId(id))
+          .flatMap((id) => getAllByFolderId(id, userId))
       );
 
       await Promise.all(

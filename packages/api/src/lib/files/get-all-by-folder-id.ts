@@ -3,7 +3,10 @@ import { user } from "@better-t-ins/db/schema/auth";
 import { file, history } from "@better-t-ins/db/schema/upload";
 import { createFileFolderCondition } from "./utils";
 
-export async function getAllByFolderId(folderId: number | null) {
+export async function getAllByFolderId(
+  folderId: number | null,
+  userId: string
+) {
   return await db
     .select({
       id: file.id,
@@ -19,7 +22,5 @@ export async function getAllByFolderId(folderId: number | null) {
     })
     .from(file)
     .innerJoin(user, eq(file.owner_id, user.id))
-    .where(
-      and(createFileFolderCondition(folderId), eq(file.owner_id, user.id))
-    );
+    .where(and(createFileFolderCondition(folderId), eq(file.owner_id, userId)));
 }

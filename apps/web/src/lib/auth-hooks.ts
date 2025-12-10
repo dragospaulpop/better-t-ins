@@ -264,6 +264,26 @@ function useUnbanUser(options?: Partial<AuthQueryOptions>) {
   });
 }
 
+function useImpersonateUser(options?: Partial<AuthQueryOptions>) {
+  const { sessionKey: queryKey } = useContext(AuthQueryContext);
+
+  return useAuthMutation({
+    queryKey,
+    mutationFn: authClient.admin.impersonateUser,
+    options,
+  });
+}
+
+function useStopImpersonatingUser(options?: Partial<AuthQueryOptions>) {
+  const { sessionKey: queryKey } = useContext(AuthQueryContext);
+
+  return useAuthMutation({
+    queryKey,
+    mutationFn: authClient.admin.stopImpersonating,
+    options,
+  });
+}
+
 export {
   useSession,
   usePrefetchSession,
@@ -307,4 +327,6 @@ export {
   useSetUserPassword,
   useBanUser,
   useUnbanUser,
+  useImpersonateUser,
+  useStopImpersonatingUser,
 };

@@ -1,11 +1,15 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useSession } from "@/lib/auth-hooks";
 import { ModeToggle } from "./mode-toggle";
+import StopImpersonating from "./stop-impersonating";
 import UploadNotifications from "./upload-notifications";
 import UserMenu from "./user-menu";
 
 export default function Header() {
+  const { data: session } = useSession();
+
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-card px-6">
       <SidebarTrigger />
@@ -22,6 +26,8 @@ export default function Header() {
       </div>
 
       <div className="flex items-center gap-2">
+        {session?.session?.impersonatedBy && <StopImpersonating />}
+
         <UploadNotifications />
 
         <ModeToggle />

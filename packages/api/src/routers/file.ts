@@ -19,7 +19,9 @@ const FIVE_MINUTES_IN_SECONDS = FIVE_MINUTES * SECONDS;
 export const fileRouter = router({
   getAllByFolderId: protectedProcedure
     .input(z.object({ folder_id: z.string().nullable().optional() }))
-    .query(async ({ input }) => {
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+
       const folderId =
         Number.isNaN(input.folder_id) ||
         input.folder_id === null ||
@@ -27,7 +29,7 @@ export const fileRouter = router({
           ? null
           : Number.parseInt(input.folder_id as string, 10);
 
-      return await getAllByFolderId(folderId);
+      return await getAllByFolderId(folderId, userId);
     }),
 
   getHistory: protectedProcedure

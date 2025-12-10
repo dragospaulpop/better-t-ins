@@ -16,7 +16,8 @@ export async function insertFiles(records: ObjWithFileRecordAndS3Key[]) {
       .where(
         and(
           eq(file.name, fileRecord.name),
-          createFolderCondition(fileRecord.folder_id)
+          createFolderCondition(fileRecord.folder_id),
+          eq(file.owner_id, fileRecord.owner_id as string)
         )
       )
       .limit(1);

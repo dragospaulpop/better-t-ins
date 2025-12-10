@@ -111,7 +111,7 @@ export default function ItemHistory({
             Timeline of uploads of a file with the same name in the same folder
           </DialogDescription>
         </DialogHeader>
-        {isLoading && <Spinner className="size-4 animate-spin" />}
+        {isLoading && <Spinner className="size-4" />}
         {isError && <AlertCircleIcon className="size-4 text-destructive" />}
         {history && history.length > 0 && (
           <ItemGroup className="max-h-[500px] overflow-y-auto">
