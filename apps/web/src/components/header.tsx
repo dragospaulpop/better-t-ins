@@ -19,6 +19,7 @@ export default function Header() {
           <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
           <Input
             className="pl-10"
+            disabled
             placeholder="Search files, folders, users..."
             type="search"
           />
