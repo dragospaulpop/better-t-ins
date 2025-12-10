@@ -43,7 +43,7 @@ function FolderNodeItem({ node }: { node: FolderNode }) {
           ) : (
             <FolderIcon className="size-4 shrink-0" />
           )}
-          <span className="whitespace-nowrap">{node.name} leaf</span>
+          <span className="whitespace-nowrap">{node.name}</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
     );
