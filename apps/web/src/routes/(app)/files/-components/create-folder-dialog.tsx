@@ -64,6 +64,9 @@ export default function CreateFolderDialog() {
               parent_id: parentId,
             }),
           });
+          await queryClient.invalidateQueries(
+            trpc.folder.getRootFolderTree.queryOptions()
+          );
           // await router.invalidate();
           form.reset();
           setOpen(false);
