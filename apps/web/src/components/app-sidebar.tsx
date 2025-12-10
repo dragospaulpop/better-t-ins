@@ -125,8 +125,10 @@ export function AppSidebar() {
               </Tooltip>
             )}
           </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <FileExplorer items={rootFolderTree ?? ([] as FolderNode[])} />
+          <SidebarGroupContent className="overflow-x-auto">
+            <div className="min-w-max">
+              <FileExplorer items={rootFolderTree ?? ([] as FolderNode[])} />
+            </div>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>

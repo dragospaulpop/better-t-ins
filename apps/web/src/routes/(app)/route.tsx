@@ -26,7 +26,11 @@ export const Route = createFileRoute("/(app)")({
 function RouteComponent() {
   return (
     <UploadFeedbackProvider>
-      <SidebarProvider>
+      <SidebarProvider
+      // style={{
+      //   "--sidebar-width": "min-content",
+      // }}
+      >
         <div className="flex h-screen w-full overflow-hidden bg-background">
           <AppSidebar />
           <div className="flex flex-1 flex-col overflow-hidden">
