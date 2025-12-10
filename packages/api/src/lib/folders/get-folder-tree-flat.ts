@@ -1,6 +1,6 @@
 // packages/api/src/lib/folders/get-folder-tree-flat.ts
 import type { MySql2Database } from "@better-t-ins/db";
-import { eq, sql } from "@better-t-ins/db";
+import { and, eq, sql } from "@better-t-ins/db";
 import {
   file,
   folder,
@@ -8,7 +8,11 @@ import {
   history,
 } from "@better-t-ins/db/schema/upload";
 
-export async function getFolderTreeFlat(db: MySql2Database, folderId: number) {
+export async function getFolderTreeFlat(
+  db: MySql2Database,
+  folderId: number,
+  userId: string
+) {
   // Get folders with depth
   const folders = await db
     .select({
@@ -44,7 +48,12 @@ export async function getFolderTreeFlat(db: MySql2Database, folderId: number) {
       )`.as("s3_key"),
     })
     .from(file)
-    .where(sql`${file.folder_id} IN (${sql.join(folderIds, sql`, `)})`);
+    .where(
+      and(
+        sql`${file.folder_id} IN (${sql.join(folderIds, sql`, `)})`,
+        eq(file.owner_id, userId)
+      )
+    );
 
   return { folders, files };
 }

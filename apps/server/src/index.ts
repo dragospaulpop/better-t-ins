@@ -144,7 +144,7 @@ app.get("/download/folder/:id", async (c) => {
   }
 
   const folderName = folderRecord[0]?.name ?? "Untitled Folder";
-  const { folders, files } = await getFolderTreeFlat(db, folderId);
+  const { folders, files } = await getFolderTreeFlat(db, folderId, user.id);
   const paths = buildPaths(folders);
 
   const archive = archiver("zip", { zlib: { level: 9 } });
