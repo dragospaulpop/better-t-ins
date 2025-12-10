@@ -8,7 +8,7 @@ import { createContext } from "@tud-box/api/context";
 import { appRouter } from "@tud-box/api/routers/index";
 import { auth } from "@tud-box/auth";
 import "dotenv/config";
-import { Readable } from "node:stream";
+import { PassThrough, Readable } from "node:stream";
 import { handleRequest } from "@better-upload/server";
 import buildPaths from "@tud-box/api/lib/folders/build-paths";
 import { getFolderTreeFlat } from "@tud-box/api/lib/folders/get-folder-tree-flat";
@@ -153,61 +153,45 @@ app.get("/download/folder/:id", async (c) => {
   const paths = buildPaths(folders);
 
   const archive = archiver("zip", { zlib: { level: 9 } });
-
-  // Critical: Handle archive errors
-  archive.on("error", (err) => {
-    customLogger("Archive error:", err.message);
-    archive.abort();
-  });
-
-  // Append files sequentially to avoid overwhelming connections
-  const appendFiles = async () => {
-    for (const file of files) {
-      const folderPath = file.folderId ? (paths.get(file.folderId) ?? "") : "";
-
-      try {
-        const fileStream = await storage.client.getObject(
-          storage.bucketName,
-          file.s3Key
-        );
-
-        // Wrap in a promise to properly handle stream errors
-        await new Promise<void>((resolve, reject) => {
-          fileStream.on("error", reject);
-          archive.append(fileStream, {
-            name: `${folderPath}/${file.fileName}`,
-          });
-          // archiver emits 'entry' when the entry has been processed
-          archive.once("entry", () => resolve());
-        });
-      } catch (err) {
-        customLogger(
-          `Error fetching file ${file.s3Key}:`,
-          (err as Error).message
-        );
-        // Continue with other files or abort - your choice
-        // To abort: throw err;
-      }
-    }
-  };
-
-  // Use a PassThrough stream for better control
-  const { PassThrough } = await import("node:stream");
   const passThrough = new PassThrough();
 
-  // Pipe archive to passthrough
+  // Pipe archive to passThrough - this connection persists
   archive.pipe(passThrough);
 
-  // Start appending files and finalize when done
-  appendFiles()
-    .then(() => archive.finalize())
-    .catch((err) => {
-      customLogger("Failed to create archive:", (err as Error).message);
-      archive.abort();
-      passThrough.destroy(err);
-    });
+  // Error handling
+  archive.on("error", (err) => {
+    customLogger("Archive error:", err.message);
+    passThrough.destroy(err);
+  });
 
-  // Convert to web stream
+  archive.on("warning", (err) => {
+    customLogger("Archive warning:", err.message);
+  });
+
+  // Append all files synchronously (the append itself is sync, data flows async)
+  for (const file of files) {
+    const folderPath = file.folderId ? (paths.get(file.folderId) ?? "") : "";
+
+    try {
+      const fileStream = await storage.client.getObject(
+        storage.bucketName,
+        file.s3Key
+      );
+      archive.append(fileStream, {
+        name: `${folderPath}/${file.fileName}`,
+      });
+    } catch (err) {
+      customLogger(
+        `Error fetching file ${file.s3Key}:`,
+        (err as Error).message
+      );
+    }
+  }
+
+  // Signal no more files - data continues to flow through the pipe
+  archive.finalize();
+
+  // Convert PassThrough to web stream
   const webStream = Readable.toWeb(passThrough) as ReadableStream;
 
   return new Response(webStream, {

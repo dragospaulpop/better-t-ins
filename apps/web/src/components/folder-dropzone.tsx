@@ -163,25 +163,12 @@ export function FolderDropzone({
     })
   );
 
-  const downloadFolder = async (folderId: number) => {
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/download/folder/${folderId}`,
-        { credentials: "include" }
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Download failed");
-      }
-
-      // Create a blob from the stream and trigger download
-      window.open(response.url, "_blank", "noopener");
-    } catch (error) {
-      toast.error("Failed to download folder", {
-        description: (error as Error).message,
-      });
-    }
+  const downloadFolder = (folderId: number) => {
+    window.open(
+      `${import.meta.env.VITE_SERVER_URL}/download/folder/${folderId}`,
+      "_blank",
+      "noopener"
+    );
   };
 
   const { getRootProps, getInputProps, isDragActive, inputRef } = useDropzone({
