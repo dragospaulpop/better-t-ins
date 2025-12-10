@@ -13,9 +13,9 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@better-t-ins/api/*": ["../../packages/api/src/*"],
-      "@better-t-ins/auth/*": ["../../packages/auth/src/*"],
-      "@better-t-ins/db/*": ["../../packages/db/src/*"]
+      "@tud-box/api/*": ["../../packages/api/src/*"],
+      "@tud-box/auth/*": ["../../packages/auth/src/*"],
+      "@tud-box/db/*": ["../../packages/db/src/*"]
     }
   }
 }

@@ -1,14 +1,14 @@
-name: better-t-ins
+name: tud-box
 
 services:
   mailhog:
     image: mailhog/mailhog
-    container_name: better-t-ins-mailhog
+    container_name: tud-box-mailhog
     ports:
       - "1025:1025"
       - "8025:8025"
     volumes:
-      - better-t-ins_mailhog_data:/var/lib/mailhog
+      - tud-box_mailhog_data:/var/lib/mailhog
 
 volumes:
-  better-t-ins_mailhog_data:
+  tud-box_mailhog_data:

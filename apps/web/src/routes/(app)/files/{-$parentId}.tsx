@@ -65,17 +65,17 @@ export const Route = createFileRoute("/(app)/files/{-$parentId}")({
     }
   },
   loader: ({ context: { trpc, queryClient }, params: { parentId } }) => {
-    queryClient.ensureQueryData(
+    queryClient.fetchQuery(
       trpc.folder.getAllByParentId.queryOptions({
         parent_id: parentId,
       })
     );
-    queryClient.ensureQueryData(
+    queryClient.fetchQuery(
       trpc.folder.getAncestors.queryOptions({
         id: parentId,
       })
     );
-    queryClient.ensureQueryData(
+    queryClient.fetchQuery(
       trpc.file.getAllByFolderId.queryOptions({
         folder_id: parentId,
       })

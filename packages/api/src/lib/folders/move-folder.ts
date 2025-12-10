@@ -1,6 +1,6 @@
-import type { MySql2Database } from "@better-t-ins/db";
-import { eq, sql } from "@better-t-ins/db";
-import { folder } from "@better-t-ins/db/schema/upload";
+import type { MySql2Database } from "@tud-box/db";
+import { eq, sql } from "@tud-box/db";
+import { folder } from "@tud-box/db/schema/upload";
 
 export async function moveFolder(
   db: MySql2Database,

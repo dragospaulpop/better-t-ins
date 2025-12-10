@@ -1,6 +1,6 @@
-import { db } from "@better-t-ins/db";
-import type { FileInsert } from "@better-t-ins/db/schema/upload";
-import { file, history } from "@better-t-ins/db/schema/upload";
+import { db } from "@tud-box/db";
+import type { FileInsert } from "@tud-box/db/schema/upload";
+import { file, history } from "@tud-box/db/schema/upload";
 import { and, eq, isNull } from "drizzle-orm";
 
 type ObjWithFileRecordAndS3Key = {

@@ -1,6 +1,6 @@
-import { db } from "@better-t-ins/db";
-import { user } from "@better-t-ins/db/schema/auth";
-import { history } from "@better-t-ins/db/schema/upload";
+import { db } from "@tud-box/db";
+import { user } from "@tud-box/db/schema/auth";
+import { history } from "@tud-box/db/schema/upload";
 import { desc, eq } from "drizzle-orm";
 
 export async function getHistory(fileId: number) {

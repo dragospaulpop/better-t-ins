@@ -1,5 +1,5 @@
-import { desc, eq, inArray, type MySql2Database, or } from "@better-t-ins/db";
-import { folder, folderClosure } from "@better-t-ins/db/schema/upload";
+import { desc, eq, inArray, type MySql2Database, or } from "@tud-box/db";
+import { folder, folderClosure } from "@tud-box/db/schema/upload";
 
 export async function deleteFolder(db: MySql2Database, folderId: number) {
   await db.transaction(async (tx) => {

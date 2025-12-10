@@ -3,7 +3,7 @@ set -e
 mkdir -p .certs
 cd .certs
 mkcert -install
-mkcert app.better-t-ins.test api.better-t-ins.test \
-       mail.better-t-ins.test s3.better-t-ins.test \
-       storage.better-t-ins.test drizzle-studio.better-t-ins.test \
-       react-email.better-t-ins.test
+mkcert app.tud-box.test api.tud-box.test \
+       mail.tud-box.test s3.tud-box.test \
+       storage.tud-box.test drizzle-studio.tud-box.test \
+       react-email.tud-box.test

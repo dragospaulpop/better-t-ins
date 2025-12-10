@@ -40,7 +40,7 @@ export default function EnableTwoFactorForm() {
       enable2FA(
         {
           password: value.password,
-          issuer: "VerdeINS",
+          issuer: "TUDBox",
         },
         {
           onSuccess: (data) => {

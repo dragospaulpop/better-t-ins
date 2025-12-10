@@ -1,5 +1,5 @@
 {
-  "name": "@better-t-ins/storage",
+  "name": "@tud-box/storage",
   "type": "module",
   "exports": {
     ".": {
@@ -31,8 +31,8 @@
     "dotenv": "catalog:",
     "minio": "^8.0.3",
     "zod": "catalog:",
-    "@better-t-ins/auth": "workspace:*",
-    "@better-t-ins/db": "workspace:*",
+    "@tud-box/auth": "workspace:*",
+    "@tud-box/db": "workspace:*",
     "@better-upload/server": "^3.0.3"
   }
 }

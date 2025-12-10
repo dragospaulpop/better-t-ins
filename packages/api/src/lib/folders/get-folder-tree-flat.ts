@@ -1,12 +1,12 @@
 // packages/api/src/lib/folders/get-folder-tree-flat.ts
-import type { MySql2Database } from "@better-t-ins/db";
-import { and, eq, sql } from "@better-t-ins/db";
+import type { MySql2Database } from "@tud-box/db";
+import { and, eq, sql } from "@tud-box/db";
 import {
   file,
   folder,
   folderClosure,
   history,
-} from "@better-t-ins/db/schema/upload";
+} from "@tud-box/db/schema/upload";
 
 export async function getFolderTreeFlat(
   db: MySql2Database,

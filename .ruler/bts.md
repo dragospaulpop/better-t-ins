@@ -1,6 +1,6 @@
 # Better-T-Stack Project Rules
 
-This is a better-t-ins project created with Better-T-Stack CLI.
+This is a tud-box project created with Better-T-Stack CLI.
 
 ## Project Structure
 

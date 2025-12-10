@@ -1,4 +1,4 @@
-import type { Ancestors } from "@better-t-ins/api/lib/get-ancestors";
+import type { Ancestors } from "@tud-box/api/lib/get-ancestors";
 import { Link } from "@tanstack/react-router";
 import { Fragment } from "react";
 import {

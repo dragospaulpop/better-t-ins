@@ -3,18 +3,18 @@ if (process.env.NODE_ENV !== "production") {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 }
 
-import { createContext } from "@better-t-ins/api/context";
-import { appRouter } from "@better-t-ins/api/routers/index";
-import { auth } from "@better-t-ins/auth";
+import { createContext } from "@tud-box/api/context";
+import { appRouter } from "@tud-box/api/routers/index";
+import { auth } from "@tud-box/auth";
 import { trpcServer } from "@hono/trpc-server";
 import "dotenv/config";
 import { Readable } from "node:stream";
-import buildPaths from "@better-t-ins/api/lib/folders/build-paths";
-import { getFolderTreeFlat } from "@better-t-ins/api/lib/folders/get-folder-tree-flat";
-import { and, db, eq } from "@better-t-ins/db";
-import { folder } from "@better-t-ins/db/schema/upload";
-import { storage } from "@better-t-ins/storage";
-import { router as uploadRouter } from "@better-t-ins/storage/router";
+import buildPaths from "@tud-box/api/lib/folders/build-paths";
+import { getFolderTreeFlat } from "@tud-box/api/lib/folders/get-folder-tree-flat";
+import { and, db, eq } from "@tud-box/db";
+import { folder } from "@tud-box/db/schema/upload";
+import { storage } from "@tud-box/storage";
+import { router as uploadRouter } from "@tud-box/storage/router";
 import { handleRequest } from "@better-upload/server";
 import archiver from "archiver";
 import { Hono } from "hono";

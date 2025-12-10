@@ -1,6 +1,6 @@
 ---
 name: VPS Deployment Plan
-overview: "Deploy the better-t-ins monorepo across 4 Ubuntu VPSes: nginx as entry point with SSL termination, Bun/PM2 for the web and API apps, MinIO in Docker for file storage, and MySQL for the database. All services communicate via private network."
+overview: "Deploy the tud-box monorepo across 4 Ubuntu VPSes: nginx as entry point with SSL termination, Bun/PM2 for the web and API apps, MinIO in Docker for file storage, and MySQL for the database. All services communicate via private network."
 todos:
   - id: mysql-setup
     content: Document VPS 4 MySQL installation, user/database creation, and firewall config
@@ -22,7 +22,7 @@ todos:
     status: pending
 ---
 
-# VPS Deployment Plan for better-t-ins
+# VPS Deployment Plan for tud-box
 
 ## Architecture Overview
 
@@ -65,11 +65,11 @@ Internet -> [phpint: Nginx + SSL] -> Private Network -> [nodeint: Bun API + Web]
 
 ## Environment Variables Required
 
-Create `/home/deploy/better-t-ins/apps/server/.env` on `nodeint`:
+Create `/home/deploy/tud-box/apps/server/.env` on `nodeint`:
 
 ```bash
 # Database (mysqlint)
-DATABASE_URL=mysql://bettertins_user:YOUR_DB_PASSWORD@10.194.250.30:3306/bettertins
+DATABASE_URL=mysql://tudbox_user:YOUR_DB_PASSWORD@10.194.250.30:3306/tudbox
 
 # Auth & Security
 RECAPTCHA_SECRET_KEY=your_recaptcha_secret
@@ -79,7 +79,7 @@ ARCJET_KEY=your_arcjet_key
 CORS_ORIGIN=https://app.yourdomain.com
 DOMAIN=yourdomain.com
 FRONTEND_URL=https://app.yourdomain.com
-APP_NAME=better-t-ins
+APP_NAME=tud-box
 
 # MinIO Storage (filesint - internal network, no SSL)
 MINIO_CLIENT_REGION=us-east-1
@@ -88,7 +88,7 @@ MINIO_CLIENT_PORT=9000
 MINIO_CLIENT_USE_SSL=false
 MINIO_CLIENT_ACCESS_KEY=minioadmin
 MINIO_CLIENT_SECRET_KEY=YOUR_MINIO_SECRET
-MINIO_CLIENT_BUCKET_NAME=bettertins
+MINIO_CLIENT_BUCKET_NAME=tudbox
 
 # Email (Resend for production)
 RESEND_API_KEY=your_resend_api_key
@@ -106,9 +106,9 @@ MySQL is already installed. Just create the database and user for this applicati
 # SSH to mysqlint (10.194.250.30)
 mysql -u root -p
 
-CREATE DATABASE bettertins CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'bettertins_user'@'10.194.250.%' IDENTIFIED BY 'YOUR_SECURE_PASSWORD';
-GRANT ALL PRIVILEGES ON bettertins.* TO 'bettertins_user'@'10.194.250.%';
+CREATE DATABASE tudbox CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'tudbox_user'@'10.194.250.%' IDENTIFIED BY 'YOUR_SECURE_PASSWORD';
+GRANT ALL PRIVILEGES ON tudbox.* TO 'tudbox_user'@'10.194.250.%';
 FLUSH PRIVILEGES;
 ```
 
@@ -149,21 +149,21 @@ source ~/.bashrc
 
 # Clone/copy project and build
 cd /home/deploy
-git clone <repo> better-t-ins
-cd better-t-ins
+git clone <repo> tud-box
+cd tud-box
 bun install
 bun run build
 
 # Create .env file at apps/server/.env (see Environment Variables section)
 ```
 
-Create PM2 ecosystem file at `/home/deploy/better-t-ins/ecosystem.config.cjs`:
+Create PM2 ecosystem file at `/home/deploy/tud-box/ecosystem.config.cjs`:
 
 ```javascript
 module.exports = {
   apps: [
     {
-      name: 'bettertins-api',
+      name: 'tudbox-api',
       cwd: './apps/server',
       script: 'bun',
       args: 'run start',
@@ -189,7 +189,7 @@ pm2 save
 Nginx is already installed. Add server blocks for the new subdomains.
 
 ```nginx
-# /etc/nginx/sites-available/bettertins-app
+# /etc/nginx/sites-available/tudbox-app
 server {
     listen 80;
     server_name app.yourdomain.com;
@@ -204,7 +204,7 @@ server {
     }
 }
 
-# /etc/nginx/sites-available/bettertins-api
+# /etc/nginx/sites-available/tudbox-api
 server {
     listen 80;
     server_name api.yourdomain.com;
@@ -221,7 +221,7 @@ server {
     }
 }
 
-# /etc/nginx/sites-available/bettertins-s3
+# /etc/nginx/sites-available/tudbox-s3
 server {
     listen 80;
     server_name s3.yourdomain.com;
@@ -239,7 +239,7 @@ server {
 ```
 ```bash
 # Enable sites and get SSL
-sudo ln -s /etc/nginx/sites-available/bettertins-* /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/tudbox-* /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
 
@@ -253,7 +253,7 @@ Run Drizzle migrations from nodeint.
 
 ```bash
 # SSH to nodeint
-cd /home/deploy/better-t-ins
+cd /home/deploy/tud-box
 bun run db:push
 ```
 
@@ -263,7 +263,7 @@ bun run db:push
 # On nodeint or via MinIO console
 # Access MinIO console: http://10.194.250.31:9001
 # Login with minioadmin / YOUR_MINIO_SECRET
-# Create bucket named "bettertins"
+# Create bucket named "tudbox"
 ```
 
 ## Internet Access Workaround

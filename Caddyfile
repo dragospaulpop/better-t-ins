@@ -3,26 +3,26 @@
 }
 
 (app-cert) {
-	tls ./.certs/app.better-t-ins.test+6.pem \
- ./.certs/app.better-t-ins.test+6-key.pem
+	tls ./.certs/app.tud-box.test+6.pem \
+ ./.certs/app.tud-box.test+6-key.pem
 }
 
-app.better-t-ins.test {
+app.tud-box.test {
 	import app-cert
 	reverse_proxy localhost:3001 # Vite
 }
 
-api.better-t-ins.test {
+api.tud-box.test {
 	import app-cert
 	reverse_proxy localhost:3000 # Bun/Hono backend
 }
 
-mail.better-t-ins.test {
+mail.tud-box.test {
 	import app-cert
 	reverse_proxy localhost:8025 # Mailhog Docker
 }
 
-storage.better-t-ins.test {
+storage.tud-box.test {
 	import app-cert
 	reverse_proxy localhost:9001 {
 		header_up Host {host}
@@ -31,7 +31,7 @@ storage.better-t-ins.test {
 	}
 }
 
-s3.better-t-ins.test {
+s3.tud-box.test {
 	import app-cert
 	reverse_proxy localhost:9000 {
 		header_up Host {host}
@@ -40,12 +40,12 @@ s3.better-t-ins.test {
 	}
 }
 
-drizzle-studio.better-t-ins.test {
+drizzle-studio.tud-box.test {
 	import app-cert
 	reverse_proxy localhost:4983
 }
 
-react-email.better-t-ins.test {
+react-email.tud-box.test {
 	import app-cert
 	reverse_proxy localhost:3030
 }

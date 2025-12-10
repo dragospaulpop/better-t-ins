@@ -1,5 +1,5 @@
-import { and, db, desc, eq } from "@better-t-ins/db";
-import { history } from "@better-t-ins/db/schema/upload";
+import { and, db, desc, eq } from "@tud-box/db";
+import { history } from "@tud-box/db/schema/upload";
 
 export async function getLatestFileHistoryKey(fileId: number) {
   const [file] = await db

@@ -1,9 +1,9 @@
-name: better-t-ins
+name: tud-box
 
 services:
   minio:
     image: minio/minio
-    container_name: better-t-ins-minio
+    container_name: tud-box-minio
     ports:
       - "${MINIO_PORT}:9000"
       - "${MINIO_CONSOLE_PORT}:9001"

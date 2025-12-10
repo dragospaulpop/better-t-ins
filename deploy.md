@@ -1,6 +1,6 @@
 # Deployment Instructions
 
-This guide outlines how to deploy the **better-t-ins** application across your VPS infrastructure.
+This guide outlines how to deploy the **tud-box** application across your VPS infrastructure.
 
 ## Infrastructure Overview
 
@@ -29,11 +29,11 @@ mysql -u root -p
 Execute the following SQL commands:
 
 ```sql
-CREATE DATABASE bettertins CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE tudbox CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- Replace 'YOUR_SECURE_PASSWORD' with a strong password
-CREATE USER 'bettertins_user'@'10.194.250.%' IDENTIFIED BY 'YOUR_SECURE_PASSWORD';
-GRANT ALL PRIVILEGES ON bettertins.* TO 'bettertins_user'@'10.194.250.%';
+CREATE USER 'tudbox_user'@'10.194.250.%' IDENTIFIED BY 'YOUR_SECURE_PASSWORD';
+GRANT ALL PRIVILEGES ON tudbox.* TO 'tudbox_user'@'10.194.250.%';
 FLUSH PRIVILEGES;
 EXIT;
 ```
@@ -98,8 +98,8 @@ SSH into `nodeint` (10.194.250.35).
 
     ```bash
     # Navigate to your deployment directory (e.g., /home/deploy)
-    git clone <your-repo-url> better-t-ins
-    cd better-t-ins
+    git clone <your-repo-url> tud-box
+    cd tud-box
 
     # Install dependencies and build
     bun install
@@ -112,14 +112,14 @@ SSH into `nodeint` (10.194.250.35).
 
     ```env
     # Database
-    DATABASE_URL=mysql://bettertins_user:YOUR_SECURE_PASSWORD@10.194.250.30:3306/bettertins
+    DATABASE_URL=mysql://tudbox_user:YOUR_SECURE_PASSWORD@10.194.250.30:3306/tudbox
 
     # App Config
     NODE_ENV=production
     CORS_ORIGIN=https://app.yourdomain.com
     DOMAIN=yourdomain.com
     FRONTEND_URL=https://app.yourdomain.com
-    APP_NAME=better-t-ins
+    APP_NAME=tud-box
 
     # Security
     RECAPTCHA_SECRET_KEY=your_recaptcha_key
@@ -132,7 +132,7 @@ SSH into `nodeint` (10.194.250.35).
     MINIO_CLIENT_USE_SSL=false
     MINIO_CLIENT_ACCESS_KEY=minioadmin
     MINIO_CLIENT_SECRET_KEY=YOUR_MINIO_SECRET
-    MINIO_CLIENT_BUCKET_NAME=bettertins
+    MINIO_CLIENT_BUCKET_NAME=tudbox
 
     # Mail (Resend)
     RESEND_API_KEY=your_resend_api_key
@@ -167,7 +167,7 @@ SSH into `phpint` (10.194.250.33).
 
     Create three new configuration files in `/etc/nginx/sites-available/`:
 
-    **File:** `/etc/nginx/sites-available/bettertins-app`
+    **File:** `/etc/nginx/sites-available/tudbox-app`
     ```nginx
     server {
         server_name app.yourdomain.com;
@@ -183,7 +183,7 @@ SSH into `phpint` (10.194.250.33).
     }
     ```
 
-    **File:** `/etc/nginx/sites-available/bettertins-api`
+    **File:** `/etc/nginx/sites-available/tudbox-api`
     ```nginx
     server {
         server_name api.yourdomain.com;
@@ -202,7 +202,7 @@ SSH into `phpint` (10.194.250.33).
     }
     ```
 
-    **File:** `/etc/nginx/sites-available/bettertins-s3`
+    **File:** `/etc/nginx/sites-available/tudbox-s3`
     ```nginx
     server {
         server_name s3.yourdomain.com;
@@ -222,7 +222,7 @@ SSH into `phpint` (10.194.250.33).
 2.  **Enable Sites and SSL:**
 
     ```bash
-    sudo ln -s /etc/nginx/sites-available/bettertins-* /etc/nginx/sites-enabled/
+    sudo ln -s /etc/nginx/sites-available/tudbox-* /etc/nginx/sites-enabled/
     sudo nginx -t
     sudo systemctl reload nginx
 
@@ -237,7 +237,7 @@ SSH into `phpint` (10.194.250.33).
 1.  **Create MinIO Bucket:**
     - Access the MinIO Console at `http://10.194.250.31:9001` (You might need an SSH tunnel to access this: `ssh -L 9001:localhost:9001 deploy@10.194.250.31`).
     - Login with the credentials set in Step 2.
-    - Create a bucket named `bettertins`.
+    - Create a bucket named `tudbox`.
     - Go to "Identity" -> "Users" and create access keys if you don't want to use root credentials in the app (Recommended). Update `apps/server/.env` with these new keys.
 
 2.  **Verify Deployment:**

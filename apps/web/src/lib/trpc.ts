@@ -1,4 +1,4 @@
-import type { AppRouter } from "@better-t-ins/api/routers/index";
+import type { AppRouter } from "@tud-box/api/routers/index";
 import { QueryCache, QueryClient } from "@tanstack/react-query";
 import {
   createTRPCClient,

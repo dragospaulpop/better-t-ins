@@ -1,4 +1,4 @@
-import { type AuthAPIWithPlugins, auth } from "@better-t-ins/auth";
+import { type AuthAPIWithPlugins, auth } from "@tud-box/auth";
 import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../index";
 

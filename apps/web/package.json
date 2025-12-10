@@ -13,8 +13,8 @@
   },
   "dependencies": {
     "@better-auth/passkey": "catalog:",
-    "@better-t-ins/api": "workspace:*",
-    "@better-t-ins/auth": "workspace:*",
+    "@tud-box/api": "workspace:*",
+    "@tud-box/auth": "workspace:*",
     "@better-upload/client": "^3.0.3",
     "@daveyplate/better-auth-tanstack": "^1.3.6",
     "@hookform/resolvers": "^5.1.1",

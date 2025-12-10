@@ -1,5 +1,5 @@
 {
-  "name": "@better-t-ins/db",
+  "name": "@tud-box/db",
   "type": "module",
   "exports": {
     ".": {

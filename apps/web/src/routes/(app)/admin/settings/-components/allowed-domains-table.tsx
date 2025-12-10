@@ -1,4 +1,4 @@
-import type { AllowedHost } from "@better-t-ins/db/schema/settings";
+import type { AllowedHost } from "@tud-box/db/schema/settings";
 import { DataTable } from "@/components/data-table";
 import { columns } from "./allowed-domains/columns";
 

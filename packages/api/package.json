@@ -1,5 +1,5 @@
 {
-  "name": "@better-t-ins/api",
+  "name": "@tud-box/api",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -26,9 +26,9 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "@better-t-ins/auth": "workspace:*",
-    "@better-t-ins/db": "workspace:*",
-    "@better-t-ins/storage": "workspace:*",
+    "@tud-box/auth": "workspace:*",
+    "@tud-box/db": "workspace:*",
+    "@tud-box/storage": "workspace:*",
     "@trpc/client": "catalog:",
     "@trpc/server": "catalog:",
     "archiver": "^7.0.1",

@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1765367037578,
+      "tag": "0000_quiet_sally_floyd",
+      "breakpoints": true
+    }
+  ]
+}

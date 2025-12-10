@@ -1,5 +1,5 @@
 import { passkeyClient } from "@better-auth/passkey/client";
-import type { auth } from "@better-t-ins/auth";
+import type { auth } from "@tud-box/auth";
 import {
   adminClient,
   inferAdditionalFields,

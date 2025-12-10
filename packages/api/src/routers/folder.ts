@@ -1,5 +1,5 @@
-import { and, db, eq, isNull } from "@better-t-ins/db";
-import { folder } from "@better-t-ins/db/schema/upload";
+import { and, db, eq, isNull } from "@tud-box/db";
+import { folder } from "@tud-box/db/schema/upload";
 import { z } from "zod";
 import { protectedProcedure, router } from "../index";
 import { deleteFile } from "../lib/files/delete-file";

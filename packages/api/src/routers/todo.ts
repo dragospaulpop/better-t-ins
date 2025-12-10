@@ -1,5 +1,5 @@
-import { db, eq } from "@better-t-ins/db";
-import { todo } from "@better-t-ins/db/schema/todo";
+import { db, eq } from "@tud-box/db";
+import { todo } from "@tud-box/db/schema/todo";
 
 import z from "zod";
 import { publicProcedure, router } from "../index";

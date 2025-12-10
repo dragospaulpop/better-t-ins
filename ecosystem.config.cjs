@@ -2,7 +2,7 @@
 module.exports = {
   apps: [
     {
-      name: "bettertins-api",
+      name: "tudbox-api",
       script: "apps/server/dist/index.js",
       interpreter: "bun",
       env: {
@@ -11,7 +11,7 @@ module.exports = {
       },
     },
     {
-      name: "bettertins-web",
+      name: "tudbox-web",
       // Use 'serve' to serve the static build.
       // Ensure 'serve' is installed globally: bun install -g serve
       script: "serve",

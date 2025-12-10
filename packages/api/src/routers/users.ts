@@ -1,5 +1,5 @@
-import { db } from "@better-t-ins/db";
-import { user } from "@better-t-ins/db/schema/auth";
+import { db } from "@tud-box/db";
+import { user } from "@tud-box/db/schema/auth";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { adminProcedure, router } from "../index";

@@ -8,7 +8,7 @@ async function waitForDatabase(maxAttempts = 30, delayMs = 1000) {
     try {
       // Check if container exists and is running
       const containerStatus = execSync(
-        "docker inspect better-t-ins-mysql --format='{{.State.Status}}' 2>/dev/null || echo 'not-found'",
+        "docker inspect tud-box-mysql --format='{{.State.Status}}' 2>/dev/null || echo 'not-found'",
         { encoding: "utf-8", stdio: "pipe", shell: "/bin/sh" }
       ).trim();
 
@@ -16,14 +16,14 @@ async function waitForDatabase(maxAttempts = 30, delayMs = 1000) {
         // Check health status if available
         try {
           const health = execSync(
-            "docker inspect better-t-ins-mysql --format='{{.State.Health.Status}}' 2>/dev/null || echo 'none'",
+            "docker inspect tud-box-mysql --format='{{.State.Health.Status}}' 2>/dev/null || echo 'none'",
             { encoding: "utf-8", stdio: "pipe", shell: "/bin/sh" }
           ).trim();
 
           if (health === "healthy" || health === "none") {
             // Try to connect to MySQL
             execSync(
-              "docker exec better-t-ins-mysql mysqladmin ping -h localhost --silent 2>/dev/null",
+              "docker exec tud-box-mysql mysqladmin ping -h localhost --silent 2>/dev/null",
               { encoding: "utf-8", stdio: "pipe", shell: "/bin/sh" }
             );
             console.log("✓ Database is ready!");
@@ -32,7 +32,7 @@ async function waitForDatabase(maxAttempts = 30, delayMs = 1000) {
         } catch {
           // Health check not available, try direct connection
           execSync(
-            "docker exec better-t-ins-mysql mysqladmin ping -h localhost --silent 2>/dev/null",
+            "docker exec tud-box-mysql mysqladmin ping -h localhost --silent 2>/dev/null",
             { encoding: "utf-8", stdio: "pipe", shell: "/bin/sh" }
           );
           console.log("✓ Database is ready!");

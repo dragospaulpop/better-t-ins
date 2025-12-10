@@ -27,10 +27,10 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 3001,
-    allowedHosts: ["app.better-t-ins.test", "localhost"],
+    allowedHosts: ["app.tud-box.test", "localhost"],
     // https: {
-    //   key: "./.certs/app.better-t-ins.test+6-key.pem",
-    //   cert: "./.certs/app.better-t-ins.test+6.pem",
+    //   key: "./.certs/app.tud-box.test+6-key.pem",
+    //   cert: "./.certs/app.tud-box.test+6.pem",
     // },
   },
   resolve: {

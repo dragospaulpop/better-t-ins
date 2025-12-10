@@ -1,6 +1,6 @@
-import { and, db, eq, sql } from "@better-t-ins/db";
-import { user } from "@better-t-ins/db/schema/auth";
-import { file, history } from "@better-t-ins/db/schema/upload";
+import { and, db, eq, sql } from "@tud-box/db";
+import { user } from "@tud-box/db/schema/auth";
+import { file, history } from "@tud-box/db/schema/upload";
 import { createFileFolderCondition } from "./utils";
 
 export async function getAllByFolderId(

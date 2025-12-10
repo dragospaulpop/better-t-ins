@@ -1,4 +1,4 @@
-import { storage } from "@better-t-ins/storage";
+import { storage } from "@tud-box/storage";
 import { z } from "zod";
 import { protectedProcedure, router } from "../index";
 import { deleteFile } from "../lib/files/delete-file";

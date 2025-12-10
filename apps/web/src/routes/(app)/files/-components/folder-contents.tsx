@@ -1,4 +1,4 @@
-import type { File, Folder } from "@better-t-ins/db/schema/upload";
+import type { File, Folder } from "@tud-box/db/schema/upload";
 import { useSelectedItems } from "@/providers/selected-items-provider";
 import Folders from "./folders";
 

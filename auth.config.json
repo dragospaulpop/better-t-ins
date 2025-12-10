@@ -43,7 +43,7 @@
           }
         }
       },
-      "appName": "VerdeINS",
+      "appName": "TUDBox",
       "plugins": [
         {
           "name": "two-factor",
@@ -54,9 +54,7 @@
               "otpOptions": {}
             },
             "hooks": {
-              "after": [
-                {}
-              ]
+              "after": [{}]
             },
             "schema": {
               "user": {
@@ -215,9 +213,7 @@
           "config": {
             "id": "admin",
             "hooks": {
-              "after": [
-                {}
-              ]
+              "after": [{}]
             },
             "endpoints": {},
             "$ERROR_CODES": {
@@ -279,9 +275,7 @@
           }
         }
       ],
-      "trustedOrigins": [
-        "https://app.better-t-ins.test"
-      ],
+      "trustedOrigins": ["https://app.tud-box.test"],
       "emailAndPassword": {
         "enabled": true,
         "requireEmailVerification": false,

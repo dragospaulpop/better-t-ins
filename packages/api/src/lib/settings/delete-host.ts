@@ -1,5 +1,5 @@
-import type { MySql2Database } from "@better-t-ins/db";
-import { allowedHost } from "@better-t-ins/db/schema/settings";
+import type { MySql2Database } from "@tud-box/db";
+import { allowedHost } from "@tud-box/db/schema/settings";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 

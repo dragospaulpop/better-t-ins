@@ -1,6 +1,6 @@
-import { db } from "@better-t-ins/db";
-import { file, history } from "@better-t-ins/db/schema/upload";
-import { deleteS3File } from "@better-t-ins/storage/lib/delete-s3-file";
+import { db } from "@tud-box/db";
+import { file, history } from "@tud-box/db/schema/upload";
+import { deleteS3File } from "@tud-box/storage/lib/delete-s3-file";
 import { eq } from "drizzle-orm";
 
 export async function deleteHistoryItem(historyId: number) {

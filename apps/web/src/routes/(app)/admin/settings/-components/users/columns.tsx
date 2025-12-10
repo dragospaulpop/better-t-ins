@@ -1,6 +1,6 @@
 // export here because better-uth schema generation overrides the schema file
 
-import type { user } from "@better-t-ins/db/schema/auth";
+import type { user } from "@tud-box/db/schema/auth";
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";

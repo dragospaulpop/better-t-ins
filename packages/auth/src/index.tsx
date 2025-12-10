@@ -1,18 +1,18 @@
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { passkey } from "@better-auth/passkey";
-import { and, db, eq } from "@better-t-ins/db";
+import { and, db, eq } from "@tud-box/db";
 // biome-ignore lint/performance/noNamespaceImport: this is a schema
-import * as schema from "@better-t-ins/db/schema/auth";
-import { allowedHost } from "@better-t-ins/db/schema/settings";
-import { file, folder } from "@better-t-ins/db/schema/upload";
-import { sendEmail } from "@better-t-ins/mail";
-import DeleteAccountEmail from "@better-t-ins/mail/emails/delete-account-email";
-import MagicLinkEmail from "@better-t-ins/mail/emails/magic-link-email";
-import OTPEmail from "@better-t-ins/mail/emails/otp-email";
-import ResetPasswordEmail from "@better-t-ins/mail/emails/reset-password-email";
-import VerifyEmail from "@better-t-ins/mail/emails/verify-email";
-import render from "@better-t-ins/mail/render";
+import * as schema from "@tud-box/db/schema/auth";
+import { allowedHost } from "@tud-box/db/schema/settings";
+import { file, folder } from "@tud-box/db/schema/upload";
+import { sendEmail } from "@tud-box/mail";
+import DeleteAccountEmail from "@tud-box/mail/emails/delete-account-email";
+import MagicLinkEmail from "@tud-box/mail/emails/magic-link-email";
+import OTPEmail from "@tud-box/mail/emails/otp-email";
+import ResetPasswordEmail from "@tud-box/mail/emails/reset-password-email";
+import VerifyEmail from "@tud-box/mail/emails/verify-email";
+import render from "@tud-box/mail/render";
 import { APIError, type BetterAuthOptions, betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import {

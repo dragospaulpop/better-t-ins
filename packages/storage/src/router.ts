@@ -1,6 +1,6 @@
 // when using a separate backend server, make sure to update the `api` option on the client hooks.
 
-import { auth } from "@better-t-ins/auth";
+import { auth } from "@tud-box/auth";
 import { RejectUpload, type Router, route } from "@better-upload/server";
 import { minio } from "@better-upload/server/clients";
 import z from "zod";

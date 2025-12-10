@@ -1,5 +1,5 @@
 {
-  "name": "@better-t-ins/mail",
+  "name": "@tud-box/mail",
   "type": "module",
   "exports": {
     ".": {

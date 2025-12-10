@@ -1,6 +1,6 @@
-import { db } from "@better-t-ins/db";
-import { user } from "@better-t-ins/db/schema/auth";
-import { allowedHost } from "@better-t-ins/db/schema/settings";
+import { db } from "@tud-box/db";
+import { user } from "@tud-box/db/schema/auth";
+import { allowedHost } from "@tud-box/db/schema/settings";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { adminProcedure, router } from "../index";

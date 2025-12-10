@@ -1,4 +1,4 @@
-# better-t-ins
+# tud-box
 
 This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines React, TanStack Router, Hono, TRPC, and more.
 
@@ -55,7 +55,7 @@ The API is running at [http://localhost:3000](http://localhost:3000).
 ## Project Structure
 
 ```
-better-t-ins/
+tud-box/
 ├── apps/
 │   ├── web/         # Frontend application (React + TanStack Router)
 │   └── server/      # Backend API (Hono, TRPC)
@@ -94,7 +94,7 @@ mkcert -CAROOT
 ```
 - add the entries to the host file (for wsl use the linux vm ip by running `ip addr show eth0 | grep 'inet ' | awk '{ print $2; exit }'` - be advised, the ip might change when you restart the vm):
 ```text
-<ip> app.better-t-ins.test api.better-t-ins.test mail.better-t-ins.test s3.better-t-ins.test storage.better-t-ins.test drizzle-studio.better-t-ins.test react-email.better-t-ins.test db.better-t-ins.test
+<ip> app.tud-box.test api.tud-box.test mail.tud-box.test s3.tud-box.test storage.tud-box.test drizzle-studio.tud-box.test react-email.tud-box.test db.tud-box.test
 
 ```
 
@@ -117,5 +117,5 @@ caddy run --config Caddyfile
 
 ## Drizzle Studio
 
-To open the Drizzle Studio, access `http://drizzle-studio.better-t-ins.test`
-Connection string: `mysql://user:password@better-t-ins-mysql/better-t-ins`
+To open the Drizzle Studio, access `http://drizzle-studio.tud-box.test`
+Connection string: `mysql://user:password@tud-box-mysql/tud-box`

@@ -1,5 +1,5 @@
-import { db } from "@better-t-ins/db";
-import { history } from "@better-t-ins/db/schema/upload";
+import { db } from "@tud-box/db";
+import { history } from "@tud-box/db/schema/upload";
 import { eq } from "drizzle-orm";
 import { deleteHistoryItem } from "./delete-history-item";
 

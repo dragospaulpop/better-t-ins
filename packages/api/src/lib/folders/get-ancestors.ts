@@ -1,6 +1,6 @@
-import type { MySql2Database } from "@better-t-ins/db";
-import { desc, eq } from "@better-t-ins/db";
-import { folder, folderClosure } from "@better-t-ins/db/schema/upload";
+import type { MySql2Database } from "@tud-box/db";
+import { desc, eq } from "@tud-box/db";
+import { folder, folderClosure } from "@tud-box/db/schema/upload";
 
 export async function getAncestors(db: MySql2Database, id: number) {
   return await db

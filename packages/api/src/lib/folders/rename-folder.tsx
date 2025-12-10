@@ -1,4 +1,4 @@
-import { folder } from "@better-t-ins/db/schema/upload";
+import { folder } from "@tud-box/db/schema/upload";
 import { eq } from "drizzle-orm";
 import type { MySql2Database } from "drizzle-orm/mysql2";
 

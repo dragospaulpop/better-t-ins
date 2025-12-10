@@ -1,5 +1,5 @@
-import { db } from "@better-t-ins/db";
-import { file } from "@better-t-ins/db/schema/upload";
+import { db } from "@tud-box/db";
+import { file } from "@tud-box/db/schema/upload";
 import { and, eq, ne } from "drizzle-orm";
 import { createFileFolderCondition } from "./utils";
 
