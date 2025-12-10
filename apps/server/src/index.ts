@@ -8,8 +8,15 @@ import { appRouter } from "@better-t-ins/api/routers/index";
 import { auth } from "@better-t-ins/auth";
 import { trpcServer } from "@hono/trpc-server";
 import "dotenv/config";
+import { Readable } from "node:stream";
+import buildPaths from "@better-t-ins/api/lib/folders/build-paths";
+import { getFolderTreeFlat } from "@better-t-ins/api/lib/folders/get-folder-tree-flat";
+import { and, db, eq } from "@better-t-ins/db";
+import { folder } from "@better-t-ins/db/schema/upload";
+import { storage } from "@better-t-ins/storage";
 import { router as uploadRouter } from "@better-t-ins/storage/router";
 import { handleRequest } from "@better-upload/server";
+import archiver from "archiver";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
@@ -19,6 +26,9 @@ import protect from "./arcjet";
 const RATE_LIMIT_EXCEEDED_STATUS = 429;
 const EMAIL_INVALID_STATUS = 400;
 const FORBIDDEN_STATUS = 403;
+const UNAUTHORIZED_STATUS = 401;
+const BAD_REQUEST_STATUS = 400;
+const NOT_FOUND_STATUS = 404;
 
 const envSchema = z.object({
   CORS_ORIGIN: z.string(),
@@ -108,6 +118,62 @@ app.use(
 );
 
 app.post("/upload", (c) => handleRequest(c.req.raw, uploadRouter));
+
+app.get("/download/folder/:id", async (c) => {
+  const user = c.get("user");
+
+  if (!user) {
+    return c.json({ message: "Unauthorized" }, UNAUTHORIZED_STATUS);
+  }
+
+  const folderId = Number.parseInt(c.req.param("id"), 10);
+
+  if (Number.isNaN(folderId)) {
+    return c.json({ message: "Invalid folder ID" }, BAD_REQUEST_STATUS);
+  }
+
+  // Verify folder ownership
+  const folderRecord = await db
+    .select()
+    .from(folder)
+    .where(and(eq(folder.id, folderId), eq(folder.owner_id, user.id)))
+    .limit(1);
+
+  if (folderRecord.length === 0) {
+    return c.json({ message: "Folder not found" }, NOT_FOUND_STATUS);
+  }
+
+  const folderName = folderRecord[0]?.name ?? "Untitled Folder";
+  const { folders, files } = await getFolderTreeFlat(db, folderId);
+  const paths = buildPaths(folders);
+
+  const archive = archiver("zip", { zlib: { level: 9 } });
+
+  // Append each file's content from storage
+  for (const file of files) {
+    const folderPath = file.folderId ? (paths.get(file.folderId) ?? "") : "";
+
+    const fileStream = await storage.client.getObject(
+      storage.bucketName,
+      file.s3Key
+    );
+    archive.append(fileStream, { name: `${folderPath}/${file.fileName}` });
+  }
+
+  // Don't await - let it finalize while streaming
+  archive.finalize();
+
+  // Convert Node.js Readable to Web ReadableStream
+  const webStream = Readable.toWeb(archive) as ReadableStream;
+
+  return new Response(webStream, {
+    headers: {
+      "Content-Type": "application/zip",
+      "Content-Disposition": `attachment; filename="${encodeURIComponent(folderName)}.zip"`,
+      "Cache-Control": "private, max-age=0, no-store",
+    },
+  });
+});
 
 app.get("/", (c) => c.text("OK"));
 

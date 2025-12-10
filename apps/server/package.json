@@ -19,14 +19,16 @@
     "@better-t-ins/storage": "workspace:*",
     "@hono/trpc-server": "^0.4.0",
     "@trpc/server": "catalog:",
+    "archiver": "^7.0.1",
     "better-auth": "catalog:",
     "dotenv": "catalog:",
     "hono": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "typescript": "catalog:",
+    "@types/archiver": "^7.0.0",
     "@types/bun": "^1.2.6",
-    "tsdown": "catalog:"
+    "tsdown": "catalog:",
+    "typescript": "catalog:"
   }
 }

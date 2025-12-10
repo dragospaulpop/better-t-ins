@@ -19,6 +19,7 @@
     "build": "tsdown"
   },
   "devDependencies": {
+    "@types/archiver": "^7.0.0",
     "tsdown": "catalog:"
   },
   "peerDependencies": {
@@ -30,6 +31,7 @@
     "@better-t-ins/storage": "workspace:*",
     "@trpc/client": "catalog:",
     "@trpc/server": "catalog:",
+    "archiver": "^7.0.1",
     "dotenv": "catalog:",
     "drizzle-orm": "catalog:",
     "hono": "catalog:",

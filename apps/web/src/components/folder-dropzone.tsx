@@ -125,6 +125,27 @@ export function FolderDropzone({
     })
   );
 
+  const downloadFolder = async (folderId: number) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/download/folder/${folderId}`,
+        { credentials: "include" }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Download failed");
+      }
+
+      // Create a blob from the stream and trigger download
+      window.open(response.url, "_blank", "noopener");
+    } catch (error) {
+      toast.error("Failed to download folder", {
+        description: (error as Error).message,
+      });
+    }
+  };
+
   const { getRootProps, getInputProps, isDragActive, inputRef } = useDropzone({
     onDrop: (files) => {
       // Allow drops anytime - queue system handles concurrent uploads
@@ -282,7 +303,9 @@ export function FolderDropzone({
               >
                 Open in new tab
               </DropdownMenuItem>
-              <DropdownMenuItem>Download</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => downloadFolder(item.id)}>
+                Download
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setOpenDialog("edit")}>
                 Rename
               </DropdownMenuItem>

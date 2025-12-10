@@ -25,6 +25,7 @@ export const db = drizzle({
   connection: {
     uri: env.data.DATABASE_URL,
   },
+  logger: process.env.NODE_ENV === "development",
 });
 
 // biome-ignore lint/performance/noBarrelFile: O.M.F.G.!!!

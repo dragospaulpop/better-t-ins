@@ -3,9 +3,9 @@ import { useMemo } from "react";
 import { defaultStyles, FileIcon } from "react-file-icon";
 import { cn } from "@/lib/utils";
 import { useSelectedItems } from "@/providers/selected-items-provider";
+import { FileItemMenu } from "./file-item-menu";
 import { FolderUploader } from "./folder-uploader";
 import type { Item } from "./folders";
-import { ItemMenu } from "./item-menu";
 import { type Size, sizeClassMap } from "./size-options";
 
 interface GridItemsProps {
@@ -189,7 +189,7 @@ function FileItem({
           <FileStackIcon className="absolute top-1 left-1 size-3 text-tud-green/75" />
         )}
       </div>
-      <ItemMenu item={item} />
+      <FileItemMenu item={item} />
     </div>
   );
 }

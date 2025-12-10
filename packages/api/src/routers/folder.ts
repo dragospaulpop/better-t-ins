@@ -4,9 +4,12 @@ import { z } from "zod";
 import { protectedProcedure, router } from "../index";
 import { deleteFile } from "../lib/files/delete-file";
 import { getAllByFolderId } from "../lib/files/get-all-by-folder-id";
+import buildPaths from "../lib/folders/build-paths";
 import { deleteFolder } from "../lib/folders/delete-folder";
+import buildTree from "../lib/folders/folder-tree";
 import { getAncestors } from "../lib/folders/get-ancestors";
 import { getDescendants } from "../lib/folders/get-descendants";
+import { getFolderTreeFlat } from "../lib/folders/get-folder-tree-flat";
 import { insertFolder } from "../lib/folders/insert-folder";
 import renameFolder from "../lib/folders/rename-folder";
 
@@ -205,6 +208,55 @@ export const folderRouter = router({
       }
 
       await renameFolder(db, id, name);
+    }),
+
+  downloadFolder: protectedProcedure
+    .input(z.object({ id: z.coerce.number() }))
+    .mutation(async ({ input }) => {
+      const id = input.id;
+
+      if (!id) {
+        return;
+      }
+
+      const { folders, files } = await getFolderTreeFlat(db, id);
+      const tree = buildTree(folders, files);
+      const paths = buildPaths(folders);
+
+      const result: { name: string }[] = [];
+      for (const file of files) {
+        const folderPath = file.folderId
+          ? (paths.get(file.folderId) ?? "")
+          : "";
+        result.push({ name: `${folderPath}/${file.fileName}` });
+      }
+
+      return { id, tree, paths: Object.fromEntries(paths), folders, result };
+
+      /**
+        async function writeTree(dirHandle, node) {
+          // create current folder
+          const currentDir =
+            node.depth === 0 ? dirHandle : await dirHandle.getDirectoryHandle(node.name, { create: true });
+
+          // write files in this folder
+          for (const file of node.files ?? []) {
+            const fileHandle = await currentDir.getFileHandle(file.fileName, { create: true });
+            const writable = await fileHandle.createWritable();
+            // write your actual file data here
+            await writable.write("placeholder");
+            await writable.close();
+          }
+
+          // recurse children
+          for (const child of node.children ?? []) {
+            await writeTree(currentDir, child);
+          }
+        }
+
+        const root = await window.showDirectoryPicker();
+        await writeTree(root, treeRootObject);
+      */
     }),
 });
 

@@ -53,7 +53,7 @@ import ItemHistory from "./item-history";
 
 const MAX_FILE_NAME_LENGTH = 255;
 
-export function ItemMenu({ item }: { item: Item }) {
+export function FileItemMenu({ item }: { item: Item }) {
   const { refetchFiles } = useRefetchFolder();
   const [historyOpen, setHistoryOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -161,7 +161,7 @@ export function ItemMenu({ item }: { item: Item }) {
             <PencilIcon className="mr-2 size-4" />
             Rename
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem disabled>
             <PencilIcon className="mr-2 size-4" />
             Move to
           </DropdownMenuItem>
