@@ -16,7 +16,7 @@ import { cloneRawRequest } from "hono/request";
 // The arcjet instance is created outside of the handler
 const aj = arcjet({
   key: process.env.ARCJET_KEY || "", // Get your site key from https://app.arcjet.com
-  characteristics: ["userId"],
+  characteristics: ["userId", "ip"],
   rules: [
     // Protect against common attacks with Arcjet Shield. Other rules are
     // added dynamically using `withRule`.
@@ -63,9 +63,6 @@ export default async function protect(c: Context): Promise<ArcjetDecision> {
     findIp(c.req.raw) ||
     "127.0.0.1";
 
-  console.log(ip);
-  console.log(c.req.header());
-
   const userId = session?.userId ?? ip;
 
   // If this is a signup then use the special protectSignup rule
@@ -81,14 +78,14 @@ export default async function protect(c: Context): Promise<ArcjetDecision> {
     if (typeof body.email === "string") {
       return aj
         .withRule(protectSignup(signupOptions))
-        .protect(c.req.raw, { email: body.email, userId });
+        .protect(c.req.raw, { email: body.email, userId, ip });
     }
     // Otherwise use rate limit and detect bot
     return aj
       .withRule(detectBot(botOptions))
       .withRule(slidingWindow(rateLimitOptions))
-      .protect(c.req.raw, { userId });
+      .protect(c.req.raw, { userId, ip });
   }
   // For all other auth requests
-  return aj.withRule(detectBot(botOptions)).protect(c.req.raw, { userId });
+  return aj.withRule(detectBot(botOptions)).protect(c.req.raw, { userId, ip });
 }
