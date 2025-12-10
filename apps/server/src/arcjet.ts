@@ -57,15 +57,13 @@ const signupOptions = {
 export default async function protect(c: Context): Promise<ArcjetDecision> {
   const session = c.get("session");
 
-  // If the user is logged in we'll use their ID as the identifier. This
-  // allows limits to be applied across all devices and sessions (you could
-  // also use the session ID). Otherwise, fall back to the IP address.
-  let userId: string;
-  if (session?.userId) {
-    userId = session.userId;
-  } else {
-    userId = findIp(c.req.raw) || "127.0.0.1"; // Fall back to local IP if none
-  }
+  const ip =
+    c.req.header("X-Forwarded-For")?.split(",")?.[0]?.trim() ||
+    c.req.header("X-Real-IP") ||
+    findIp(c.req.raw) ||
+    "127.0.0.1";
+
+  const userId = session?.userId ?? ip;
 
   // If this is a signup then use the special protectSignup rule
   // See https://docs.arcjet.com/signup-protection/quick-start
