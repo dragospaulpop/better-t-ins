@@ -192,7 +192,10 @@ function RouteComponent() {
       currentFolderId={currentFolderId}
       refreshCurrentFolder={refetchFiles}
     >
-      <SelectedItemsProvider currentFolderId={currentFolderId}>
+      <SelectedItemsProvider
+        currentFolderId={currentFolderId}
+        key={currentFolderId ?? "root"}
+      >
         <RefetchFolderProvider
           refetchFiles={refetchFiles}
           refetchFolders={refetchFolders}

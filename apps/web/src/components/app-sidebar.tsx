@@ -1,5 +1,15 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Clock, FolderOpen, Home, Settings, Shield, Users } from "lucide-react";
+import type { FolderNode } from "@tud-box/api/lib/folders/folder-tree";
+import {
+  AlertCircleIcon,
+  Clock,
+  FolderOpen,
+  Home,
+  Settings,
+  Shield,
+  Users,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -12,7 +22,11 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useSession } from "@/lib/auth-hooks";
+import { trpc } from "@/lib/trpc";
 import AppTitle from "./app-title";
+import FileExplorer from "./file-explorer";
+import { Spinner } from "./ui/spinner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 const mainItems = [
   { title: "Files", url: "/files", icon: FolderOpen },
@@ -34,6 +48,13 @@ const userItems = [
 export function AppSidebar() {
   const { open } = useSidebar();
   const { user } = useSession();
+
+  const {
+    data: rootFolderTree,
+    isLoading: isLoadingRootFolderTree,
+    isError: isErrorRootFolderTree,
+    error: errorRootFolderTree,
+  } = useQuery(trpc.folder.getRootFolderTree.queryOptions());
 
   const isAdmin = user?.role === "admin";
   const items = isAdmin ? adminItems : userItems;
@@ -86,6 +107,26 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel className="flex items-center justify-between gap-2">
+            <span>Explorer</span>
+            {isLoadingRootFolderTree && <Spinner />}
+            {isErrorRootFolderTree && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <AlertCircleIcon className="size-4 text-destructive" />
+                </TooltipTrigger>
+                <TooltipContent className="bg-muted text-muted-foreground">
+                  {errorRootFolderTree.message}
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <FileExplorer items={rootFolderTree ?? ([] as FolderNode[])} />
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>

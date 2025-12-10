@@ -18,7 +18,7 @@ function DropzoneLabel({
   if (isQueued) {
     return "Upload queued";
   }
-  return "Drag and drop files here";
+  return "Drag and drop files here to upload to the current folder or drag and drop files over a folder to upload to that folder";
 }
 
 type UploadDropzoneProps = {
@@ -112,7 +112,7 @@ export function UploadDropzone({
           )}
         </div>
 
-        <div className="mt-3 space-y-1 text-center">
+        <div className="mt-3 flex flex-col items-center justify-center space-y-1 text-center">
           <p className="font-semibold text-sm">
             <DropzoneLabel isQueued={isQueued} isUploading={isUploading} />
           </p>

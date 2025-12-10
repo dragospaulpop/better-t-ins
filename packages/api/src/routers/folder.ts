@@ -4,9 +4,8 @@ import { z } from "zod";
 import { protectedProcedure, router } from "../index";
 import { deleteFile } from "../lib/files/delete-file";
 import { getAllByFolderId } from "../lib/files/get-all-by-folder-id";
-import buildPaths from "../lib/folders/build-paths";
 import { deleteFolder } from "../lib/folders/delete-folder";
-import buildTree from "../lib/folders/folder-tree";
+import buildTree, { type FolderNode } from "../lib/folders/folder-tree";
 import { getAncestors } from "../lib/folders/get-ancestors";
 import { getDescendants } from "../lib/folders/get-descendants";
 import { getFolderTreeFlat } from "../lib/folders/get-folder-tree-flat";
@@ -212,16 +211,19 @@ export const folderRouter = router({
       await renameFolder(db, id, name);
     }),
 
+  // bun route used insted, this is just for reference
+  /**
   downloadFolder: protectedProcedure
     .input(z.object({ id: z.coerce.number() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
       const id = input.id;
+      const userId = ctx.session.user.id;
 
       if (!id) {
         return;
       }
 
-      const { folders, files } = await getFolderTreeFlat(db, id);
+      const { folders, files } = await getFolderTreeFlat(db, id, userId);
       const tree = buildTree(folders, files);
       const paths = buildPaths(folders);
 
@@ -235,7 +237,7 @@ export const folderRouter = router({
 
       return { id, tree, paths: Object.fromEntries(paths), folders, result };
 
-      /**
+
         async function writeTree(dirHandle, node) {
           // create current folder
           const currentDir =
@@ -258,8 +260,37 @@ export const folderRouter = router({
 
         const root = await window.showDirectoryPicker();
         await writeTree(root, treeRootObject);
-      */
+
     }),
+  */
+
+  getRootFolderTree: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+
+    const foldersInRoot = await db
+      .select({
+        id: folder.id,
+      })
+      .from(folder)
+      .where(and(eq(folder.owner_id, userId), isNull(folder.parent_id)))
+      .orderBy(folder.name);
+
+    const tree: FolderNode[] = [];
+
+    for (const folderInRoot of foldersInRoot) {
+      const { folders, files } = await getFolderTreeFlat(
+        db,
+        folderInRoot.id,
+        userId
+      );
+      const treeNode = buildTree(folders, files);
+      if (treeNode) {
+        tree.push(treeNode);
+      }
+    }
+
+    return tree;
+  }),
 });
 
 function createFolderParentCondition(parentId: number | null) {
