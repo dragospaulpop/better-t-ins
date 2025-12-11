@@ -1,14 +1,16 @@
 import { FileStackIcon } from "lucide-react";
 import { useMemo } from "react";
 import { defaultStyles, FileIcon } from "react-file-icon";
+import { useTheme } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 import {
   sizeClassMap,
+  sizeClassMapLoading,
   useDisplaySettings,
 } from "@/providers/display-settings-provider";
 import { useSelectedItems } from "@/providers/selected-items-provider";
 import { FileItemMenu } from "./file-item-menu";
-import { FolderUploader } from "./folder-uploader";
+import { FolderDropzoneItem } from "./folder-dropzone-item";
 import type { Item } from "./folders";
 
 interface GridItemsProps {
@@ -17,6 +19,27 @@ interface GridItemsProps {
 
 export default function GridItems({ items }: GridItemsProps) {
   const { itemSize } = useDisplaySettings();
+
+  const gridItemSize = useMemo(() => sizeClassMap[itemSize], [itemSize]);
+  const gridItemSizeLoading = useMemo(
+    () => sizeClassMapLoading[itemSize],
+    [itemSize]
+  );
+  const gridItemSizeFolder = useMemo(() => sizeClassMap[itemSize], [itemSize]);
+  const gridItemLabel = useMemo(() => {
+    switch (itemSize) {
+      case "xs":
+        return "text-xs font-extralight";
+      case "sm":
+        return "text-sm font-light";
+      case "md":
+        return "text-base font-normal";
+      case "lg":
+        return "text-lg font-medium";
+      default:
+        return "text-sm font-light";
+    }
+  }, [itemSize]);
 
   const gridMinColSize = useMemo(() => {
     switch (itemSize) {
@@ -37,36 +60,39 @@ export default function GridItems({ items }: GridItemsProps) {
     <div className={cn("grid w-full gap-0.5", gridMinColSize)}>
       {items.map((item) =>
         item.type === "folder" ? (
-          <FolderUploader item={item} key={item.id} />
+          <FolderDropzoneItem
+            display="grid"
+            item={item}
+            itemLabel={gridItemLabel}
+            itemSizeClass={gridItemSize}
+            itemSizeClassFolder={gridItemSizeFolder}
+            itemSizeClassLoading={gridItemSizeLoading}
+            key={item.id}
+          />
         ) : (
-          <FileItem item={item} key={item.id} />
+          <FileItem
+            item={item}
+            itemLabel={gridItemLabel}
+            itemSizeClass={gridItemSize}
+            key={item.id}
+          />
         )
       )}
     </div>
   );
 }
 
-function FileItem({ item }: { item: Item }) {
+function FileItem({
+  item,
+  itemSizeClass,
+  itemLabel,
+}: {
+  item: Item;
+  itemSizeClass: string;
+  itemLabel: string;
+}) {
   const { selectedFiles, toggleSelectedFile } = useSelectedItems();
-  const { itemSize } = useDisplaySettings();
-
-  const gridItemSize = useMemo(() => sizeClassMap[itemSize], [itemSize]);
-
-  const gridItemLabel = useMemo(() => {
-    switch (itemSize) {
-      case "xs":
-        return "text-xs font-extralight";
-      case "sm":
-        return "text-sm font-light";
-      case "md":
-        return "text-base font-normal";
-      case "lg":
-        return "text-lg font-medium";
-      default:
-        return "text-sm font-light";
-    }
-  }, [itemSize]);
-
+  const { resolvedTheme } = useTheme();
   const extension = useMemo(
     () => item.name.split(".").pop()?.toLowerCase(),
     [item.name]
@@ -78,6 +104,8 @@ function FileItem({ item }: { item: Item }) {
       defaultStyles.bin,
     [extension]
   );
+
+  const iconColor = resolvedTheme === "dark" ? "#999999" : "#dddddd";
 
   return (
     <div className="group relative">
@@ -108,15 +136,20 @@ function FileItem({ item }: { item: Item }) {
         <div className="relative">
           <div
             className={cn(
-              gridItemSize,
+              itemSizeClass,
               "my-2 grid shrink-0 place-items-center p-2 [&>svg]:size-full"
             )}
           >
-            <FileIcon extension={extension} {...style} labelUppercase={false} />
+            <FileIcon
+              extension={extension}
+              {...style}
+              color={iconColor}
+              labelUppercase={false}
+            />
           </div>
         </div>
         <span
-          className={cn("line-clamp-none break-all text-center", gridItemLabel)}
+          className={cn("line-clamp-none break-all text-center", itemLabel)}
         >
           {item.name}
         </span>

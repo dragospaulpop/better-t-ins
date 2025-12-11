@@ -40,6 +40,12 @@ export const sizeClassMap: Record<Size, string> = {
   md: "size-20",
   lg: "size-24",
 };
+export const sizeClassMapLoading: Record<Size, string> = {
+  xs: "size-2",
+  sm: "size-4",
+  md: "size-6",
+  lg: "size-8",
+};
 export const getSizeValue = (size: Size): SizeValue => sizeMap[size];
 
 interface DisplaySettingsContextValue {

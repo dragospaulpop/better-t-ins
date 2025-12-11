@@ -1,9 +1,9 @@
 import { formatBytes } from "@better-upload/client/helpers";
 import { useNavigate } from "@tanstack/react-router";
-import { FolderIcon } from "lucide-react";
 import { useMemo } from "react";
 import { Fragment } from "react/jsx-runtime";
 import { defaultStyles, FileIcon } from "react-file-icon";
+import { useTheme } from "@/components/theme-provider";
 import {
   Item,
   ItemActions,
@@ -17,11 +17,12 @@ import {
 import { cn } from "@/lib/utils";
 import {
   getSizeValue,
+  sizeClassMapLoading,
   useDisplaySettings,
 } from "@/providers/display-settings-provider";
 import { useSelectedItems } from "@/providers/selected-items-provider";
 import { FileItemMenu } from "./file-item-menu";
-import FolderItemMenu from "./folder-item-menu";
+import { FolderDropzoneItem } from "./folder-dropzone-item";
 import { type Item as ItemType, mimeToReadable } from "./folders";
 
 const LIST_ITEM_SIZE_OFFSET = 4;
@@ -34,21 +35,25 @@ interface ListItemsProps {
 
 export default function ListItems({ items }: ListItemsProps) {
   const { itemSize } = useDisplaySettings();
-  const { selectedFiles, toggleSelectedFile } = useSelectedItems();
-  const navigate = useNavigate();
 
   const listItemSize = useMemo(
     () => `size-${getSizeValue(itemSize) - LIST_ITEM_SIZE_OFFSET}`,
     [itemSize]
   );
-  const listItemIconSizeFolder = useMemo(
+  const listItemSizeFolder = useMemo(
     () => `size-${getSizeValue(itemSize) - LIST_ITEM_ICON_SIZE_OFFSET_FOLDER}`,
     [itemSize]
   );
-  const listItemIconSizeFile = useMemo(
+  const listItemSizeFile = useMemo(
     () => `size-${getSizeValue(itemSize) - LIST_ITEM_ICON_SIZE_OFFSET_FILE}`,
     [itemSize]
   );
+
+  const listItemSizeLoading = useMemo(
+    () => sizeClassMapLoading[itemSize],
+    [itemSize]
+  );
+
   const listItemLabel = useMemo(() => {
     switch (itemSize) {
       case "xs":
@@ -69,96 +74,23 @@ export default function ListItems({ items }: ListItemsProps) {
       <ItemGroup>
         {items.map((item, index) => (
           <Fragment key={item.id}>
-            <Item
-              className={cn(
-                "group rounded-none px-0 py-0.5 transition-none hover:bg-tud-blue/25",
-                {
-                  "border-tud-blue/80 bg-tud-blue/25": selectedFiles.includes(
-                    item.id
-                  ),
-                }
-              )}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                toggleSelectedFile(item.id);
-              }}
-              onDoubleClick={(e) => {
-                e.preventDefault();
-                if (item.type === "folder") {
-                  navigate({
-                    to: "/files/{-$parentId}",
-                    params: { parentId: String(item.id) },
-                  });
-                }
-              }}
-              onKeyUp={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  toggleSelectedFile(item.id);
-                }
-              }}
-              role="button"
-              size="sm"
-              tabIndex={0}
-            >
-              <ItemMedia className={cn(listItemSize)}>
-                {item.type === "folder" ? (
-                  <FolderIcon
-                    className={cn(
-                      "shrink-0 fill-tud-blue/75 dark:fill-tud-blue",
-                      listItemIconSizeFolder
-                    )}
-                    strokeWidth={0}
-                  />
-                ) : (
-                  <MimeFileIcon
-                    listItemIconSize={listItemIconSizeFile}
-                    mime={item.mime}
-                  />
-                )}
-              </ItemMedia>
-              <ItemContent className="grid w-full grid-cols-4 items-center justify-center gap-6">
-                <ItemTitle
-                  className={cn(
-                    "line-clamp-none break-all text-left",
-                    listItemLabel
-                  )}
-                >
-                  {item.name}
-                </ItemTitle>
-                <ItemDescription className={cn("text-left", listItemLabel)}>
-                  {mimeToReadable(item.mime)}
-                </ItemDescription>
-                <ItemDescription className={cn("text-left", listItemLabel)}>
-                  {formatBytes(item.size ?? 0, { decimalPlaces: 2 })}
-                </ItemDescription>
-                <ItemDescription className={cn("text-left", listItemLabel)}>
-                  {item.createdAt.toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit",
-                    hour12: false,
-                  })}
-                </ItemDescription>
-              </ItemContent>
-              <ItemActions>
-                {item.type === "file" && (
-                  <FileItemMenu
-                    className="relative top-auto right-auto"
-                    item={item}
-                  />
-                )}
-                {item.type === "folder" && (
-                  <FolderItemMenu
-                    className="relative top-auto right-auto"
-                    item={item}
-                  />
-                )}
-              </ItemActions>
-            </Item>
+            {item.type === "folder" ? (
+              <FolderDropzoneItem
+                display="list"
+                item={item}
+                itemLabel={listItemLabel}
+                itemSizeClass={listItemSize}
+                itemSizeClassFolder={listItemSizeFolder}
+                itemSizeClassLoading={listItemSizeLoading}
+              />
+            ) : (
+              <ListFileItem
+                item={item}
+                itemLabel={listItemLabel}
+                itemSizeClass={listItemSize}
+                itemSizeClassFile={listItemSizeFile}
+              />
+            )}
             {index !== items.length - 1 && <ItemSeparator />}
           </Fragment>
         ))}
@@ -167,13 +99,95 @@ export default function ListItems({ items }: ListItemsProps) {
   );
 }
 
+function ListFileItem({
+  item,
+  itemSizeClass,
+  itemLabel,
+  itemSizeClassFile,
+}: {
+  item: ItemType;
+  itemSizeClass: string;
+  itemLabel: string;
+
+  itemSizeClassFile: string;
+}) {
+  const { selectedFiles, toggleSelectedFile } = useSelectedItems();
+  const navigate = useNavigate();
+
+  return (
+    <Item
+      className={cn(
+        "group rounded-none px-0 py-0.5 transition-none hover:bg-tud-blue/25",
+        {
+          "border-tud-blue/80 bg-tud-blue/25": selectedFiles.includes(item.id),
+        }
+      )}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleSelectedFile(item.id);
+      }}
+      onDoubleClick={(e) => {
+        e.preventDefault();
+        if (item.type === "folder") {
+          navigate({
+            to: "/files/{-$parentId}",
+            params: { parentId: String(item.id) },
+          });
+        }
+      }}
+      onKeyUp={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          toggleSelectedFile(item.id);
+        }
+      }}
+      role="button"
+      size="sm"
+      tabIndex={0}
+    >
+      <ItemMedia className={cn(itemSizeClass)}>
+        <MimeFileIcon itemSizeClass={itemSizeClassFile} mime={item.mime} />
+      </ItemMedia>
+      <ItemContent className="grid w-full grid-cols-4 items-center justify-center gap-6">
+        <ItemTitle
+          className={cn("line-clamp-none break-all text-left", itemLabel)}
+        >
+          {item.name}
+        </ItemTitle>
+        <ItemDescription className={cn("text-left", itemLabel)}>
+          {mimeToReadable(item.mime)}
+        </ItemDescription>
+        <ItemDescription className={cn("text-left", itemLabel)}>
+          {formatBytes(item.size ?? 0, { decimalPlaces: 2 })}
+        </ItemDescription>
+        <ItemDescription className={cn("text-left", itemLabel)}>
+          {item.createdAt.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+          })}
+        </ItemDescription>
+      </ItemContent>
+      <ItemActions>
+        <FileItemMenu className="relative top-auto right-auto" item={item} />
+      </ItemActions>
+    </Item>
+  );
+}
+
 function MimeFileIcon({
   mime,
-  listItemIconSize,
+  itemSizeClass,
 }: {
   mime: string;
-  listItemIconSize: string;
+  itemSizeClass: string;
 }) {
+  const { resolvedTheme } = useTheme();
+
   const extension = useMemo(() => mime.split("/").pop()?.toLowerCase(), [mime]);
 
   const style = useMemo(
@@ -183,14 +197,21 @@ function MimeFileIcon({
     [extension]
   );
 
+  const iconColor = resolvedTheme === "dark" ? "#999999" : "#dddddd";
+
   return (
     <div
       className={cn(
-        listItemIconSize,
+        itemSizeClass,
         "my-2 grid shrink-0 place-items-center p-2 [&>svg]:size-full"
       )}
     >
-      <FileIcon extension={extension} {...style} labelUppercase={false} />
+      <FileIcon
+        extension={extension}
+        {...style}
+        color={iconColor}
+        labelUppercase={false}
+      />
     </div>
   );
 }

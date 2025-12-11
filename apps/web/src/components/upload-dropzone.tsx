@@ -39,7 +39,7 @@ type UploadDropzoneProps = {
   ) => void;
   isUploading?: boolean;
   isQueued?: boolean;
-  folderId?: string | number | null;
+  folderId?: number | null;
 };
 
 export function UploadDropzone({
@@ -80,19 +80,19 @@ export function UploadDropzone({
   return (
     <div
       className={cn(
-        "relative h-full w-full rounded-lg border border-input border-dashed text-foreground transition-colors",
+        "relative h-full w-full rounded-none text-foreground transition-none",
         {
-          "border-primary/80": isDragActive,
+          "border border-primary/80 border-dashed": isDragActive,
         }
       )}
     >
       <label
         {...getRootProps()}
         className={cn(
-          "flex h-full w-full min-w-72 cursor-pointer flex-col items-center justify-center rounded-lg bg-transparent px-2 py-6 transition-colors dark:bg-input/10",
+          "flex h-full w-full min-w-72 cursor-pointer flex-col items-center justify-center rounded-none bg-transparent px-2 py-6 transition-none",
+          "hover:border hover:border-dashed hover:bg-accent dark:hover:bg-accent/40",
           {
-            "hover:bg-accent dark:hover:bg-accent/40": true,
-            "opacity-0": isDragActive,
+            "border-dashed opacity-0": isDragActive,
           }
         )}
         htmlFor={_id || id}
