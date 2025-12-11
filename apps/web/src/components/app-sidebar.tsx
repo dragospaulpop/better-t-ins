@@ -110,7 +110,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
+        <SidebarGroup className="flex-1">
           <SidebarGroupLabel className="flex items-center justify-between gap-2">
             <span>Explorer</span>
             {isLoadingRootFolderTree && <Spinner />}
@@ -125,8 +125,8 @@ export function AppSidebar() {
               </Tooltip>
             )}
           </SidebarGroupLabel>
-          <SidebarGroupContent className="overflow-x-auto">
-            <div className="min-w-max">
+          <SidebarGroupContent className="flex flex-1 overflow-x-auto">
+            <div className="min-w-max flex-1">
               <FileExplorer
                 rootNode={
                   rootFolderTree ??
