@@ -146,21 +146,21 @@ function ListFileItem({
       tabIndex={0}
     >
       <ItemMedia className={cn(itemSizeClass)}>
-        <MimeFileIcon itemSizeClass={itemSizeClassFile} mime={item.mime} />
+        <MimeFileIcon itemSizeClass={itemSizeClassFile} name={item.name} />
       </ItemMedia>
       <ItemContent className="grid w-full grid-cols-4 items-center justify-center gap-6">
         <ItemTitle
-          className={cn("line-clamp-none break-all text-left", itemLabel)}
+          className={cn("line-clamp-1 break-all text-left", itemLabel)}
         >
           {item.name}
         </ItemTitle>
-        <ItemDescription className={cn("text-left", itemLabel)}>
+        <ItemDescription className={cn("line-clamp-1 text-left", itemLabel)}>
           {mimeToReadable(item.mime)}
         </ItemDescription>
-        <ItemDescription className={cn("text-left", itemLabel)}>
+        <ItemDescription className={cn("line-clamp-1 text-left", itemLabel)}>
           {formatBytes(item.size ?? 0, { decimalPlaces: 2 })}
         </ItemDescription>
-        <ItemDescription className={cn("text-left", itemLabel)}>
+        <ItemDescription className={cn("line-clamp-1 text-left", itemLabel)}>
           {item.createdAt.toLocaleDateString("en-US", {
             year: "numeric",
             month: "short",
@@ -180,15 +180,15 @@ function ListFileItem({
 }
 
 function MimeFileIcon({
-  mime,
+  name,
   itemSizeClass,
 }: {
-  mime: string;
+  name: string;
   itemSizeClass: string;
 }) {
   const { resolvedTheme } = useTheme();
 
-  const extension = useMemo(() => mime.split("/").pop()?.toLowerCase(), [mime]);
+  const extension = useMemo(() => name.split(".").pop()?.toLowerCase(), [name]);
 
   const style = useMemo(
     () =>

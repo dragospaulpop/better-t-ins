@@ -225,19 +225,25 @@ function ListFolderItem({
         )}
       >
         <ItemTitle
-          className={cn("line-clamp-none break-all text-left", itemLabel)}
+          className={cn("line-clamp-1 break-all text-left", itemLabel)}
         >
           {item.name}
         </ItemTitle>
         {!isDragActive && (
           <>
-            <ItemDescription className={cn("text-left", itemLabel)}>
+            <ItemDescription
+              className={cn("line-clamp-1 text-left", itemLabel)}
+            >
               {mimeToReadable(item.mime)}
             </ItemDescription>
-            <ItemDescription className={cn("text-left", itemLabel)}>
+            <ItemDescription
+              className={cn("line-clamp-1 text-left", itemLabel)}
+            >
               {formatBytes(item.size ?? 0, { decimalPlaces: 2 })}
             </ItemDescription>
-            <ItemDescription className={cn("text-left", itemLabel)}>
+            <ItemDescription
+              className={cn("line-clamp-1 text-left", itemLabel)}
+            >
               {item.createdAt.toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "short",
