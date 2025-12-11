@@ -1,5 +1,6 @@
-import type { Ancestors } from "@tud-box/api/lib/get-ancestors";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import type { Ancestors } from "@tud-box/api/lib/folders/get-ancestors";
 import { Fragment } from "react";
 import {
   Breadcrumb,
@@ -15,15 +16,26 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { trpc } from "@/lib/trpc";
 
 interface BreadcrumbNavProps {
   id?: string;
-  ancestors?: Ancestors;
+  currentFolderId?: string | null | undefined;
 }
 
-export function BreadcrumbNav({ ancestors }: BreadcrumbNavProps) {
-  const lastTwoAncestors = ancestors?.slice(-2);
-  const menuAncestors = ancestors?.slice(0, -2);
+const selectAncestors = (ancestors: Ancestors) => ({
+  lastTwoAncestors: ancestors.slice(-2),
+  menuAncestors: ancestors.slice(0, -2),
+});
+
+export function BreadcrumbNav({ currentFolderId }: BreadcrumbNavProps) {
+  const { data: { lastTwoAncestors = [], menuAncestors = [] } = {} } =
+    useSuspenseQuery({
+      ...trpc.folder.getAncestors.queryOptions({
+        id: currentFolderId,
+      }),
+      select: selectAncestors,
+    });
 
   return (
     <Breadcrumb>
@@ -35,7 +47,7 @@ export function BreadcrumbNav({ ancestors }: BreadcrumbNavProps) {
             </Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
-        {ancestors && menuAncestors?.length ? (
+        {menuAncestors.length ? (
           <>
             <BreadcrumbSeparator key="separator-ellipsis" />
             <BreadcrumbItem key="item-ellipsis">
@@ -60,7 +72,7 @@ export function BreadcrumbNav({ ancestors }: BreadcrumbNavProps) {
             </BreadcrumbItem>
           </>
         ) : null}
-        {ancestors && lastTwoAncestors?.length ? (
+        {lastTwoAncestors.length ? (
           <>
             <BreadcrumbSeparator key="separator-last-two" />
             {lastTwoAncestors.map((ancestor, index) => (

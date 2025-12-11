@@ -2,27 +2,23 @@ import { FileStackIcon } from "lucide-react";
 import { useMemo } from "react";
 import { defaultStyles, FileIcon } from "react-file-icon";
 import { cn } from "@/lib/utils";
+import {
+  sizeClassMap,
+  useDisplaySettings,
+} from "@/providers/display-settings-provider";
 import { useSelectedItems } from "@/providers/selected-items-provider";
 import { FileItemMenu } from "./file-item-menu";
 import { FolderUploader } from "./folder-uploader";
 import type { Item } from "./folders";
-import { type Size, sizeClassMap } from "./size-options";
 
 interface GridItemsProps {
   items: Item[];
-  sortField: "name" | "type" | "size" | "date";
-  sortDirection: "asc" | "desc";
-  itemSize: Size;
-  foldersFirst: boolean;
 }
 
-export default function GridItems({
-  items,
-  sortField,
-  sortDirection,
-  itemSize,
-  foldersFirst,
-}: GridItemsProps) {
+export default function GridItems({ items }: GridItemsProps) {
+  const { itemSize, sortField, sortDirection, foldersFirst } =
+    useDisplaySettings();
+
   /**
    * Sort the items by the sort field and direction.
    * Folders are always sorted before files.

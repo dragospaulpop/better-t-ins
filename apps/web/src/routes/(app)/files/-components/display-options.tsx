@@ -1,19 +1,16 @@
 import { GridIcon, ListIcon } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  type DisplayMode,
+  useDisplaySettings,
+} from "@/providers/display-settings-provider";
 
-interface DisplayOptionsProps {
-  displayMode: "grid" | "list";
-  setDisplayMode: (mode: "grid" | "list") => void;
-}
-
-export default function DisplayOptions({
-  displayMode,
-  setDisplayMode,
-}: DisplayOptionsProps) {
+export default function DisplayOptions() {
+  const { displayMode, setDisplayMode } = useDisplaySettings();
   return (
     <ToggleGroup
-      onValueChange={(v: "grid" | "list" | "") => {
-        setDisplayMode(v === "" ? displayMode : (v as "grid" | "list"));
+      onValueChange={(v: DisplayMode | "") => {
+        setDisplayMode(v === "" ? displayMode : (v as DisplayMode));
       }}
       size="sm"
       type="single"

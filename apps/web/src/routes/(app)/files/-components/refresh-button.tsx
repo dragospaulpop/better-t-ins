@@ -1,23 +1,25 @@
 import { RefreshCwIcon } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LoadingSwap } from "@/components/ui/loading-swap";
+import { useRefetchFolder } from "@/providers/refetch-folder-provider";
 
-interface RefreshButtonProps {
-  refresh: () => Promise<void>;
-}
-
-export default function RefreshButton({ refresh }: RefreshButtonProps) {
+export default function RefreshButton() {
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const { refetchFiles, refetchFolders, refetchAncestors, refetchTree } =
+    useRefetchFolder();
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      await refresh();
+      await refetchFiles();
+      await refetchFolders();
+      await refetchAncestors();
+      await refetchTree();
     } finally {
       setIsRefreshing(false);
     }
-  };
+  }, [refetchFiles, refetchFolders, refetchAncestors, refetchTree]);
 
   return (
     <Button

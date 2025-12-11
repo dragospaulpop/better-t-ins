@@ -1,39 +1,13 @@
 import { ScalingIcon } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import {
+  getSizeValue,
+  sizeReverseMap,
+  useDisplaySettings,
+} from "@/providers/display-settings-provider";
 
-const sizeMap = {
-  xs: 12, // 3rem
-  sm: 16, // 4rem
-  md: 20, // 5rem
-  lg: 24, // 6rem
-} as const;
-
-const sizeReverseMap = {
-  12: "xs",
-  16: "sm",
-  20: "md",
-  24: "lg",
-} as const;
-
-export const sizeClassMap: Record<Size, string> = {
-  xs: "size-12",
-  sm: "size-16",
-  md: "size-20",
-  lg: "size-24",
-};
-
-export type Size = keyof typeof sizeMap;
-export type SizeValue = (typeof sizeMap)[Size];
-export const getSizeValue = (size: Size): SizeValue => sizeMap[size];
-
-interface SizeOptionsProps {
-  itemSize: Size;
-  handleItemSize: (size: Size) => void;
-}
-export default function SizeOptions({
-  itemSize,
-  handleItemSize,
-}: SizeOptionsProps) {
+export default function SizeOptions() {
+  const { itemSize, setItemSize } = useDisplaySettings();
   return (
     <div className="flex w-48 items-center space-x-4">
       {/* <Label className="font-medium text-sm">Size</Label> */}
@@ -43,7 +17,7 @@ export default function SizeOptions({
         max={24}
         min={12}
         onValueChange={(value) =>
-          handleItemSize(
+          setItemSize(
             sizeReverseMap[value[0] as keyof typeof sizeReverseMap] ?? "md"
           )
         }
@@ -53,26 +27,5 @@ export default function SizeOptions({
         {itemSize}
       </div>
     </div>
-    // <ToggleGroup
-    //   onValueChange={(v: Size | "") => {
-    //     handleItemSize(v === "" ? itemSize : (v as Size));
-    //   }}
-    //   size="sm"
-    //   type="single"
-    //   value={itemSize}
-    // >
-    //   <ToggleGroupItem aria-label="Toggle xs" value="xs">
-    //     xs
-    //   </ToggleGroupItem>
-    //   <ToggleGroupItem aria-label="Toggle sm" value="sm">
-    //     sm
-    //   </ToggleGroupItem>
-    //   <ToggleGroupItem aria-label="Toggle md" value="md">
-    //     md
-    //   </ToggleGroupItem>
-    //   <ToggleGroupItem aria-label="Toggle lg" value="lg">
-    //     lg
-    //   </ToggleGroupItem>
-    // </ToggleGroup>
   );
 }

@@ -1,27 +1,15 @@
-import type { File, Folder } from "@tud-box/db/schema/upload";
 import { useSelectedItems } from "@/providers/selected-items-provider";
 import Folders from "./folders";
 
 interface FolderContentsProps {
-  displayMode: "grid" | "list";
-  files: File[];
-  folders: Folder[];
-  foldersFirst: boolean;
-  itemSize: "xs" | "sm" | "md" | "lg";
-  sortDirection: "asc" | "desc";
-  sortField: "name" | "type" | "size" | "date";
+  currentFolderId: string | null | undefined;
 }
 
 export default function FolderContents({
-  displayMode,
-  files,
-  folders,
-  foldersFirst,
-  itemSize,
-  sortDirection,
-  sortField,
+  currentFolderId,
 }: FolderContentsProps) {
   const { clearSelectedItems } = useSelectedItems();
+
   return (
     // biome-ignore lint/a11y/useSemanticElements: gimme a break
     <div
@@ -38,15 +26,7 @@ export default function FolderContents({
       role="button"
       tabIndex={0}
     >
-      <Folders
-        displayMode={displayMode}
-        files={files}
-        folders={folders}
-        foldersFirst={foldersFirst}
-        itemSize={itemSize}
-        sortDirection={sortDirection}
-        sortField={sortField}
-      />
+      <Folders currentFolderId={currentFolderId} />
     </div>
   );
 }

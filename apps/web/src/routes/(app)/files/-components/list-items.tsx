@@ -15,27 +15,23 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { cn } from "@/lib/utils";
+import {
+  getSizeValue,
+  useDisplaySettings,
+} from "@/providers/display-settings-provider";
 import { CustomIcon, type Item as ItemType, mimeToReadable } from "./folders";
-import { getSizeValue, type Size } from "./size-options";
 
 const LIST_ITEM_SIZE_OFFSET = 4;
 const LIST_ITEM_ICON_SIZE_OFFSET = 8;
 
 interface ListItemsProps {
   items: ItemType[];
-  sortField: "name" | "type" | "size" | "date";
-  sortDirection: "asc" | "desc";
-  itemSize: Size;
-  foldersFirst: boolean;
 }
 
-export default function ListItems({
-  items,
-  sortField,
-  sortDirection,
-  itemSize,
-  foldersFirst,
-}: ListItemsProps) {
+export default function ListItems({ items }: ListItemsProps) {
+  const { itemSize, sortField, sortDirection, foldersFirst } =
+    useDisplaySettings();
+
   const sortedItems = useMemo(
     () =>
       // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: sorting items
@@ -59,7 +55,9 @@ export default function ListItems({
               ? a.mime.localeCompare(b.mime)
               : b.mime.localeCompare(a.mime);
           case "size":
-            return sortDirection === "asc" ? a.size - b.size : b.size - a.size;
+            return sortDirection === "asc"
+              ? (a.size ?? 0) - (b.size ?? 0)
+              : (b.size ?? 0) - (a.size ?? 0);
           case "date":
             return sortDirection === "asc"
               ? a.createdAt.getTime() - b.createdAt.getTime()
@@ -132,7 +130,7 @@ export default function ListItems({
                   {mimeToReadable(item.mime)}
                 </ItemDescription>
                 <ItemDescription className={cn("text-left", listItemLabel)}>
-                  {formatBytes(item.size, { decimalPlaces: 2 })}
+                  {formatBytes(item.size ?? 0, { decimalPlaces: 2 })}
                 </ItemDescription>
                 <ItemDescription className={cn("text-left", listItemLabel)}>
                   {item.createdAt.toLocaleDateString("en-US", {

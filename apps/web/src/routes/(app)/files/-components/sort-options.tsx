@@ -10,24 +10,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useDisplaySettings } from "@/providers/display-settings-provider";
 
-interface SortOptionsProps {
-  sortField: "name" | "type" | "size" | "date";
-  sortDirection: "asc" | "desc";
-  handleSortBy: (newField: "name" | "type" | "size" | "date") => void;
-  handleSortDirection: (newDirection: "asc" | "desc") => void;
-  foldersFirst: boolean;
-  setFoldersFirst: (newFoldersFirst: boolean) => void;
-}
+export default function SortOptions() {
+  const {
+    sortField,
+    sortDirection,
+    foldersFirst,
+    handleSortBy,
+    setFoldersFirst,
+    setSortDirection,
+  } = useDisplaySettings();
 
-export default function SortOptions({
-  sortField,
-  sortDirection,
-  handleSortBy,
-  handleSortDirection,
-  foldersFirst,
-  setFoldersFirst,
-}: SortOptionsProps) {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <DropdownMenu onOpenChange={setIsOpen} open={isOpen}>
@@ -54,9 +48,7 @@ export default function SortOptions({
         <DropdownMenuSeparator />
         <DropdownMenuLabel>Sort direction</DropdownMenuLabel>
         <DropdownMenuRadioGroup
-          onValueChange={(value) =>
-            handleSortDirection(value as "asc" | "desc")
-          }
+          onValueChange={(value) => setSortDirection(value as "asc" | "desc")}
           value={sortDirection}
         >
           <DropdownMenuRadioItem value="asc">Ascending</DropdownMenuRadioItem>
@@ -79,42 +71,3 @@ export default function SortOptions({
     </DropdownMenu>
   );
 }
-
-// <div className="flex items-center gap-2">
-//   <Button onClick={() => handleSortBy("name")} size="sm" variant="outline">
-//     Name
-//     {sortField === "name" &&
-//       (sortDirection === "asc" ? (
-//         <ChevronUpIcon className="h-4 w-4" />
-//       ) : (
-//         <ChevronDownIcon className="h-4 w-4" />
-//       ))}
-//   </Button>
-//   <Button onClick={() => handleSortBy("type")} size="sm" variant="outline">
-//     Type
-//     {sortField === "type" &&
-//       (sortDirection === "asc" ? (
-//         <ChevronUpIcon className="h-4 w-4" />
-//       ) : (
-//         <ChevronDownIcon className="h-4 w-4" />
-//       ))}
-//   </Button>
-//   <Button onClick={() => handleSortBy("size")} size="sm" variant="outline">
-//     Size
-//     {sortField === "size" &&
-//       (sortDirection === "asc" ? (
-//         <ChevronUpIcon className="h-4 w-4" />
-//       ) : (
-//         <ChevronDownIcon className="h-4 w-4" />
-//       ))}
-//   </Button>
-//   <Button onClick={() => handleSortBy("date")} size="sm" variant="outline">
-//     Date
-//     {sortField === "date" &&
-//       (sortDirection === "asc" ? (
-//         <ChevronUpIcon className="h-4 w-4" />
-//       ) : (
-//         <ChevronDownIcon className="h-4 w-4" />
-//       ))}
-//   </Button>
-// </div>

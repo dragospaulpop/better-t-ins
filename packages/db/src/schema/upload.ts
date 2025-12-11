@@ -34,6 +34,11 @@ export const folder = mysqlTable(
 );
 
 export type Folder = typeof folder.$inferSelect;
+export type TrpcFolder = Omit<Folder, "createdAt" | "updatedAt"> & {
+  createdAt: string;
+  updatedAt: string;
+};
+export type FolderInsert = typeof folder.$inferInsert;
 
 export const folderClosure = mysqlTable(
   "folder_closure",
@@ -67,6 +72,10 @@ export const file = mysqlTable("file", {
 });
 
 export type File = typeof file.$inferSelect;
+export type TrpcFile = Omit<File, "createdAt" | "updatedAt"> & {
+  createdAt: string;
+  updatedAt: string;
+};
 export type FileInsert = typeof file.$inferInsert;
 
 export const history = mysqlTable("history", {

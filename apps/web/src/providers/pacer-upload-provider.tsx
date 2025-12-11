@@ -13,6 +13,7 @@ import {
   updateItemProgress,
   updateItemStatus,
 } from "@/stores/upload-store";
+import { useRefetchFolder } from "./refetch-folder-provider";
 
 interface PacerUploadContextValue {
   currentFolderId?: string | number | null;
@@ -26,7 +27,6 @@ const PacerUploadContext = createContext<PacerUploadContextValue | null>(null);
 interface PacerUploadProviderProps {
   children: React.ReactNode;
   currentFolderId: number | null;
-  refreshCurrentFolder: () => void;
 }
 
 // import { addItem as addItemToStore } from "@/stores/upload-store";
@@ -47,10 +47,9 @@ const COMPLETED_PROGRESS = 100;
 export function PacerUploadProvider({
   children,
   currentFolderId,
-  refreshCurrentFolder,
 }: PacerUploadProviderProps) {
+  const { refetchFiles: refreshCurrentFolder } = useRefetchFolder();
   const fileTrackingMap = useRef(new WeakMap<File, EnhancedFile>());
-
   const { control, uploadAsync } = useUploadFiles({
     route: "files",
     api: `${import.meta.env.VITE_SERVER_URL}/upload`,

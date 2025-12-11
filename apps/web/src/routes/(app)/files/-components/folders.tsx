@@ -1,4 +1,5 @@
-import type { File, Folder } from "@tud-box/db/schema/upload";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import type { TrpcFile, TrpcFolder } from "@tud-box/db/schema/upload";
 import {
   FileArchiveIcon,
   FileAudioIcon,
@@ -9,9 +10,10 @@ import {
   FolderIcon,
   type LucideIcon,
 } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { useDisplaySettings } from "@/providers/display-settings-provider";
 import GridItems from "./grid-items";
 import ListItems from "./list-items";
-import type { Size } from "./size-options";
 
 const fileIcons: Record<string, LucideIcon> = {
   "application/x-folder": FolderIcon,
@@ -76,71 +78,58 @@ export type Item = {
 };
 
 interface FoldersProps {
-  displayMode: "grid" | "list";
-  foldersFirst: boolean;
-  sortField: "name" | "type" | "size" | "date";
-  sortDirection: "asc" | "desc";
-  itemSize: Size;
-  folders: Folder[];
-  files: (File & { history_count?: number })[];
+  currentFolderId: string | null | undefined;
 }
 
-export default function Folders({
-  displayMode,
-  foldersFirst,
-  sortField,
-  sortDirection,
-  itemSize,
-  folders,
-  files,
-}: FoldersProps) {
-  const folderItems = folders.map(
-    (folder) =>
-      ({
-        id: folder.id,
-        name: folder.name,
-        parentId: folder.parent_id ?? null,
-        type: "folder",
-        mime: "application/x-folder",
-        createdAt: folder.createdAt,
-        updatedAt: folder.updatedAt,
-      }) as Item
-  );
+const selectFolders = (folders: TrpcFolder[]): Item[] =>
+  folders.map((folder) => ({
+    id: folder.id,
+    name: folder.name,
+    parentId: folder.parent_id ?? null,
+    type: "folder",
+    mime: "application/x-folder",
+    size: 0,
+    createdAt: new Date(folder.createdAt),
+    updatedAt: new Date(folder.updatedAt),
+  }));
 
-  const fileItems = files.map(
-    (file) =>
-      ({
-        id: file.id,
-        name: file.name,
-        type: "file",
-        mime: file.type,
-        size: file.size,
-        createdAt: file.createdAt,
-        updatedAt: file.updatedAt,
-        history_count: file.history_count,
-      }) as Item
-  );
+const selectFiles = (files: TrpcFile[]): Item[] =>
+  files.map((file) => ({
+    id: file.id,
+    name: file.name,
+    parentId: file.folder_id ?? null,
+    type: "file",
+    mime: file.type ?? "application/octet-stream",
+    size: file.size ?? undefined,
+    createdAt: new Date(file.createdAt),
+    updatedAt: new Date(file.updatedAt),
+  }));
 
-  const items = [...fileItems, ...folderItems];
+export default function Folders({ currentFolderId }: FoldersProps) {
+  const { displayMode } = useDisplaySettings();
+
+  const { data: folders = [] } = useSuspenseQuery({
+    ...trpc.folder.getAllByParentId.queryOptions({
+      parent_id: currentFolderId,
+    }),
+    select: selectFolders,
+  });
+
+  const { data: files = [] } = useSuspenseQuery({
+    ...trpc.file.getAllByFolderId.queryOptions({
+      folder_id: currentFolderId,
+    }),
+    select: selectFiles,
+  });
+
+  const items = [...files, ...folders];
 
   return (
     <div className="w-full">
       {displayMode === "grid" ? (
-        <GridItems
-          foldersFirst={foldersFirst}
-          itemSize={itemSize}
-          items={items}
-          sortDirection={sortDirection}
-          sortField={sortField}
-        />
+        <GridItems items={items} />
       ) : (
-        <ListItems
-          foldersFirst={foldersFirst}
-          itemSize={itemSize}
-          items={items}
-          sortDirection={sortDirection}
-          sortField={sortField}
-        />
+        <ListItems items={items} />
       )}
     </div>
   );
