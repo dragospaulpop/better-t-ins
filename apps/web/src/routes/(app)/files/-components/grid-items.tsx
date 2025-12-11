@@ -18,8 +18,6 @@ interface GridItemsProps {
 export default function GridItems({ items }: GridItemsProps) {
   const { itemSize } = useDisplaySettings();
 
-  const gridItemSize = useMemo(() => sizeClassMap[itemSize], [itemSize]);
-
   const gridMinColSize = useMemo(() => {
     switch (itemSize) {
       case "xs":
@@ -35,6 +33,25 @@ export default function GridItems({ items }: GridItemsProps) {
     }
   }, [itemSize]);
 
+  return (
+    <div className={cn("grid w-full gap-0.5", gridMinColSize)}>
+      {items.map((item) =>
+        item.type === "folder" ? (
+          <FolderUploader item={item} key={item.id} />
+        ) : (
+          <FileItem item={item} key={item.id} />
+        )
+      )}
+    </div>
+  );
+}
+
+function FileItem({ item }: { item: Item }) {
+  const { selectedFiles, toggleSelectedFile } = useSelectedItems();
+  const { itemSize } = useDisplaySettings();
+
+  const gridItemSize = useMemo(() => sizeClassMap[itemSize], [itemSize]);
+
   const gridItemLabel = useMemo(() => {
     switch (itemSize) {
       case "xs":
@@ -49,40 +66,6 @@ export default function GridItems({ items }: GridItemsProps) {
         return "text-sm font-light";
     }
   }, [itemSize]);
-
-  return (
-    <div className={cn("grid w-full gap-0.5", gridMinColSize)}>
-      {items.map((item) =>
-        item.type === "folder" ? (
-          <FolderItem
-            gridItemLabel={gridItemLabel}
-            gridItemSize={gridItemSize}
-            item={item}
-            key={item.id}
-          />
-        ) : (
-          <FileItem
-            gridItemLabel={gridItemLabel}
-            gridItemSize={gridItemSize}
-            item={item}
-            key={item.id}
-          />
-        )
-      )}
-    </div>
-  );
-}
-
-function FileItem({
-  item,
-  gridItemSize,
-  gridItemLabel,
-}: {
-  item: Item;
-  gridItemSize: string;
-  gridItemLabel: string;
-}) {
-  const { selectedFiles, toggleSelectedFile } = useSelectedItems();
 
   const extension = useMemo(
     () => item.name.split(".").pop()?.toLowerCase(),
@@ -143,23 +126,5 @@ function FileItem({
       </div>
       <FileItemMenu item={item} />
     </div>
-  );
-}
-
-function FolderItem({
-  item,
-  gridItemSize,
-  gridItemLabel,
-}: {
-  item: Item;
-  gridItemSize: string;
-  gridItemLabel: string;
-}) {
-  return (
-    <FolderUploader
-      gridItemLabel={gridItemLabel}
-      gridItemSize={gridItemSize}
-      item={item}
-    />
   );
 }

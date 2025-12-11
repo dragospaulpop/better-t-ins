@@ -6,15 +6,9 @@ import type { Item } from "./folders";
 
 interface FolderUploaderProps {
   item: Item;
-  gridItemSize: string;
-  gridItemLabel: string;
 }
 
-export function FolderUploader({
-  item,
-  gridItemSize,
-  gridItemLabel,
-}: FolderUploaderProps) {
+export function FolderUploader({ item }: FolderUploaderProps) {
   const { control, addToUploadQueue } = usePacerUpload();
 
   const uploadingFolderId = useStore(store, (state) => state.uploadingFolderId);
@@ -23,8 +17,6 @@ export function FolderUploader({
   return (
     <FolderDropzone
       control={control}
-      gridItemLabel={gridItemLabel}
-      gridItemSize={gridItemSize}
       isQueued={queuedFolderIds.has(item.id)}
       isUploading={uploadingFolderId === item.id}
       item={item}

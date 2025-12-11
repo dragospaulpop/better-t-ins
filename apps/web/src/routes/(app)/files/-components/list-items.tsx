@@ -120,7 +120,7 @@ export default function ListItems({ items }: ListItemsProps) {
               <ItemContent className="grid w-full grid-cols-4 items-center justify-center gap-6">
                 <ItemTitle
                   className={cn(
-                    "line-clamp-2 break-all text-left",
+                    "line-clamp-none break-all text-left",
                     listItemLabel
                   )}
                 >

@@ -1,9 +1,13 @@
 import type { UploadHookControl } from "@better-upload/client";
 import { useNavigate } from "@tanstack/react-router";
 import { ClockIcon, FolderIcon, Loader2, UploadIcon } from "lucide-react";
-import { useId } from "react";
+import { useId, useMemo } from "react";
 import { useDropzone } from "react-dropzone";
 import { cn } from "@/lib/utils";
+import {
+  sizeClassMap,
+  useDisplaySettings,
+} from "@/providers/display-settings-provider";
 import type { EnhancedFile } from "@/providers/pacer-upload-provider";
 import { useSelectedItems } from "@/providers/selected-items-provider";
 import FolderItemMenu from "@/routes/(app)/files/-components/folder-item-menu";
@@ -19,8 +23,6 @@ type FolderDropzoneProps = {
     options?: Parameters<UploadHookControl<true>["upload"]>[1]
   ) => void;
   item: FolderItem;
-  gridItemSize: string;
-  gridItemLabel: string;
   isUploading?: boolean;
   isQueued?: boolean;
 };
@@ -32,8 +34,6 @@ export function FolderDropzone({
   metadata,
   uploadOverride,
   item,
-  gridItemSize,
-  gridItemLabel,
   isUploading = false,
   isQueued = false,
 }: FolderDropzoneProps) {
@@ -41,6 +41,25 @@ export function FolderDropzone({
 
   const navigate = useNavigate();
   const { toggleSelectedFolder, selectedFolders } = useSelectedItems();
+
+  const { itemSize } = useDisplaySettings();
+
+  const gridItemSize = useMemo(() => sizeClassMap[itemSize], [itemSize]);
+
+  const gridItemLabel = useMemo(() => {
+    switch (itemSize) {
+      case "xs":
+        return "text-xs font-extralight";
+      case "sm":
+        return "text-sm font-light";
+      case "md":
+        return "text-base font-normal";
+      case "lg":
+        return "text-lg font-medium";
+      default:
+        return "text-sm font-light";
+    }
+  }, [itemSize]);
 
   const { getRootProps, getInputProps, isDragActive, inputRef } = useDropzone({
     onDrop: (files) => {
