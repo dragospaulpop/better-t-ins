@@ -1,9 +1,9 @@
 import { formatBytes } from "@better-upload/client/helpers";
-import { FolderIcon, MoreVerticalIcon } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { FolderIcon } from "lucide-react";
 import { useMemo } from "react";
 import { Fragment } from "react/jsx-runtime";
-import { Button } from "@/components/ui/button";
-
+import { defaultStyles, FileIcon } from "react-file-icon";
 import {
   Item,
   ItemActions,
@@ -19,65 +19,36 @@ import {
   getSizeValue,
   useDisplaySettings,
 } from "@/providers/display-settings-provider";
-import { CustomIcon, type Item as ItemType, mimeToReadable } from "./folders";
+import { useSelectedItems } from "@/providers/selected-items-provider";
+import { FileItemMenu } from "./file-item-menu";
+import FolderItemMenu from "./folder-item-menu";
+import { type Item as ItemType, mimeToReadable } from "./folders";
 
 const LIST_ITEM_SIZE_OFFSET = 4;
-const LIST_ITEM_ICON_SIZE_OFFSET = 8;
+const LIST_ITEM_ICON_SIZE_OFFSET_FOLDER = 8;
+const LIST_ITEM_ICON_SIZE_OFFSET_FILE = 4;
 
 interface ListItemsProps {
   items: ItemType[];
 }
 
 export default function ListItems({ items }: ListItemsProps) {
-  const { itemSize, sortField, sortDirection, foldersFirst } =
-    useDisplaySettings();
-
-  const sortedItems = useMemo(
-    () =>
-      // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: sorting items
-      items.sort((a, b) => {
-        if (foldersFirst) {
-          if (a.type === "folder" && b.type === "file") {
-            return -1;
-          }
-          if (a.type === "file" && b.type === "folder") {
-            return 1;
-          }
-        }
-
-        switch (sortField) {
-          case "name":
-            return sortDirection === "asc"
-              ? a.name.localeCompare(b.name)
-              : b.name.localeCompare(a.name);
-          case "type":
-            return sortDirection === "asc"
-              ? a.mime.localeCompare(b.mime)
-              : b.mime.localeCompare(a.mime);
-          case "size":
-            return sortDirection === "asc"
-              ? (a.size ?? 0) - (b.size ?? 0)
-              : (b.size ?? 0) - (a.size ?? 0);
-          case "date":
-            return sortDirection === "asc"
-              ? a.createdAt.getTime() - b.createdAt.getTime()
-              : b.createdAt.getTime() - a.createdAt.getTime();
-          default:
-            return 0;
-        }
-      }),
-    [items, sortField, sortDirection, foldersFirst]
-  );
+  const { itemSize } = useDisplaySettings();
+  const { selectedFiles, toggleSelectedFile } = useSelectedItems();
+  const navigate = useNavigate();
 
   const listItemSize = useMemo(
     () => `size-${getSizeValue(itemSize) - LIST_ITEM_SIZE_OFFSET}`,
     [itemSize]
   );
-  const listItemIconSize = useMemo(
-    () => `size-${getSizeValue(itemSize) - LIST_ITEM_ICON_SIZE_OFFSET}`,
+  const listItemIconSizeFolder = useMemo(
+    () => `size-${getSizeValue(itemSize) - LIST_ITEM_ICON_SIZE_OFFSET_FOLDER}`,
     [itemSize]
   );
-
+  const listItemIconSizeFile = useMemo(
+    () => `size-${getSizeValue(itemSize) - LIST_ITEM_ICON_SIZE_OFFSET_FILE}`,
+    [itemSize]
+  );
   const listItemLabel = useMemo(() => {
     switch (itemSize) {
       case "xs":
@@ -96,24 +67,53 @@ export default function ListItems({ items }: ListItemsProps) {
   return (
     <div className="flex flex-col gap-2">
       <ItemGroup>
-        {sortedItems.map((item, index) => (
+        {items.map((item, index) => (
           <Fragment key={item.id}>
-            <Item size="sm">
+            <Item
+              className={cn(
+                "group rounded-none px-0 py-0.5 transition-none hover:bg-tud-blue/25",
+                {
+                  "border-tud-blue/80 bg-tud-blue/25": selectedFiles.includes(
+                    item.id
+                  ),
+                }
+              )}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleSelectedFile(item.id);
+              }}
+              onDoubleClick={(e) => {
+                e.preventDefault();
+                if (item.type === "folder") {
+                  navigate({
+                    to: "/files/{-$parentId}",
+                    params: { parentId: String(item.id) },
+                  });
+                }
+              }}
+              onKeyUp={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  toggleSelectedFile(item.id);
+                }
+              }}
+              role="button"
+              size="sm"
+              tabIndex={0}
+            >
               <ItemMedia className={cn(listItemSize)}>
                 {item.type === "folder" ? (
                   <FolderIcon
                     className={cn(
                       "shrink-0 fill-tud-blue/75 dark:fill-tud-blue",
-                      listItemIconSize
+                      listItemIconSizeFolder
                     )}
                     strokeWidth={0}
                   />
                 ) : (
-                  <CustomIcon
-                    absoluteStrokeWidth={true}
-                    className={cn("shrink-0", listItemIconSize)}
-                    extension={item.mime as string}
-                    strokeWidth={0.75}
+                  <MimeFileIcon
+                    listItemIconSize={listItemIconSizeFile}
+                    mime={item.mime}
                   />
                 )}
               </ItemMedia>
@@ -145,15 +145,52 @@ export default function ListItems({ items }: ListItemsProps) {
                 </ItemDescription>
               </ItemContent>
               <ItemActions>
-                <Button className="rounded-full" size="icon" variant="ghost">
-                  <MoreVerticalIcon />
-                </Button>
+                {item.type === "file" && (
+                  <FileItemMenu
+                    className="relative top-auto right-auto"
+                    item={item}
+                  />
+                )}
+                {item.type === "folder" && (
+                  <FolderItemMenu
+                    className="relative top-auto right-auto"
+                    item={item}
+                  />
+                )}
               </ItemActions>
             </Item>
             {index !== items.length - 1 && <ItemSeparator />}
           </Fragment>
         ))}
       </ItemGroup>
+    </div>
+  );
+}
+
+function MimeFileIcon({
+  mime,
+  listItemIconSize,
+}: {
+  mime: string;
+  listItemIconSize: string;
+}) {
+  const extension = useMemo(() => mime.split("/").pop()?.toLowerCase(), [mime]);
+
+  const style = useMemo(
+    () =>
+      defaultStyles[extension as keyof typeof defaultStyles] ||
+      defaultStyles.bin,
+    [extension]
+  );
+
+  return (
+    <div
+      className={cn(
+        listItemIconSize,
+        "my-2 grid shrink-0 place-items-center p-2 [&>svg]:size-full"
+      )}
+    >
+      <FileIcon extension={extension} {...style} labelUppercase={false} />
     </div>
   );
 }

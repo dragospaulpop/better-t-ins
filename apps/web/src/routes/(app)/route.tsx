@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/app-sidebar";
 import Header from "@/components/header";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { ensureSessionData } from "@/lib/auth-utils";
 import { UploadFeedbackProvider } from "@/providers/upload-feedback-provider";
 
@@ -26,20 +26,18 @@ export const Route = createFileRoute("/(app)")({
 function RouteComponent() {
   return (
     <UploadFeedbackProvider>
-      <SidebarProvider
-      // style={{
-      //   "--sidebar-width": "min-content",
-      // }}
-      >
-        <div className="flex h-screen w-full overflow-hidden bg-background">
-          <AppSidebar />
-          <div className="flex flex-1 flex-col overflow-hidden">
-            <Header />
-            <main className="flex-1 overflow-hidden p-0">
-              <Outlet />
-            </main>
+      <SidebarProvider>
+        <SidebarInset>
+          <div className="flex h-screen w-full overflow-hidden bg-background">
+            <AppSidebar />
+            <div className="flex flex-1 flex-col overflow-hidden">
+              <Header />
+              <main className="flex-1 overflow-hidden p-0">
+                <Outlet />
+              </main>
+            </div>
           </div>
-        </div>
+        </SidebarInset>
       </SidebarProvider>
     </UploadFeedbackProvider>
   );

@@ -15,8 +15,6 @@ import { pacerDevtoolsPlugin } from "@tanstack/react-pacer-devtools";
 
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-
-import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import NotFound from "@/components/not-found";
 import RouterError from "@/components/router-error";
 import type { authClient } from "@/lib/auth-client";
@@ -59,8 +57,6 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 });
 
 function RootComponent() {
-  const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
-
   // const isFetching = useRouterState({
   //   select: (s) => s.isLoading,
   // });
@@ -74,19 +70,14 @@ function RootComponent() {
         disableTransitionOnChange
         storageKey="vite-ui-theme"
       >
-        <GoogleReCaptchaProvider
-          reCaptchaKey={RECAPTCHA_SITE_KEY as string}
-          scriptProps={{ async: true, defer: true, appendTo: "body" }}
-          useRecaptchaNet
-        >
-          <div className="flex min-h-screen w-full bg-background">
-            <div className="flex min-h-0 flex-1 flex-col">
-              <main className="min-h-0 flex-1 p-0">
-                <Outlet />
-              </main>
-            </div>
+        <div className="flex min-h-screen w-full bg-background">
+          <div className="flex min-h-0 flex-1 flex-col">
+            <main className="min-h-0 flex-1 p-0">
+              <Outlet />
+            </main>
           </div>
-        </GoogleReCaptchaProvider>
+        </div>
+
         <Toaster richColors />
       </ThemeProvider>
       <TanStackDevtools

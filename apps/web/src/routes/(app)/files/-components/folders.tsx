@@ -10,6 +10,7 @@ import {
   FolderIcon,
   type LucideIcon,
 } from "lucide-react";
+import { useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { useDisplaySettings } from "@/providers/display-settings-provider";
 import GridItems from "./grid-items";
@@ -106,7 +107,8 @@ const selectFiles = (files: TrpcFile[]): Item[] =>
   }));
 
 export default function Folders({ currentFolderId }: FoldersProps) {
-  const { displayMode } = useDisplaySettings();
+  const { displayMode, sortField, sortDirection, foldersFirst } =
+    useDisplaySettings();
 
   const { data: folders = [] } = useSuspenseQuery({
     ...trpc.folder.getAllByParentId.queryOptions({
@@ -122,7 +124,42 @@ export default function Folders({ currentFolderId }: FoldersProps) {
     select: selectFiles,
   });
 
-  const items = [...files, ...folders];
+  const items = useMemo(
+    () =>
+      // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: sorting items
+      [...files, ...folders].sort((a, b) => {
+        if (foldersFirst) {
+          if (a.type === "folder" && b.type === "file") {
+            return -1;
+          }
+          if (a.type === "file" && b.type === "folder") {
+            return 1;
+          }
+        }
+
+        switch (sortField) {
+          case "name":
+            return sortDirection === "asc"
+              ? a.name.localeCompare(b.name)
+              : b.name.localeCompare(a.name);
+          case "type":
+            return sortDirection === "asc"
+              ? a.mime.localeCompare(b.mime)
+              : b.mime.localeCompare(a.mime);
+          case "size":
+            return sortDirection === "asc"
+              ? (a.size ?? 0) - (b.size ?? 0)
+              : (b.size ?? 0) - (a.size ?? 0);
+          case "date":
+            return sortDirection === "asc"
+              ? a.createdAt.getTime() - b.createdAt.getTime()
+              : b.createdAt.getTime() - a.createdAt.getTime();
+          default:
+            return 0;
+        }
+      }),
+    [files, folders, sortField, sortDirection, foldersFirst]
+  );
 
   return (
     <div className="w-full">

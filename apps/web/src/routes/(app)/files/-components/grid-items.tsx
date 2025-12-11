@@ -16,51 +16,7 @@ interface GridItemsProps {
 }
 
 export default function GridItems({ items }: GridItemsProps) {
-  const { itemSize, sortField, sortDirection, foldersFirst } =
-    useDisplaySettings();
-
-  /**
-   * Sort the items by the sort field and direction.
-   * Folders are always sorted before files.
-   * Other fields are sorted by the sort field and direction.
-   */
-
-  const sortedItems = useMemo(
-    () =>
-      // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: sorting items
-      items.sort((a, b) => {
-        if (foldersFirst) {
-          if (a.type === "folder" && b.type === "file") {
-            return -1;
-          }
-          if (a.type === "file" && b.type === "folder") {
-            return 1;
-          }
-        }
-
-        switch (sortField) {
-          case "name":
-            return sortDirection === "asc"
-              ? a.name.localeCompare(b.name)
-              : b.name.localeCompare(a.name);
-          case "type":
-            return sortDirection === "asc"
-              ? a.mime.localeCompare(b.mime)
-              : b.mime.localeCompare(a.mime);
-          case "size":
-            return sortDirection === "asc"
-              ? (a.size ?? 0) - (b.size ?? 0)
-              : (b.size ?? 0) - (a.size ?? 0);
-          case "date":
-            return sortDirection === "asc"
-              ? a.createdAt.getTime() - b.createdAt.getTime()
-              : b.createdAt.getTime() - a.createdAt.getTime();
-          default:
-            return 0;
-        }
-      }),
-    [items, sortField, sortDirection, foldersFirst]
-  );
+  const { itemSize } = useDisplaySettings();
 
   const gridItemSize = useMemo(() => sizeClassMap[itemSize], [itemSize]);
 
@@ -95,8 +51,8 @@ export default function GridItems({ items }: GridItemsProps) {
   }, [itemSize]);
 
   return (
-    <div className={cn("grid w-full gap-4", gridMinColSize)}>
-      {sortedItems.map((item) =>
+    <div className={cn("grid w-full gap-0.5", gridMinColSize)}>
+      {items.map((item) =>
         item.type === "folder" ? (
           <FolderItem
             gridItemLabel={gridItemLabel}
@@ -145,7 +101,7 @@ function FileItem({
       {/* biome-ignore lint/a11y/useSemanticElements: gimme a break */}
       <div
         className={cn(
-          "group z-10 flex h-full flex-col items-center justify-start gap-0 rounded-lg border border-transparent p-2 transition-all hover:bg-tud-blue/25 hover:shadow-md hover:shadow-tud-green/25",
+          "group z-10 flex h-full flex-col items-center justify-start gap-0 rounded-none border border-transparent p-2 transition-none hover:bg-tud-blue/25",
           {
             "border-tud-blue/80 bg-tud-blue/25": selectedFiles.includes(
               item.id

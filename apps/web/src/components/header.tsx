@@ -5,7 +5,6 @@ import { useSession } from "@/lib/auth-hooks";
 import { ModeToggle } from "./mode-toggle";
 import StopImpersonating from "./stop-impersonating";
 import UploadNotifications from "./upload-notifications";
-import UserMenu from "./user-menu";
 
 export default function Header() {
   const { data: session } = useSession();
@@ -33,7 +32,7 @@ export default function Header() {
 
         <ModeToggle />
 
-        <UserMenu />
+        {/* <UserMenu variant="header" /> */}
       </div>
     </header>
   );

@@ -47,13 +47,20 @@ import {
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
 import { LoadingSwap } from "@/components/ui/loading-swap";
 import { trpc } from "@/lib/trpc";
+import { cn } from "@/lib/utils";
 import { useRefetchFolder } from "@/providers/refetch-folder-provider";
 import type { Item } from "./folders";
 import ItemHistory from "./item-history";
 
 const MAX_FILE_NAME_LENGTH = 255;
 
-export function FileItemMenu({ item }: { item: Item }) {
+export function FileItemMenu({
+  item,
+  className,
+}: {
+  item: Item;
+  className?: string;
+}) {
   const { refetchFiles, refetchTree } = useRefetchFolder();
   const [historyOpen, setHistoryOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -139,7 +146,10 @@ export function FileItemMenu({ item }: { item: Item }) {
     // biome-ignore lint/a11y/useSemanticElements: leave me alone
     // biome-ignore lint/a11y/useKeyWithClickEvents: leave me alone
     <div
-      className="absolute top-1 right-1 z-20 opacity-0 transition-opacity group-hover:opacity-100"
+      className={cn(
+        "absolute top-1 right-1 z-20 opacity-0 transition-none group-hover:opacity-100",
+        className
+      )}
       onClick={(e) => e.stopPropagation()}
       onDoubleClick={(e) => e.preventDefault()}
       role="button"
